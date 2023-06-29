@@ -1,4 +1,4 @@
-# Odysseus framwork
+# Odysseus framework
 C2 framework that makes use of object loading and has different handlers, clients and implants.
 
 ## Server
