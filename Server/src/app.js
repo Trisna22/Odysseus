@@ -6,6 +6,13 @@ const DatabaseHelper = require("./helpers/DatabaseHelper")
 global.databaseHelper = new DatabaseHelper();
 global.cryptoHelper = require("./helpers/CryptoHelper");
 
+// JSON data.
+const bodyParser = require("body-parser");
+app.use(bodyParser.json());
+
+// Allow CORS.
+const cors = require("cors");
+app.use(cors());
 
 /**
  * These routes handle implant requests.

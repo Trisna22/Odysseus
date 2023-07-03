@@ -6,9 +6,6 @@ const router = express.Router();
 const responseHelper = require("../../helpers/ImplantResponseHelper")
 const implantMiddleware = require("../../middlewares/ImplantMiddleware")
 
-const bodyParser = require("body-parser");
-router.use(bodyParser.json());
-
 router.post("/", implantMiddleware.checkInitRequest, (req, res) => {
 
     // Check if slave exists.
