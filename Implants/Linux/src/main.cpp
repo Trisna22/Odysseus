@@ -28,9 +28,6 @@ void prepareConnection(ConnectionController* cc) {
 
 void loop(ConnectionController* cc) {
 
-    // Our loader?
-    // ObjectLoader loader;
-
     for (;;) {
         sleep(5);
 
@@ -49,7 +46,13 @@ void loop(ConnectionController* cc) {
                     continue;
                 }
 
+                // Execute job and send status to master.
                 int status = loader->run();
+                if (cc->finishJob(status) != RESPONSE_LOITER) {
+                    printf("Failed to finish job!\n");
+                    return;
+                }
+                break;
             }
 
             case RESPONSE_DESTROY: {
@@ -58,7 +61,8 @@ void loop(ConnectionController* cc) {
             }
 
             case RESPONSE_PONG: {
-                continue;
+                printf("PONG\n");
+                break;
             }
 
             default: {
@@ -76,18 +80,18 @@ int main(int argc, char* argv[])
 
     int code = cc->initConnection();
     if (code == RESPONSE_NEW_OBJECT) {
-        // There is a new init object for us.
-        printf("New init object...\n");
 
         if (!cc->getNewJob(loader)) {
             printf("Failed to retrieve init object!\n");
             return 1;
         }
 
-        printf("Job loaded...\n");
-
+        // Execute job and send status to master.
         int status = loader->run();
-        printf("loader->RUN(): %d\n", status);
+        if (cc->finishJob(status) != RESPONSE_LOITER) {
+            printf("Failed to finish job!\n");
+            return 1;
+        }
     }
     else if (code == RESPONSE_LOITER) {
         // Nothing.

