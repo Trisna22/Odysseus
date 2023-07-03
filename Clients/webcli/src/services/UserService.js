@@ -18,5 +18,22 @@ export default class UserService {
         })
     }
 
+    setNickName(slaveId, nickname) {
+        return this.instance.post("/client/slaves/nickname", {
+            slaveId: slaveId,
+            nickname: nickname
+        }, {
+            headers: {
+                'Authorization' : localStorage.getItem("authToken")
+            }
+        })
+    }
 
+    getSlaves() {
+        return this.instance.get("/client/slaves",{
+            headers: {
+                'Authorization' : localStorage.getItem("authToken")
+            }
+        });
+    }
 }

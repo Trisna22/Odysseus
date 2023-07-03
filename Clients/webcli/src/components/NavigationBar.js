@@ -20,12 +20,12 @@ const NavigationBar = () => {
                 <>
                     <NavLink href="/payloads">Payloads</NavLink>
                     <NavLink href="/slaves">Slaves</NavLink>
-                    <NavLink href="/commands">Commands</NavLink>
+                    <NavLink href="/jobs">Jobs</NavLink>
                     <Navbar.Text>
                         Signed in as:
                     </Navbar.Text>
                     <NavDropdown 
-                        title={localStorage.getItem("user")}>
+                        title={localStorage.getItem("user") ? localStorage.getItem("user") : "Anonymous"}>
                         <NavDropdown.Item onClick={() => userLogout()}>
                             Logout
                         </NavDropdown.Item> 
