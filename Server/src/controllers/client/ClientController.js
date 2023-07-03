@@ -2,6 +2,7 @@
  * Route for /client 
 */
 const router = express.Router();
+const userMiddleware = require("../../middlewares/UserMiddleware");
 
 router.post("/login", (req, res) => {
 
@@ -21,8 +22,20 @@ router.post("/login", (req, res) => {
         databaseHelper.saveAuthToken(token, "anonymous");
         res.json({token: token})
     }
+});
+
+// Retrieve all slaves.
+router.get("/slaves", userMiddleware.hasAuthToken, (req, res) => {
+    
+    res.json(databaseHelper.getSlaves());
 })
 
-
+// Nickname an slave.
+router.post("/slaves/nickname", userMiddleware.hasAuthToken, 
+    userMiddleware.checkNickName, (req, res) => {
+    
+    databaseHelper.setNickname(req.body.slaveId, req.body.nickname);
+    res.json({message: "Success"});
+})
 
 module.exports = router;

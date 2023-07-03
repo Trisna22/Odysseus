@@ -2,7 +2,7 @@
  * Route for /payload
  */
 const router = express.Router();
-const authMiddleware = require("../../middlewares/AuthMiddleware");
+const authMiddleware = require("../../middlewares/UserMiddleware");
 
 router.get("/", authMiddleware.hasAuthToken, (req, res) => {
 

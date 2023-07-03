@@ -10,8 +10,7 @@ const newAuthToken = (user) => {
 // Checks if auth tokens match.
 const checkAuthToken = (token) => { 
 
-    return true;
-    // return databaseHelper.getAuthTokenById(token) == token;
+    return databaseHelper.checkAuthToken(token);
 }
 
 module.exports = {

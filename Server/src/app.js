@@ -26,7 +26,7 @@ app.use("/payload", require("./controllers/client/PayloadController"));
 app.use("/client", require("./controllers/client/ClientController"));
 
 global.serverOptions = {
-    useAuthentication: true
+    useAuthentication: false
 }
 
 app.listen(8080, () => {
