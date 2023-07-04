@@ -13,5 +13,5 @@ The slave programs that connects to the C2 server and is been runned by the vict
 ## Handlers
 Handles different types of connections and bounces the requests to the C2 server.
 
-## Framwork architecture
+## Framework architecture
 ![Diagram_Odysseus](./documentation/odysseus_architecture.png)
