@@ -36,4 +36,12 @@ export default class UserService {
             }
         });
     }
+
+    getPayloads() {
+        return this.instance.get("/payload", {
+            headers: {
+                'Authorization' : localStorage.getItem("authToken")
+            }
+        });
+    }
 }

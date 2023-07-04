@@ -1,5 +1,7 @@
 import {Container, Nav, NavDropdown, NavLink, Navbar } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import {GiAngelOutfit} from "react-icons/gi";
+import { FaUserSecret, FaUserTie } from "react-icons/fa";
 
 const NavigationBar = () => {
     
@@ -8,24 +10,38 @@ const NavigationBar = () => {
         localStorage.clear();
         window.location.reload(false);
     }
+
+    const isAuth = () => {
+
+        return localStorage.getItem("authToken");
+    }    
+
+    const hasUser = () => {
+        return localStorage.getItem("user");
+    }
     
     return (
         <Navbar>
             <Container>
-
+            <GiAngelOutfit size={30}/>
             <Navbar.Brand href="/">Odysseus client</Navbar.Brand>
 
             {
-                localStorage.getItem("authToken") ? 
+                isAuth() ? 
                 <>
                     <NavLink href="/payloads">Payloads</NavLink>
-                    <NavLink href="/slaves">Slaves</NavLink>
+                    <NavLink href="/">Slaves</NavLink>
                     <NavLink href="/jobs">Jobs</NavLink>
                     <Navbar.Text>
                         Signed in as:
                     </Navbar.Text>
+                    {
+                        hasUser() ?
+                        <FaUserTie/> :
+                        <FaUserSecret/>
+                    }
                     <NavDropdown 
-                        title={localStorage.getItem("user") ? localStorage.getItem("user") : "Anonymous"}>
+                        title={hasUser() ? localStorage.getItem("user") : "Anonymous"}>
                         <NavDropdown.Item onClick={() => userLogout()}>
                             Logout
                         </NavDropdown.Item> 

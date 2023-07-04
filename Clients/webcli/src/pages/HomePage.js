@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Button, ButtonGroup, Container, Form, Modal, Table, Toast } from "react-bootstrap";
+import { Button, ButtonGroup, Container, Form, Modal, Spinner, Table, Toast } from "react-bootstrap";
 import UserService from "../services/UserService";
 
 const HomePage = () => {
 
     const userService = new UserService();
     const [slaves, setSlaves] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [modalShow, setModalShow] = useState(false);
 
     const [infoSlave, setInfoSlave] = useState({});
@@ -15,6 +16,7 @@ const HomePage = () => {
             userService.getSlaves().then((res) => {
     
                 setSlaves(res.data);
+                setLoading(false);
     
             }).catch((err) => {
                 console.error(err);
@@ -35,7 +37,7 @@ const HomePage = () => {
             ip: slave.ip,
             info: slave.info
         })
-
+        setNickName("");
         setModalShow(true);
     }
 
@@ -67,7 +69,7 @@ const HomePage = () => {
                         <th>Nickname</th>
                         <td>
                             <ButtonGroup>
-                                <Form.Control placeholder="Putin's computer" onChange={(e) => setNickName(e.target.value)}  ></Form.Control>
+                                <Form.Control placeholder="Putin's computer" onChange={(e) => setNickName(e.target.value)} value={nickname}></Form.Control>
                                 <Button onClick={() => changeNickname(infoSlave.index)} variant="success">Update</Button>
                             </ButtonGroup>
                         </td>
@@ -112,6 +114,9 @@ const HomePage = () => {
                 }
             </tbody>
         </Table>
+        {
+            loading ? <p>Loading... <Spinner/></p> : <></>
+        }
         </>
     )
 }

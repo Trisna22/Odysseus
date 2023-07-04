@@ -8,10 +8,7 @@ router.get("/", authMiddleware.hasAuthToken, (req, res) => {
 
     // Get all payloads.
 
-    res.json([
-        {payload: "bomb",id: 0},
-        {payload: "nuke",id: 1}
-    ])
+    res.json(databaseHelper.getPayloads())
 })
 
 router.get("/jobs", authMiddleware.hasAuthToken, (req, res) => {

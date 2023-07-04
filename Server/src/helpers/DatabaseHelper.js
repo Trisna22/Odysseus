@@ -13,6 +13,22 @@ class DatabaseHelper {
             slaveId: "e1896e80-c325-11ed-b033-f5252f300cca",
             payloadId: "PAYLOAD_ID"
         })
+
+        this.payloads.push({
+            id: "RANDOMPAYLOADID",
+            name: "Odysseus init task",
+            description: "Init task to be run when connected",
+            location: "somewhere",
+            categories: ["haunted", "command & control"]
+        })
+
+        this.payloads.push({
+            id: "RANDOMPAYLOADID2",
+            name: "Ragnarok",
+            description: "God killer features",
+            location: "somewhere",
+            categories: ["scary", "stealth"]
+        })
     }
 
     addNewSlave(slave) {
@@ -95,6 +111,10 @@ class DatabaseHelper {
 
     getSlaves() {
         return this.slaves;
+    }
+
+    getPayloads() {
+        return this.payloads;
     }
 }
 

@@ -10,17 +10,30 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Bootstrap Bundle JS
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import LoginPage from './pages/LoginPage';
+import PayloadsPage from './pages/PayloadsPage';
+import JobsPage from "./pages/JobsPage";
 
 function App() {
 
-  return (
+    const isAuth = () => {
+
+      return localStorage.getItem("authToken") && 
+          localStorage.getItem("authToken");
+    }   
+  
+    return (
     <div className="App">
       <NavigationBar/>
       <BrowserRouter>
         <Routes>
           {
-            localStorage.getItem("authToken") ? 
-            <Route path="/" element={<HomePage/>}/> :
+            isAuth() ? 
+            <>
+              <Route path="/" element={<HomePage/>}/>
+              <Route path="/payloads" element={<PayloadsPage/>}/>
+              <Route path="/jobs" element={<JobsPage/>}/>
+            </>
+            :
             <Route path="/" element={<LoginPage/>}/>
           }
           <Route path="*" element={<NotFoundPage/>}/>
