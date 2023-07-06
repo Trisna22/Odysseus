@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Container, Form, InputGroup } from "react-bootstrap";
 import UserService from "../services/UserService";
+import { useParams } from "react-router-dom";
 
 const LoginPage = () => {
 
@@ -10,6 +11,25 @@ const LoginPage = () => {
     const [targetURL, setTargetURL] = useState("");
     const [errorText, setErrorText] = useState("");
 
+    const query = new URLSearchParams(window.location.search)
+    
+    useEffect(() => {
+        if (query.get("error")) {
+            switch (query.get("error")) {
+                case 'reset':
+                    setErrorText("Lost connection with C2 server!");
+                    return;
+                case 'logout':
+                    setErrorText("Succesfully logged out!")
+                    return;
+
+                default:
+                    setErrorText("Somethings bad happend, unknown error '" + query.get("error") + "'!");
+                    return;
+            }
+        }
+    },[])
+    
     const connectToServer = () => {
 
         localStorage.setItem("baseURL", targetURL);

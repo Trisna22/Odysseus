@@ -24,6 +24,11 @@ router.post("/login", (req, res) => {
     }
 });
 
+// Check if token is good.
+router.get("/ping", userMiddleware.hasAuthToken, (req, res) => {
+    res.json({message: "You're good"})
+})
+
 // Retrieve all slaves.
 router.get("/slaves", userMiddleware.hasAuthToken, (req, res) => {
     

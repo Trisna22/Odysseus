@@ -2,8 +2,11 @@ import {Container, Nav, NavDropdown, NavLink, Navbar } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import {GiAngelOutfit} from "react-icons/gi";
 import { FaUserSecret, FaUserTie } from "react-icons/fa";
+import UserService from "../services/UserService";
 
 const NavigationBar = () => {
+    
+    const userService = new UserService();
     
     const userLogout = () => {
 
@@ -11,9 +14,17 @@ const NavigationBar = () => {
         window.location.reload(false);
     }
 
-    const isAuth = () => {
+    const isAuth = () => {        
 
-        return localStorage.getItem("authToken");
+        if (localStorage.getItem("authToken")) {
+            userService.checkToken().catch((err) => {
+                userLogout(); // If not logged in, go to login page.
+            }); 
+            return true;
+        }     
+        else {
+            return false;
+        }   
     }    
 
     const hasUser = () => {

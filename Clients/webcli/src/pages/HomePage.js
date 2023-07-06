@@ -19,6 +19,13 @@ const HomePage = () => {
                 setLoading(false);
     
             }).catch((err) => {
+
+                if (err.code == "ERR_NETWORK") {
+                    localStorage.clear();
+                    window.location.replace("/?error=reset");
+                    return;
+                }
+
                 console.error(err);
                 console.error("Failed to retrieve slaves!");
             })

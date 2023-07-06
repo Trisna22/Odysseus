@@ -1,3 +1,40 @@
+// Modals DB.
+/**
+ * Slaves: {
+ *      id: $string,
+ *      ip: $string,
+ *      os: $string,
+ *      computername: $string,
+ *      nickname: $string,
+ *      username: $string,
+ *      info: $string
+ * }
+ */
+
+/**
+ * Jobs: {
+ *      id: $string,
+ *      slaveId: $string,
+ *      payloadId: $string,
+ *      createdAt: $string,
+ *      finishedAt: $string,
+ *      objectSize: $int,
+ *      status: $string
+ * }
+ */
+
+/**
+ * Payloads: {
+ *      name: $string,
+ *      id:   $string,
+ *      description: $string,
+ *      location: $string,
+ *      os: $string
+ *      categories: $array<$string>
+ *      variables: $array<$string>
+ * }
+ */
+
 
 class DatabaseHelper {
 
@@ -7,12 +44,6 @@ class DatabaseHelper {
         this.slaves = [];
         this.payloads = [];
         this.jobs = [];
-
-        this.addNewJob({
-            id: "RANDOMJOBIDDDD",
-            slaveId: "e1896e80-c325-11ed-b033-f5252f300cca",
-            payloadId: "PAYLOAD_ID"
-        })
 
         this.payloads.push({
             id: "RANDOMPAYLOADID",
@@ -115,6 +146,10 @@ class DatabaseHelper {
 
     getPayloads() {
         return this.payloads;
+    }
+
+    getJobs() {
+        return this.jobs;
     }
 }
 

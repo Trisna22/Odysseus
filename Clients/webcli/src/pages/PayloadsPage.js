@@ -17,6 +17,20 @@ const PayloadsPage = () => {
         inputRef.current?.files && 
         setUploadedFile(inputRef.current.files[0].name)       
     }
+    // From hva book store website
+    /**
+     *     const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target;
+        setBook(prevState => ({
+            ...prevState,
+            [name]: value
+        }))
+    }
+     */
+    const addNewPayload = () => {
+
+        userService.newPayload()
+    }
 
     // Delete payload.
     const [modalDeletePayloadShow, setModalDeletePayloadShow] = useState(false);
@@ -73,9 +87,11 @@ const PayloadsPage = () => {
             }).catch((err) => {
                 
                 if (err.code == "ERR_NETWORK") {
-                    alert("Couldn't connect to target C2 server!")
+                    localStorage.clear();
+                    window.location.replace("/?error=reset");
                     return;
                 }
+                
                 alert("Failed with code " + err.response.status);
             })
         }, 1000)
@@ -112,7 +128,7 @@ const PayloadsPage = () => {
                             onChange={onFileChange} ref={inputRef}></input>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="success">Upload</Button>
+                    <Button variant="success" onClick={() => addNewPayload()}>Upload</Button>
                     <Button variant="warning" onClick={() => setModalPayloadShow(false)}>Cancel</Button>
                 </Modal.Footer>
             </Modal>

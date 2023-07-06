@@ -2,20 +2,25 @@
  * Route for /payload
  */
 const router = express.Router();
-const authMiddleware = require("../../middlewares/UserMiddleware");
+const userMiddleware = require("../../middlewares/UserMiddleware");
 
-router.get("/", authMiddleware.hasAuthToken, (req, res) => {
+router.get("/", userMiddleware.hasAuthToken, (req, res) => {
 
     // Get all payloads.
 
     res.json(databaseHelper.getPayloads())
 })
 
-router.get("/jobs", authMiddleware.hasAuthToken, (req, res) => {
-    
-    // Get all active jobs.
+router.post("/", userMiddleware.hasAuthToken, userMiddleware.checkNewPayload, 
+    userMiddleware.checkPayloadExists, userMiddleware.checkPayloadValid, (req, res) => {
 
-    res.json({/*allJobs*/})
+
+
+})
+
+router.get("/jobs", userMiddleware.hasAuthToken, (req, res) => {
+    
+    res.json(databaseHelper.getJobs())
 })
 
 module.exports = router;
