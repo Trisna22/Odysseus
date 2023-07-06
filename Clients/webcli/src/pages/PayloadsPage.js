@@ -17,19 +17,60 @@ const PayloadsPage = () => {
         inputRef.current?.files && 
         setUploadedFile(inputRef.current.files[0].name)       
     }
-    // From hva book store website
-    /**
-     *     const handleChangeInput = (e: ChangeEvent<HTMLInputElement>) => {
+
+    const [newPayload, setNewPayload] = useState({});
+    const [countVariables, setCountVariables] = useState(0);
+    const [variables, setVariables] = useState([{}]);
+
+    const handleChangeInput = (e) => {
         const {name, value} = e.target;
-        setBook(prevState => ({
+        setNewPayload(prevState => ({
             ...prevState,
             [name]: value
         }))
     }
-     */
+    const handleVariableInput = (e, index, erase = false) => {
+        const {name, value} = e.target;
+
+        const newVariables = variables.map((variable, i) => {
+            if (erase && index == i) {
+                return null; // Check into this.
+            }
+            
+            if (index == i) {
+                variable[name] = value;
+                return variable;
+            }
+            
+            return variable;
+        })
+
+        setNewPayload(prevState => ({
+            ...prevState,
+            ["variables"] : newVariables
+        }))
+    }
+
+    const deleteVariableItem = (index) => {
+
+        const newVariables = variables.filter((variable, i) => {
+            if (i == index) {
+                return false;
+            }
+
+            return true;
+        });
+        
+        setNewPayload(prevState => ({
+            ...prevState,
+            ["variables"] : newVariables
+        }))
+
+    }
     const addNewPayload = () => {
 
-        userService.newPayload()
+        console.log(newPayload)
+        // userService.newPayload()
     }
 
     // Delete payload.
@@ -106,19 +147,46 @@ const PayloadsPage = () => {
                 <Modal.Body>
                     <InputGroup>
                         <InputGroup.Text>Name</InputGroup.Text>
-                        <Form.Control placeholder="Self destruction payload"></Form.Control>
+                        <Form.Control name="name" onChange={handleChangeInput} placeholder="Self destruction payload"></Form.Control>
                     </InputGroup>   
                     <br/>
                     <Form>
                         <Form.Label>Description of payload</Form.Label>
-                        <Form.Control placeholder="Does haxx" as="textarea" rows={3} />                    
+                        <Form.Control name="description" onChange={handleChangeInput} placeholder="Does haxx" as="textarea" rows={3} />                    
                     </Form>
                     <br/>
                     <InputGroup>
-                        <InputGroup.Text>Variables</InputGroup.Text>
-                        <Form.Control placeholder="TARGET_IP"></Form.Control>
-                        <Button variant="outline-secondary">Extra variables</Button>
+                        <InputGroup.Text>Variable</InputGroup.Text>
+                        <Form.Control placeholder="TARGET_IP" name="varname" onChange={(e) => handleVariableInput(e, 0)}></Form.Control>
+                        <Button variant="outline-secondary" onClick={() => {setCountVariables(prevCount => prevCount + 1);setVariables(prev => [...prev, {}])}}>Extra variables</Button>
+                        {
+                            countVariables > 0 ? 
+                                <Button variant="outline-secondary" 
+                                    onClick={(e) => {deleteVariableItem(countVariables);setCountVariables(prevState => prevState -1)}}>
+                                        <FaTrashAlt style={{color: "red"}}/>
+                                </Button> : <></>
+                        }
                     </InputGroup>
+                    <InputGroup>
+                        <InputGroup.Text>Description var</InputGroup.Text>
+                        <Form.Control onChange={(e) => handleVariableInput(e, 0)} name="description" placeholder="Sets the target IP to use..."></Form.Control>
+                    </InputGroup>
+                        {
+                            countVariables > 0 ? 
+                            Array.from(Array(countVariables)).map((index, value) => (
+                                <>
+                                <InputGroup style={{marginTop: "10px"}}>
+                                    <InputGroup.Text>Extra variable</InputGroup.Text>
+                                    <Form.Control name="varname" placeholder="TARGET_IP" onChange={(e) => handleVariableInput(e, value +1)}></Form.Control>
+                                </InputGroup>
+                                <InputGroup>
+                                    <InputGroup.Text>Description var</InputGroup.Text>
+                                    <Form.Control name="description" placeholder="Sets the target IP to use..." onChange={(e) => handleVariableInput(e, value +1)}></Form.Control>
+                                </InputGroup>
+                                </>
+                                
+                            )) : <></>
+                        }
                     <br/>
                     Choose file: <Button type="button" variant="outline-primary" 
                         onClick={() => inputRef.current?.click()}>
