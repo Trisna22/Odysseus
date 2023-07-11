@@ -46,14 +46,11 @@ export default class UserService {
 
     newPayload(payload, payloadFile) {
 
-        // const formData = new FormData();
-        // formData.append("payloadFile", payloadFile);
-        // formData.append("payload", payload);
+        const formData = new FormData();
+        formData.append("payloadFile", payloadFile);
+        formData.append("payload", JSON.stringify(payload));
 
-        return this.instance.post("/payload", {
-            payload: payload,
-            payloadFile: payloadFile
-        });
+        return this.instance.post("/payload", formData);
     }
 
     getJobs() {

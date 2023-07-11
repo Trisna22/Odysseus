@@ -1,5 +1,6 @@
 
 global.express = require("express");
+const fileUpload = require("express-fileupload");
 const app = express();
 
 const DatabaseHelper = require("./helpers/DatabaseHelper")
@@ -13,6 +14,9 @@ app.use(bodyParser.json());
 // Allow CORS.
 const cors = require("cors");
 app.use(cors());
+
+// File uploading.
+app.use(fileUpload());
 
 /**
  * These routes handle implant requests.

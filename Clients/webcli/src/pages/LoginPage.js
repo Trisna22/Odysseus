@@ -8,7 +8,7 @@ const LoginPage = () => {
     const [useAuth, setUseAuth] = useState(false); 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [targetURL, setTargetURL] = useState("");
+    const [targetURL, setTargetURL] = useState("http://localhost:8080"); // Test
     const [errorText, setErrorText] = useState("");
 
     const query = new URLSearchParams(window.location.search)
@@ -29,6 +29,12 @@ const LoginPage = () => {
             }
         }
     },[])
+
+    const onKeyEnter = (event) => {
+        if (event.key === "Enter") {
+            connectToServer()
+        }
+    }
     
     const connectToServer = () => {
 
@@ -88,7 +94,7 @@ const LoginPage = () => {
 
             <InputGroup>
                 <InputGroup.Text>Target C2 server</InputGroup.Text>
-                <Form.Control placeholder="http://example.org:666" onChange={(e) => setTargetURL(e.target.value)}></Form.Control>
+                <Form.Control placeholder="http://example.org:666" onChange={(e) => setTargetURL(e.target.value)} onKeyDown={onKeyEnter}></Form.Control>
                 <InputGroup.Text>Use authentication?</InputGroup.Text>
                 <InputGroup.Checkbox onChange={() => setUseAuth(!useAuth)}></InputGroup.Checkbox>
             </InputGroup>
@@ -99,7 +105,7 @@ const LoginPage = () => {
                         <InputGroup.Text>Username</InputGroup.Text>
                         <Form.Control placeholder="john" onChange={(e) => setUsername(e.target.value)}></Form.Control>
                         <InputGroup.Text>Password</InputGroup.Text>
-                        <Form.Control placeholder="****" onChange={(e) => setPassword(e.target.value)}></Form.Control>
+                        <Form.Control placeholder="****" onChange={(e) => setPassword(e.target.value)} onKeyDown={onKeyEnter}></Form.Control>
                     </InputGroup>
                     : <></>
             }

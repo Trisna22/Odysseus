@@ -58,7 +58,7 @@ router.get("/job/:jobId", (req, res) => {
 
     databaseHelper.setJobStatus(req.params.jobId, "Executing");
 
-    res.download("/home/ramb0/PDIR/cpp/ObjectLoader2/bin/object.so"); // Test...
+    res.download("/home/ramb0/PDIR/cpp/Odysseus/Server/payloads/080e457c-d699-4250-a658-490370190f4d/object.so"); // Test...
 })
 
 router.post("/job/:jobId", (req, res) => {

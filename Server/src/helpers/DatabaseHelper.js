@@ -45,8 +45,16 @@ class DatabaseHelper {
         this.payloads = [];
         this.jobs = [];
 
+        this.jobs.push({
+            id: "randomJobID",
+            slaveId: "e1896e80-c325-11ed-b033-f5252f300caa",
+            location: "Location",
+            status: "PENDING"
+        })
+
         this.payloads.push({
             id: "RANDOMPAYLOADID",
+            os: "linux",
             name: "Odysseus init task",
             description: "Init task to be run when connected",
             location: "somewhere",
@@ -55,6 +63,7 @@ class DatabaseHelper {
 
         this.payloads.push({
             id: "RANDOMPAYLOADID2",
+            os: "windows",
             name: "Ragnarok",
             description: "God killer features",
             location: "somewhere",
@@ -120,6 +129,19 @@ class DatabaseHelper {
             }
 
             return slave;
+        })
+    }
+
+    addPayload(payload) {
+        this.payloads.push({
+            id: payload.id,
+            os: payload.os,
+            name: payload.name,
+            variables: payload.variables,
+            location: payload.location,
+            createdAt: new Date(Date.now()).toUTCString(),
+            description: payload.description,
+            categories: payload.categories
         })
     }
 

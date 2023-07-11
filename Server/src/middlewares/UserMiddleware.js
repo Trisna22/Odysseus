@@ -43,32 +43,39 @@ const checkNickName = (req, res, next) => {
 }
 
 const checkNewPayload = (req, res, next) => {
-
-    console.log("Body: ")
-    console.log(req.body);
-
-    console.log("file: ");
-    console.log(req.files);
     
     // Check body.
-    const body = req.body;
-    if (body && body.payload.name && body.payload.description && body.payload.categories
-        && body.payload.os && body.payload.variables) {
+    const payload = JSON.parse(req.body.payload);
+    if (payload && payload.name && payload.description && payload.os ) {
+        // && payload.categories && payload.os) {
             
         // Check if file is valid.
-        if (req.files && req.files.length == 1 && req.files.payloadFile) {
+        if (req.files && req.files.payloadFile) {
 
             // Check if valid source code.
             const sourceCode = req.files.payloadFile.data.toString();
             if (sourceCode.includes(MALWARE_INIT)) {
                 
                 // Check if variables exists in code.
-                const vars = body.payload.variables;
-                for (var v of vars) {
+                const vars = payload.variables;
+                if (vars) {
+                    for (var v of vars) {
 
-                    if (!sourceCode.includes(v)) {
-                        res.status(400).json({message: "Given variables doesn't exists in payload code!"})    
-                        return;
+                        if (!v.description) {
+                            res.status(400).json({message: "No description of variable given!"});
+                            return;
+                        }
+                        
+                        if (!v.vartype || (v.vartype != "string" && v.vartype != "number")) {
+                            res.status(400).json({message: "No correct variable type given!"});
+                            return;
+                        }
+    
+                        if (!sourceCode.includes(v.varname)) {
+                            res.status(400).json({message: "Given variables doesn't exists in payload code!"})    
+                            return;
+                        }
+
                     }
                 }
                 
