@@ -69,7 +69,7 @@ const HomePage = () => {
         userService.launchPayload(payload).then((res) => {
 
             setModalShow(false);
-            navigate("/jobs");
+            window.location.replace("/jobs");
 
         }).catch((err) => {
 

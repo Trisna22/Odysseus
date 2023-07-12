@@ -9,7 +9,6 @@ const JobsPage = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
 
         setInterval(() => {
@@ -27,8 +26,8 @@ const JobsPage = () => {
                 }
             })
             
-        }, 1000)
-    })
+        }, 10000)
+    }, [])
 
     return (
         <>
