@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import UserService from "../services/UserService";
-import { Spinner, Table } from "react-bootstrap";
+import { Modal, Spinner, Table } from "react-bootstrap";
 
 
 const JobsPage = () => {
@@ -26,16 +26,152 @@ const JobsPage = () => {
                 }
             })
             
-        }, 10000)
+        }, 1000)
     }, [])
+
+    // Modal magic
+    const [modalShow, setModalShow] = useState(false);
+    const [detailsJob, setDetailsJob] = useState({});
+    const showModal = (job) => {
+        setDetailsJob(job);
+        setModalShow(true);
+    }
 
     return (
         <>
+            <Modal show={modalShow} onHide={() => setModalShow(false)}>
+                <Modal.Header closeButton>
+                    <h3>Details</h3>
+                </Modal.Header>
+                <Modal.Body>
+                    {
+                        detailsJob ? 
+                        <>
+                            <>
+                                {
+                                    detailsJob ? 
+                                    <>
+                                    <h4>Job </h4>
+                                    <Table bordered>
+                                        <tbody>
+                                            <tr>
+                                                <th>Status</th>
+                                                <td>{detailsJob.status}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Object size</th>
+                                                <td>{detailsJob.objectSize}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Created at</th>
+                                                <td>{detailsJob.createdAt}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Finished at</th>
+                                                <td>{detailsJob.finishedAt ? detailsJob.finishedAt : "Still running"}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Location</th>
+                                                <td>{detailsJob.location}</td>
+                                            </tr>
+                                        </tbody>
+
+
+                                    </Table>
+                                    </> : <></>
+                                }
+                            </>
+                            <>
+                            {
+                                detailsJob.slave ? 
+                                <>
+                                <h4>Slave</h4>
+                                <Table bordered>
+                                    <tbody>
+                                    <tr>
+                                        <th>Nickname</th>
+                                        <td>{detailsJob.slave.nickname ? detailsJob.slave.nickname : <>No nickname</>}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>IP</th>
+                                        <td>{detailsJob.slave.ip}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Computername</th>
+                                        <td>{detailsJob.slave.computername}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Username</th>
+                                        <td>{detailsJob.slave.username}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Operating system</th>
+                                        <td>{detailsJob.slave.os}</td>
+                                    </tr>
+                                    </tbody>
+                                </Table>
+                                </> : <>No slave data available</>
+                            }
+                            </>
+                            <>
+                            {
+                                detailsJob.payload ? 
+                                <>
+                                <h4>Payload</h4>
+                                <Table bordered>
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.name}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Description</th>
+                                            <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.description}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Categories</th>
+                                            {
+                                                detailsJob.payload.categories ? detailsJob.payload.categories.map((cat) => (
+                                                    <td>{cat}</td>
+                                                )): <></>
+                                            }
+                                        </tr>
+                                        <tr>
+                                            <th>Created at</th>
+                                            <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.createdAt}</td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Variables</th>
+                                            {
+                                                detailsJob.payload.variables ? <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.variables.length} variables to set.</td> : <></>
+                                            }
+                                        </tr>
+                                        {
+                                            detailsJob.payload.variables ? detailsJob.payload.variables.map((v, i) => (
+                                                <tr>
+                                                    <td>{v.varname} ({v.vartype})</td>
+                                                    <td colSpan={detailsJob.payload.categories.length}>{v.description}</td>
+                                                </tr>
+                                            )) : <></>
+                                        }
+                                        <tr>
+                                            <th>Location</th>
+                                            <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.location}</td>
+                                        </tr>
+                                    
+                                    </tbody>
+                                </Table>
+                                </> : <></>
+                            }
+                            </>
+                        </> : <></>
+                    }
+                </Modal.Body>
+
+            </Modal>
             <h1>Jobs page</h1>
-            {
-                loading ? <p>Loading... <Spinner/></p> : <></>
-            }
-            <Table striped bordered>
+            <Table bordered hover>
                 <thead>
                     <th>Slave</th>
                     <th>Payload</th>
@@ -47,17 +183,20 @@ const JobsPage = () => {
             {
                 jobs ? jobs.map((job) => (
                     
-                <tr>
+                <tr onClick={() => showModal(job)} style={{cursor: "pointer"}}>
                     <td>{job.slave.ip} {job.slave.nickname ? "(" + job.slave.nickname + ")" : <></>}</td>
                     <td>{job.payload.name}</td>
                     <td>{job.status}</td>
                     <td>{job.createdAt}</td>
-                    <td>{job.finishedAt ? job.finishedAt : <>Not finished yet!</>}</td>
+                    <td>{job.finishedAt ? job.finishedAt : <>Still running</>}</td>
                 </tr>
                 )) : <></>
             } 
             </tbody>
             </Table>
+            {
+                loading ? <p>Loading... <Spinner/></p> : <></>
+            }
         </>
     )
 }
