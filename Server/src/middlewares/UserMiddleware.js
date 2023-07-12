@@ -94,15 +94,53 @@ const checkNewPayload = (req, res, next) => {
     res.status(400).json({message: "Invalid body!"});
 }
 
+const checkLaunchingPayload = (req, res, next) => {
+
+    const payload = req.body;
+    
+    if (payload.payloadId && payload.slaveId) {
+
+        // Check of payload exists.
+        const selectedPayload = databaseHelper.getPayloadById(payload.payloadId);
+        if (!selectedPayload) {
+
+            res.status(400).json({message: "Payload doesn't exists!"});
+            return;
+        }
+
+        // Check if payload has variables.
+        if (payload.variables) {
+
+            let names = payload.variables.map(v => v.name);     
+            let values = payload.variables.map(v => v.value);      
+            if (names.length != values.length) {
+                res.status(400).json({message: "Missing variables to set!"})
+                return;
+            }
+            
+            let checkFailed = false;
+            selectedPayload.variables.forEach((v) => {
+                if (!names.includes(v.varname)) {
+                    res.status(400).json({message: "Invalid variable '" + v.varname + "' set!"});
+                    checkFailed = true;
+                    return;
+                }
+            })
+
+            if (checkFailed)
+                return;
+        }
+
+        next();
+        return;
+    }
+
+    res.status(400).json({message: "Invalid body!"});
+}
+
 const checkPayloadExists = (req, res, next) => {
 
     // Add code that checks if payload exists.
-    next();
-}
-
-const checkPayloadValid = (req, res, next) => {
-
-    // Add code that compiles payload.
     next();
 }
 
@@ -110,6 +148,6 @@ module.exports = {
     hasAuthToken,
     checkNickName,
     checkNewPayload,
-    checkPayloadValid,
-    checkPayloadExists
+    checkPayloadExists,
+    checkLaunchingPayload
 }

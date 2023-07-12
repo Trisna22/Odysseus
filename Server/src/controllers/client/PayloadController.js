@@ -14,7 +14,7 @@ router.get("/", userMiddleware.hasAuthToken, (req, res) => {
 
 // Creates new payload.
 router.post("/", userMiddleware.hasAuthToken, userMiddleware.checkNewPayload, 
-    userMiddleware.checkPayloadExists, userMiddleware.checkPayloadValid, (req, res) => {
+    userMiddleware.checkPayloadExists, (req, res) => {
     
     const payload = JSON.parse(req.body.payload);
     const payloadID = cryptoHelper.createID();
@@ -50,9 +50,40 @@ router.get("/categories", userMiddleware.hasAuthToken, (req, res) => {
     res.json(payloadHelper.getCategories());
 })
 
+router.post("/launch", userMiddleware.hasAuthToken, userMiddleware.checkLaunchingPayload, (req, res) => {
+
+
+    const payload = req.body;
+    const jobId = cryptoHelper.createID();
+
+    // First compile the code and save the object in a seperate folder.
+    const selectedPayload = databaseHelper.getPayloadById(payload.payloadId);
+    payloadHelper.compilePayload(selectedPayload, jobId, payload.variables, (path, size) => {
+
+        // Then add the job to the list. 
+        databaseHelper.addNewJob({
+            id: jobId,
+            slaveId: payload.slaveId,
+            payloadId: payload.payloadId,
+            objectSize: size,
+            location: path
+        })
+        
+        console.log("Succesfully compiled job to " + path)
+        res.json({message: "Success compiling!"});
+
+    }, (err, compileError) => {
+
+        if (compileError)
+            res.status(400).json({message: "Compile error!", compileError: err});
+        else
+            res.status(400).json({message: err});
+    })
+})
+
 router.get("/jobs", userMiddleware.hasAuthToken, (req, res) => {
     
-    res.json(databaseHelper.getJobs())
+    res.json(payloadHelper.getJobs())
 })
 
 module.exports = router;

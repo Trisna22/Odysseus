@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "start": "mkdir -p payloads;node src/app.js"
+    "start": "mkdir -p payloads;mkdir -p jobs;node src/app.js"
   },
   "author": "ramb0",
   "license": "ISC",

@@ -3,10 +3,12 @@ const fs = require("fs")
 const {exec, execFileSync, execSync} = require("child_process");
 
 global.PAYLOAD_PATH = "./payloads/";
+global.JOBS_PATH = "./jobs/"
 
 const COMMAND_COMPILE = "g++ -shared -fPIC -o " ;
+const TEMP_SOURCE = "/tmp/.source.cpp";
 
-const compilePayload = (id, variables, success, error) => {
+const compilePayloadTest = (id, variables, success, error) => {
 
     const path = PAYLOAD_PATH + id + "/"
     if (variables) {
@@ -23,12 +25,12 @@ const compilePayload = (id, variables, success, error) => {
         }
 
         // Now compile temporary file.
-        fs.writeFileSync("/tmp/source.cpp", data);
+        fs.writeFileSync(TEMP_SOURCE, data);
 
         exec(COMMAND_COMPILE + 
             path + "object.so" + // Output path 
             " " +
-            "/tmp/source.cpp" // Source path
+            TEMP_SOURCE // Source path
             , (err, stdout, stderr) => {
                 
                 if (err) {
@@ -48,17 +50,64 @@ const compilePayload = (id, variables, success, error) => {
             path + "source.cpp" // Source path
             , (err, stdout, stderr) => {
                 
-                if (err) {
-                    console.error("Failed to compile code!");
-                    console.error(stderr);
-                    error(stderr, true);
-                    return;
-                }
+            if (err) {
+                console.error("Failed to compile code!");
+                console.error(stderr);
+                error(stderr, true);
+                return;
+            }
                 
-                success(path);
-            })
+            success(path);
+        })
+    }
+}
+
+const compilePayload = (payload, jobId, variables, success, error) => {
+    
+    const path = PAYLOAD_PATH + payload.id + "/";
+    let inputFile = path + "source.cpp";
+    if (variables) {
+
+        // Fill in the variables.
+        var data = fs.readFileSync(path + "source.cpp").toString();
+
+        for (var i = 0; i < payload.variables.length; i++) {
+
+            let v = payload.variables[i];
+            if (v.varname == variables[i].name)
+                v.value = variables[i].value;
+
+            if (v.vartype == "number") {
+                data = data.replace(v.varname, v.value);
+            } else {
+                data = data.replace(v.varname, "\"" + v.value +"\"");
+            }
+
+            // Now compile temporary file.
+            fs.writeFileSync(TEMP_SOURCE, data);     
+            inputFile = TEMP_SOURCE;       
         }
     }
+
+    fs.mkdirSync(JOBS_PATH + jobId);
+    exec(COMMAND_COMPILE + 
+            JOBS_PATH + jobId + "/object.so" + // Output path 
+            " " +
+            inputFile // Source path
+            , (err, stdout, stderr) => {
+                
+        if (err) {
+            console.error("Failed to compile code!");
+            console.error(stderr);
+            error(stderr, true);
+            return;
+        }
+
+        // Get file size for completion.
+        var stats = fs.statSync(JOBS_PATH + jobId + "/object.so");
+        success(path, stats.size);
+    })
+}
 
 const createNewPayload = (payloadObject, id, variables, success, error) => {
 
@@ -73,7 +122,7 @@ const createNewPayload = (payloadObject, id, variables, success, error) => {
             return;
         }
 
-        compilePayload(id, variables, success, error);
+        compilePayloadTest(id, variables, success, error);
     });
 }
 
@@ -131,9 +180,23 @@ const getCategories = () => {
     ]
 }
 
+const getJobs = () => {
+
+    let jobs = databaseHelper.getJobs();
+
+    // Add data from other modals.
+    jobs.forEach((job) => {
+        job.slave = databaseHelper.getSlaveById(job.slaveId);
+        job.payload = databaseHelper.getPayloadById(job.payloadId);
+    })
+
+    return jobs;
+}
+
 module.exports = {
-    createNewPayload,
     compilePayload,
+    createNewPayload,
     getSources,
-    getCategories
+    getCategories,
+    getJobs
 }

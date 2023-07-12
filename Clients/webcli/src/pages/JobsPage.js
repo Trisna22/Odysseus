@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import UserService from "../services/UserService";
-import { Spinner } from "react-bootstrap";
-import {useNavigate} from "react-router-dom"
+import { Spinner, Table } from "react-bootstrap";
 
 
 const JobsPage = () => {
@@ -10,7 +9,6 @@ const JobsPage = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const navigate = useNavigate();
 
     useEffect(() => {
 
@@ -27,8 +25,6 @@ const JobsPage = () => {
                     window.location.replace("/?error=reset");
                     return;
                 }
-
-                alert("Failed with code " + err.response.status);
             })
             
         }, 1000)
@@ -40,6 +36,29 @@ const JobsPage = () => {
             {
                 loading ? <p>Loading... <Spinner/></p> : <></>
             }
+            <Table striped bordered>
+                <thead>
+                    <th>Slave</th>
+                    <th>Payload</th>
+                    <th>Status</th>
+                    <th>Created At</th>
+                    <th>Finished At</th>
+                </thead>
+            <tbody>
+            {
+                jobs ? jobs.map((job) => (
+                    
+                <tr>
+                    <td>{job.slave.ip} {job.slave.nickname ? "(" + job.slave.nickname + ")" : <></>}</td>
+                    <td>{job.payload.name}</td>
+                    <td>{job.status}</td>
+                    <td>{job.createdAt}</td>
+                    <td>{job.finishedAt ? job.finishedAt : <>Not finished yet!</>}</td>
+                </tr>
+                )) : <></>
+            } 
+            </tbody>
+            </Table>
         </>
     )
 }

@@ -60,4 +60,9 @@ export default class UserService {
     getCategories() {
         return this.instance.get("/payload/categories");
     }
+
+    launchPayload (payload) {
+        console.log(payload);
+        return this.instance.post("/payload/launch", payload);
+    }
 }

@@ -45,30 +45,31 @@ class DatabaseHelper {
         this.payloads = [];
         this.jobs = [];
 
-        this.jobs.push({
-            id: "randomJobID",
-            slaveId: "e1896e80-c325-11ed-b033-f5252f300caa",
-            location: "Location",
-            status: "PENDING"
-        })
-
-        this.payloads.push({
-            id: "RANDOMPAYLOADID",
-            os: "linux",
-            name: "Odysseus init task",
-            description: "Init task to be run when connected",
-            location: "somewhere",
-            categories: ["haunted", "command & control"]
-        })
-
-        this.payloads.push({
-            id: "RANDOMPAYLOADID2",
-            os: "windows",
-            name: "Ragnarok",
-            description: "God killer features",
-            location: "somewhere",
-            categories: ["scary", "stealth"]
-        })
+        this.payloads.push(
+            {
+                "id": "f190981e-9287-4753-a16f-b1230b3d17e4",
+                "name": "test",
+                "variables": [
+                    {
+                        "varname": "PORT_NUM",
+                        "description": "Port ton use",
+                        "vartype": "number"
+                    },
+                    {
+                        "varname": "TARGET_IP",
+                        "description": "Sets IP",
+                        "vartype": "string"
+                    },
+                ],
+                "description": "test",
+                "os": "linux",
+                "categories": [
+                    "destroyer"
+                ],
+                "location": "./payloads/f190981e-9287-4753-a16f-b1230b3d17e4/",
+                "source": "#include <iostream>\n\nconst char addrIP[] = TARGET_IP;\nint port = PORT_NUM;\n\nvoid hax() {\n\tprintf(\"Hacking the fuck out of it!\\n\");\n}\nextern \"C\" int payload_init()\n{\n\thax();\n}\n\n",
+                "createdAt": "Wed, 12 Jul 2023 15:59:22 GMT"
+            })
     }
 
     addNewSlave(slave) {
@@ -96,7 +97,8 @@ class DatabaseHelper {
             id: job.id,
             slaveId: job.slaveId,
             payloadId: job.payloadId,
-            objectSize: 15960,
+            objectSize: job.size,
+            location: job.location,
             createdAt: new Date(Date.now()).toUTCString(),
             finishedAt: "",
             status: "PENDING",
@@ -160,6 +162,10 @@ class DatabaseHelper {
 
     getJobWithId(id) {
         return this.jobs.filter(entry => entry.id == id)[0]
+    }
+
+    getPayloadById(id) {
+        return this.payloads.filter(entry => entry.id == id)[0];
     }
 
     getSlaves() {
