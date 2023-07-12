@@ -84,6 +84,16 @@ const PayloadsPage = () => {
     }
     const addNewPayload = () => {
 
+        // Add the categories to the new payload.
+        let cats = [];
+        selectedCategories.forEach((cat) => {
+            if (cat.checked) {
+                cats.push(cat.name);
+            }
+        })
+        newPayload.categories = cats;
+
+        // Fire away payload.
         userService.newPayload(newPayload, inputRef.current.files[0]).then((res) => {
 
             setModalPayloadShow(false);
@@ -115,19 +125,50 @@ const PayloadsPage = () => {
         alert("Deleting payload with id " + payloadToDelete.id)
     }
 
+    // Categories
+    const [categories, setCategories] = useState([]);
+    const [selectedCategories, setSelCategories] = useState([]);
+    const handleCategoryChange = (e) => {
+
+        const {name, checked} = e.target; 
+
+        let newCategories = selectedCategories.map((cat) => {
+            if (cat.name == name) {
+                cat.checked = checked;
+            }
+            
+            return cat;
+        })
+
+        setSelCategories(newCategories);
+    }
+      
+
     // Accordion magic.
     const [activeId, setActiveId] = useState(0);
     const badgeColor = (category) => {
 
         switch (category) {
-            case 'haunted':
+
+            case 'boot':
+            case 'crypto':
+            case 'shell':
+            case 'exec':
+            case "filesystem":
+                return 'secondary'
+            
+            // Red
+            case 'self-destruct':
             case 'scary':
+            case 'destroyer':
+            case 'command & control':
+            case 'ransom':
+            case 'stealth':
                 return 'danger'
 
-            case 'stealth':
-                return 'secondary'
-
-            case 'command & control':
+            case 'networking':
+            case 'server':
+            case 'reverse connection':
                 return "warning";
 
             default:
@@ -161,6 +202,20 @@ const PayloadsPage = () => {
     }
 
     useEffect(() => {
+
+        // Get the categories.
+        userService.getCategories().then((res) => {
+            setCategories(res.data);
+            setSelCategories(res.data);
+        }).catch((err) => {
+            if (err.code == "ERR_NETWORK") {
+                localStorage.clear();
+                window.location.replace("/?error=reset");
+                return;
+            }
+        })
+        
+        // Loop trough all payloads.
         setInterval(() => {
 
             userService.getPayloads().then((res) => {
@@ -272,6 +327,17 @@ const PayloadsPage = () => {
                             id="iphone"
                             label="Iphone"
                             name="os" />
+                    </Form>
+                    <p>Categories:</p>
+                    <Form>
+                    {
+                        categories ? categories.map((cat, index) => (
+                            <Form.Check inline
+                                onChange={handleCategoryChange}
+                                label={cat.name}
+                                name={cat.name}/>
+                        )) : <></>
+                    } 
                     </Form>
                     <br />
                     Choose file: <Button type="button" variant="outline-primary"

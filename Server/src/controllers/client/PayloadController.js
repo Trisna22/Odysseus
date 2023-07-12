@@ -46,6 +46,10 @@ router.post("/", userMiddleware.hasAuthToken, userMiddleware.checkNewPayload,
 
 // router.delete("/:payloadId", userMiddleware.hasAuthToken, userMiddleware.")
 
+router.get("/categories", userMiddleware.hasAuthToken, (req, res) => {
+    res.json(payloadHelper.getCategories());
+})
+
 router.get("/jobs", userMiddleware.hasAuthToken, (req, res) => {
     
     res.json(databaseHelper.getJobs())

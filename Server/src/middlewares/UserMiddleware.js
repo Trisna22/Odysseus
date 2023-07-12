@@ -46,8 +46,8 @@ const checkNewPayload = (req, res, next) => {
     
     // Check body.
     const payload = JSON.parse(req.body.payload);
-    if (payload && payload.name && payload.description && payload.os ) {
-        // && payload.categories && payload.os) {
+    if (payload && payload.name && payload.description 
+            && payload.os && payload.categories ) {
             
         // Check if file is valid.
         if (req.files && req.files.payloadFile) {

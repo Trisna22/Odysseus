@@ -88,12 +88,8 @@ const getSources = (payloads) => {
             source = fs.readFileSync(payload.location + "source.cpp").toString()
 
         } catch(err) {
-
-            console.error("Failed to load payload " + payload);
-            console.error(err);
             source = "Failed to load source code!"
         }
-            console.log(source);
             newPayloads.push({
                 id: payload.id,
                 name: payload.name,
@@ -102,15 +98,42 @@ const getSources = (payloads) => {
                 os: payload.os,
                 categories: payload.categories ? payload.categories : "",
                 location: payload.location,
-                source: source 
+                source: source,
+                createdAt: payload.createdAt
             })
     });
     
     return newPayloads;
 }
 
+const getCategories = () => {
+
+    return [
+        // Networking
+        {name: "networking", color: "yellow"},
+        {name: "server", color: "yellow"},
+        {name: "reverse connection", color: "yellow"},
+
+        // Payload content
+        {name: "scary", color: "red"},
+        {name: "command & control", color: "red"},
+        {name: "destroyer", color: "red"},
+        {name: "stealth", color: "red"},
+        {name: "ransom", color: "red"},
+        {name: "self-destruct", color: "red"},
+
+        // Method
+        {name: "filesystem",color: "gray"},
+        {name: "boot", color: "gray"},
+        {name: "crypto", color: "gray"},
+        {name: "shell", color: "gray"},
+        {name: "exec", color: "gray"},
+    ]
+}
+
 module.exports = {
     createNewPayload,
     compilePayload,
-    getSources
+    getSources,
+    getCategories
 }
