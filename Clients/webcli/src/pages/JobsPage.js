@@ -37,6 +37,12 @@ const JobsPage = () => {
         setModalShow(true);
     }
 
+    const decideColSpan = () => {
+        let catLen = detailsJob.payload.categories.length;
+        let varLen = detailsJob.variables.length;
+        return catLen > varLen ? catLen : varLen;
+    }
+
     return (
         <>
             <Modal show={modalShow} onHide={() => setModalShow(false)}>
@@ -60,7 +66,7 @@ const JobsPage = () => {
                                             </tr>
                                             <tr>
                                                 <th>Object size</th>
-                                                <td>{detailsJob.objectSize}</td>
+                                                <td>{detailsJob.objectSize} bytes</td>
                                             </tr>
                                             <tr>
                                                 <th>Created at</th>
@@ -71,7 +77,7 @@ const JobsPage = () => {
                                                 <td>{detailsJob.finishedAt ? detailsJob.finishedAt : "Still running"}</td>
                                             </tr>
                                             <tr>
-                                                <th>Location</th>
+                                                <th>Object location</th>
                                                 <td>{detailsJob.location}</td>
                                             </tr>
                                         </tbody>
@@ -151,12 +157,12 @@ const JobsPage = () => {
                                             detailsJob.payload.variables ? detailsJob.payload.variables.map((v, i) => (
                                                 <tr>
                                                     <td>{v.varname} ({v.vartype})</td>
-                                                    <td colSpan={detailsJob.payload.categories.length}>{v.description}</td>
+                                                    <td colSpan={detailsJob.payload.variables.length}><b>{detailsJob.variables[i].value}</b>: <i>{v.description}</i></td>
                                                 </tr>
                                             )) : <></>
                                         }
                                         <tr>
-                                            <th>Location</th>
+                                            <th>Payload location</th>
                                             <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.location}</td>
                                         </tr>
                                     

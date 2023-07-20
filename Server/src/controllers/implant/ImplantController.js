@@ -34,6 +34,8 @@ router.post("/", implantMiddleware.checkInitRequest, (req, res) => {
 
 router.get("/ping/:slaveId", (req, res) => {
     
+    // Check if implant has connected before.
+    
     // Keep up track of active implants.
     const job = databaseHelper.getJobForSlave(req.params.slaveId);
     if (!job) {
@@ -58,7 +60,10 @@ router.get("/job/:jobId", (req, res) => {
 
     databaseHelper.setJobStatus(req.params.jobId, "Executing");
 
-    res.download("/"); // Test...
+    console.log(job);
+    console.log("Downloading object now...")
+
+    res.download(job.location);
 })
 
 router.post("/job/:jobId", (req, res) => {

@@ -13,7 +13,7 @@ using namespace std;
 
 class ConnectionController {
 private: 
-    const string slaveId = "e1896e80-c325-11ed-b033-f5252f300caa";
+    const string slaveId = "e1896e80-c325-11ed-b033-f5252f300cfa";
     string computername, username, computerinfo;
     string jobId = "NO_JOBS";
     int objectSize = 0;

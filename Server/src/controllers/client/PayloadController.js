@@ -52,7 +52,6 @@ router.get("/categories", userMiddleware.hasAuthToken, (req, res) => {
 
 router.post("/launch", userMiddleware.hasAuthToken, userMiddleware.checkLaunchingPayload, (req, res) => {
 
-
     const payload = req.body;
     const jobId = cryptoHelper.createID();
 
@@ -66,7 +65,8 @@ router.post("/launch", userMiddleware.hasAuthToken, userMiddleware.checkLaunchin
             slaveId: payload.slaveId,
             payloadId: payload.payloadId,
             objectSize: size,
-            location: path
+            location: path,
+            variables: payload.variables
         })
         
         console.log("Succesfully compiled job to " + path)

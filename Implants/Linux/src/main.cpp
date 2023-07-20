@@ -39,7 +39,7 @@ void loop(ConnectionController* cc) {
             }
 
             case RESPONSE_NEW_OBJECT: {
-                printf("[%d] Loading new object...\n", responseCode);
+                printf("\nLoading new object...\n");
                 
                 if (!cc->getNewJob(loader)) {
                     printf("Failed to retrieve new object!\n");
@@ -61,8 +61,8 @@ void loop(ConnectionController* cc) {
             }
 
             case RESPONSE_PONG: {
-                printf("PONG\n");
-                break;
+                printf("PONG \n");
+                continue;
             }
 
             default: {
@@ -79,6 +79,7 @@ int main(int argc, char* argv[])
     prepareConnection(cc);
 
     int code = cc->initConnection();
+
     if (code == RESPONSE_NEW_OBJECT) {
 
         if (!cc->getNewJob(loader)) {

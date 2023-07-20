@@ -105,7 +105,7 @@ const compilePayload = (payload, jobId, variables, success, error) => {
 
         // Get file size for completion.
         var stats = fs.statSync(JOBS_PATH + jobId + "/object.so");
-        success(path, stats.size);
+        success(JOBS_PATH + jobId + "/object.so", stats.size);
     })
 }
 
