@@ -55,6 +55,18 @@ void loop(ConnectionController* cc) {
                 break;
             }
 
+            case RESPONSE_NOT_INIT: {
+                printf("Server didn't get our credentials, init now...\n");
+
+                int code = cc->initConnection();
+                if (code != RESPONSE_LOITER && code != RESPONSE_NEW_OBJECT) {
+                    printf("Server responded with invalid code!\n");
+                    return;
+                }
+                
+                continue;
+            }
+
             case RESPONSE_DESTROY: {
                 printf("[%d] Self destruction commencing...\n", responseCode);
                 return;

@@ -35,6 +35,13 @@ router.post("/", implantMiddleware.checkInitRequest, (req, res) => {
 router.get("/ping/:slaveId", (req, res) => {
     
     // Check if implant has connected before.
+    const slave = databaseHelper.getSlaveById(req.params.slaveId);
+    if (!slave) {
+
+        // Send not init response.
+        res.json({code: responseHelper.NOT_INIT});
+        return;
+    }
     
     // Keep up track of active implants.
     const job = databaseHelper.getJobForSlave(req.params.slaveId);
