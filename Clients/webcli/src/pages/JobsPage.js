@@ -157,7 +157,7 @@ const JobsPage = () => {
                                             detailsJob.payload.variables ? detailsJob.payload.variables.map((v, i) => (
                                                 <tr>
                                                     <td>{v.varname} ({v.vartype})</td>
-                                                    <td colSpan={detailsJob.payload.variables.length}><b>{detailsJob.variables[i].value}</b>: <i>{v.description}</i></td>
+                                                    <td colSpan={detailsJob.payload.categories.length}><b>{detailsJob.variables[i].value}</b>: <i>{v.description}</i></td>
                                                 </tr>
                                             )) : <></>
                                         }

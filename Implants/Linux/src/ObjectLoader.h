@@ -38,7 +38,7 @@ private:
 public:
     
     ObjectLoader() {
-        fdObject = anonFile(".", 1);
+        
     }
     
     // Reserve space for the encrypted file and object.
@@ -48,6 +48,7 @@ public:
             return false;
         }
 
+        this->fdObject = anonFile(".", 1);
         this->currentObjectSize = size;
 
         // Open memory file.
@@ -95,6 +96,7 @@ public:
         // Clean cleanup
         dlclose(this->objectHandle);
         fclose(this->encryptedMemoryFile);
+        close(this->fdObject);
         this->objectHandle = NULL;    
         return returnCode;
     }

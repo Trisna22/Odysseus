@@ -48,27 +48,22 @@ class DatabaseHelper {
 
         this.payloads.push(
             {
-                "id": "f190981e-9287-4753-a16f-b1230b3d17e4",
-                "name": "test",
+                "id": "df53576a-faf1-4fda-944f-8fa7e4569a63",
+                "name": "Echo",
                 "variables": [
                     {
-                        "varname": "PORT_NUM",
-                        "description": "Target port number to use.",
-                        "vartype": "number"
-                    },
-                    {
-                        "varname": "TARGET_IP",
-                        "description": "Sets the target IP address.",
+                        "varname": "TEXT",
+                        "description": "String to echo.",
                         "vartype": "string"
-                    },
+                    }
                 ],
-                "description": "test",
+                "description": "Echoes input var.",
                 "os": "linux",
                 "categories": [
-                    "destroyer"
+                    "scary", "stealth"
                 ],
-                "location": "./payloads/f190981e-9287-4753-a16f-b1230b3d17e4/",
-                "source": "#include <iostream>\n\nconst char addrIP[] = TARGET_IP;\nint port = PORT_NUM;\n\nvoid hax() {\n\tprintf(\"Hacking the fuck out of it!\\n\");\n}\nextern \"C\" int payload_init()\n{\n\thax();\n}\n\n",
+                "location": "./payloads/df53576a-faf1-4fda-944f-8fa7e4569a63/",
+                "source": "#include <iostream>\n#include <stdio.h>\n\n#define TO_ECHO TEXT\n\nextern \"C\" int payload_init() {\n\tprintf(\"Hello world! Message: %s\n\", TO_ECHO);\nreturn 22;\n}\n\n",
                 "createdAt": "Wed, 12 Jul 2023 15:59:22 GMT"
             })
 
