@@ -71,4 +71,9 @@ namespace json {
         return parsed;
     }
 
+    map<string, string> null() {
+
+        return map<string, string> ();
+    }
+
 };

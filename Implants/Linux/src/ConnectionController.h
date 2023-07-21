@@ -20,18 +20,32 @@ private:
 
     json::JSON httpPOST(const char* URL, const char* body) {
 
-        http::Request requestPOST{URL};
-        const auto response = requestPOST.send("POST", body, {
-            {"Content-Type", "application/json"}
-        });
-        return json::parse(string{response.body.begin(), response.body.end()});
+        try {
+
+            http::Request requestPOST{URL};
+            const auto response = requestPOST.send("POST", body, {
+                {"Content-Type", "application/json"}
+            });
+            return json::parse(string{response.body.begin(), response.body.end()});
+
+        } catch (const std::exception e) {
+
+            return json::null();
+        }
     }
 
     json::JSON httpGET(const char* URL) {
 
-        http::Request requestGET(URL);
-        const auto response = requestGET.send("GET");
-        return json:: parse(string{response.body.begin(), response.body.end()});
+        try {
+
+            http::Request requestGET(URL);
+            const auto response = requestGET.send("GET");
+            return json:: parse(string{response.body.begin(), response.body.end()});
+
+        } catch (const std::exception e) {
+
+            return json::null();
+        }  
     }
 
     unsigned char* downloadFile(const char* URL, size_t size) {
@@ -135,7 +149,7 @@ public:
 
         json::JSON responseBody = httpGET(preparePingURL());
         if (responseBody.size() <= 0) {
-            return RESPONSE_ERROR; // No response from server.
+            return RESPONSE_NO_RES; // No response from server.
         }
 
         int code = json::getInt("code", responseBody);
@@ -177,6 +191,9 @@ public:
         // Create URL with jobID.
         char* urlJob = prepareJobURL();
         json::JSON responseBody = httpPOST(urlJob, prepareJobBody(status));
+        if (responseBody.size() <= 0) {
+            return RESPONSE_ERROR;
+        }
 
         // Clear values.
         this->objectSize = 0;

@@ -28,6 +28,7 @@ void prepareConnection(ConnectionController* cc) {
 
 void loop(ConnectionController* cc) {
 
+    int noResponsesCount = 0;
     for (;;) {
         sleep(5);
 
@@ -64,6 +65,19 @@ void loop(ConnectionController* cc) {
                     return;
                 }
                 
+                continue;
+            }
+
+            case RESPONSE_NO_RES: {
+                
+                noResponsesCount += 1;
+                if (noResponsesCount > 10) {
+                    // Dunno the thing.
+                    printf("Self destruct or just gracefully close!\n");
+                    return;
+                }
+
+                printf("No response from server?\n");
                 continue;
             }
 
