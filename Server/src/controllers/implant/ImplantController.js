@@ -66,20 +66,13 @@ router.get("/job/:jobId", (req, res) => {
     }
 
     databaseHelper.setJobStatus(req.params.jobId, "Executing");
-
-    console.log(job);
-    console.log("Downloading object now...")
-
     res.download(job.location);
 })
 
 router.post("/job/:jobId", (req, res) => {
     
     // Mark job as done.    
-    console.log("FINISHED JOB")
-    console.log(req.body);
-
-    databaseHelper.setJobStatus(req.params.jobId, "Finished", true);
+    databaseHelper.setJobStatus(req.params.jobId, "Finished", req.body.code, true);
 
     res.json({code: responseHelper.LOITER})
 })

@@ -124,11 +124,12 @@ class DatabaseHelper {
             location: job.location,
             createdAt: new Date(Date.now()).toUTCString(),
             finishedAt: "",
+            code: 0,
             status: "PENDING",
         })
     }
 
-    setJobStatus(id, status, finished = false) {
+    setJobStatus(id, status, code = 0, finished = false) {
         this.jobs = this.jobs.map(job => {
 
             // Change the status of the job with id.
@@ -137,6 +138,7 @@ class DatabaseHelper {
                 job.status = status;
                 if (finished) {
                     job.finishedAt = new Date(Date.now()).toUTCString() 
+                    job.code = code;
                 }
                 
                 return job;
@@ -175,7 +177,6 @@ class DatabaseHelper {
     }
 
     checkAuthToken(token) {
-        
         return this.authTokens.filter((entry => token == entry.token))[0];
     }
 

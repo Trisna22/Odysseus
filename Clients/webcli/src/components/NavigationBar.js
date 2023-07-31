@@ -40,6 +40,7 @@ const NavigationBar = () => {
             {
                 isAuth() ? 
                 <>
+                    <NavLink href="/implant">Implant generator</NavLink>
                     <NavLink href="/payloads">Payloads</NavLink>
                     <NavLink href="/">Slaves</NavLink>
                     <NavLink href="/jobs">Jobs</NavLink>

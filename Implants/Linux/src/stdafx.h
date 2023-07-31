@@ -16,3 +16,4 @@
 #include <algorithm>
 #include <sstream>
 #include <vector>
+#include <sys/wait.h> // wait() for fork()

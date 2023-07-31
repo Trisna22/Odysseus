@@ -144,10 +144,29 @@ const checkPayloadExists = (req, res, next) => {
     next();
 }
 
+const checkNewGeneration = (req, res, next) => {
+
+    if (req.body && req.body.os && req.body.payload) {
+
+        // Check if payload is given and if it exists.
+        if (req.body.payload != "none" && !databaseHelper.getPayloadById(req.body.payload)) {
+
+            res.status(400).json({message: "Invalid body!"});
+            return;
+        }
+    
+        next();    
+        return;
+    }
+    
+    res.status(400).json({message: "Invalid body!"});
+}
+
 module.exports = {
     hasAuthToken,
     checkNickName,
     checkNewPayload,
     checkPayloadExists,
-    checkLaunchingPayload
+    checkLaunchingPayload,
+    checkNewGeneration
 }

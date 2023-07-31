@@ -65,6 +65,10 @@ const JobsPage = () => {
                                                 <td>{detailsJob.status}</td>
                                             </tr>
                                             <tr>
+                                                <th>Return code</th>
+                                                <td>{detailsJob.code ? detailsJob.code : <>0</>}</td>
+                                            </tr>
+                                            <tr>
                                                 <th>Object size</th>
                                                 <td>{detailsJob.objectSize} bytes</td>
                                             </tr>
@@ -182,6 +186,7 @@ const JobsPage = () => {
                     <th>Slave</th>
                     <th>Payload</th>
                     <th>Status</th>
+                    <th>Code</th>
                     <th>Created At</th>
                     <th>Finished At</th>
                 </thead>
@@ -193,6 +198,7 @@ const JobsPage = () => {
                     <td>{job.slave.ip} {job.slave.nickname ? "(" + job.slave.nickname + ")" : <></>}</td>
                     <td>{job.payload.name}</td>
                     <td>{job.status}</td>
+                    <td>{job.code ? job.code : <></>}</td>
                     <td>{job.createdAt}</td>
                     <td>{job.finishedAt ? job.finishedAt : <>Still running</>}</td>
                 </tr>

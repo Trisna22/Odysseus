@@ -29,6 +29,14 @@ router.get("/ping", userMiddleware.hasAuthToken, (req, res) => {
     res.json({message: "You're good"})
 })
 
+// Generate a new slave.
+router.post("/slaves", userMiddleware.checkNewGeneration, (req, res) => {
+
+    const newSlave = req.body;
+    
+    // ...
+})
+
 // Retrieve all slaves.
 router.get("/slaves", userMiddleware.hasAuthToken, (req, res) => {
     

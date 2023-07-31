@@ -12,6 +12,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 import LoginPage from './pages/LoginPage';
 import PayloadsPage from './pages/PayloadsPage';
 import JobsPage from "./pages/JobsPage";
+import ImlantPage from './pages/ImplantPage';
 
 function App() {
 
@@ -30,6 +31,7 @@ function App() {
             isAuth() ? 
             <>
               <Route path="/" element={<HomePage/>}/>
+              <Route path="/implant" element={<ImlantPage/>}/> 
               <Route path="/payloads" element={<PayloadsPage/>}/>
               <Route path="/jobs" element={<JobsPage/>}/>
             </>
