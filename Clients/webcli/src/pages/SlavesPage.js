@@ -3,7 +3,7 @@ import { Button, ButtonGroup, Container, Form, InputGroup, Modal, Spinner, Table
 import {useNavigate} from "react-router-dom"
 import UserService from "../services/UserService";
 
-const HomePage = () => {
+const SlavesPage = () => {
 
     const userService = new UserService();
     const navigate = useNavigate();
@@ -255,4 +255,4 @@ const HomePage = () => {
     )
 }
 
-export default HomePage;
+export default SlavesPage;

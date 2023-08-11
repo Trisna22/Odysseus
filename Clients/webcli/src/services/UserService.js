@@ -65,11 +65,11 @@ export default class UserService {
         return this.instance.post("/payload/launch", payload);
     }
 
-    generateSlave(nickname, os, payload) {
+    generateSlave(os, payload, variables) {
         return this.instance.post("/client/slaves", {
-            nickname: nickname,
             os: os,
-            payload: payload
+            payload: payload,
+            variables: variables
         })
     }
 }

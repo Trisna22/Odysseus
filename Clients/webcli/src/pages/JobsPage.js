@@ -195,12 +195,25 @@ const JobsPage = () => {
                 jobs ? jobs.map((job) => (
                     
                 <tr onClick={() => showModal(job)} style={{cursor: "pointer"}}>
-                    <td>{job.slave.ip} {job.slave.nickname ? "(" + job.slave.nickname + ")" : <></>}</td>
-                    <td>{job.payload.name}</td>
-                    <td>{job.status}</td>
-                    <td>{job.code ? job.code : <></>}</td>
-                    <td>{job.createdAt}</td>
-                    <td>{job.finishedAt ? job.finishedAt : <>Still running</>}</td>
+                    {
+                        job.slave ? 
+                            <>
+                                <td>{job.slave.ip ? job.slave.ip : "Not connected yet"} {job.slave.nickname ? "(" + job.slave.nickname + ")" : <></>}</td>
+                                <td>{job.payload.name}</td>
+                                <td>{job.status}</td>
+                                <td>{job.code ? job.code : <></>}</td>
+                                <td>{job.createdAt}</td>
+                                <td>{job.finishedAt ? job.finishedAt : <>Still running</>}</td>
+                            </> :
+                            <>
+                                <td>Not connected yet</td>
+                                <td>{job.payload.name}</td>
+                                <td>AWAITING IMPLANT</td>
+                                <td>0</td>
+                                <td>{job.createdAt}</td>
+                                <td>Waiting...</td>
+                            </>
+                    }
                 </tr>
                 )) : <></>
             } 

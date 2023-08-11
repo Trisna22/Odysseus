@@ -4,3 +4,9 @@ node_modules/
 ./node_modules
 payloads/
 ./payloads
+./implants
+imolants/
+skeleton_implant
+./skeleton_implant
+jobs/
+./jobs

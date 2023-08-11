@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import {BrowserRouter, Routes, Route} from "react-router-dom"
 import NavigationBar from './components/NavigationBar';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/SlavesPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Bootstrap CSS
@@ -13,6 +13,7 @@ import LoginPage from './pages/LoginPage';
 import PayloadsPage from './pages/PayloadsPage';
 import JobsPage from "./pages/JobsPage";
 import ImlantPage from './pages/ImplantPage';
+import SlavesPage from './pages/SlavesPage';
 
 function App() {
 
@@ -30,8 +31,8 @@ function App() {
           {
             isAuth() ? 
             <>
-              <Route path="/" element={<HomePage/>}/>
-              <Route path="/implant" element={<ImlantPage/>}/> 
+              <Route path="/" element={<ImlantPage/>}/>
+              <Route path="/slaves" element={<SlavesPage/>}/>
               <Route path="/payloads" element={<PayloadsPage/>}/>
               <Route path="/jobs" element={<JobsPage/>}/>
             </>
