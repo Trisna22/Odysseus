@@ -72,4 +72,11 @@ export default class UserService {
             variables: variables
         })
     }
+
+    downloadImplant(id) {
+        return this.instance.get("/client/implant/" + id, {
+            responseType: 'blob'
+        });
+    }
+    
 }

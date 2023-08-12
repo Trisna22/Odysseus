@@ -37,10 +37,9 @@ const ImlantPage = () => {
     const generateSlave = () => {
         
         userService.generateSlave(os, initPayload.id, payloadVars).then((res) => {
-
-            console.log(res.data);
+            
             setImplantLink({
-                url: "/implant/" + res.data.path,
+                id:  res.data.path,
                 name: os
             });
         }).catch((err) => {
@@ -58,6 +57,33 @@ const ImlantPage = () => {
             setErrorText(err.response.data.message);
 
             console.error("Creating new implant failed!")
+            console.error(err);
+        })
+    }
+
+    const downloadImplant = (id) => {
+        userService.downloadImplant(id).then(res => {
+
+            // Place data in URL object.
+            const href = URL.createObjectURL(res.data);
+
+            // Create download link.
+            const link = document.createElement('a');
+            link.href = href;
+            link.setAttribute("download", "implant");
+            document.body.appendChild(link);
+
+            link.click(); // Download the data.
+
+            // Clean up link element and remove URL object.
+            document.body.removeChild(link);
+            URL.revokeObjectURL(href);
+
+
+        }).catch((err) => {
+
+            console.error("Error occured!")
+            setErrorText("Failed to download the generated implant!")
             console.error(err);
         })
     }
@@ -143,7 +169,7 @@ const ImlantPage = () => {
                 <Button variant="outline-primary" onClick={() => generateSlave()}>Generate implant</Button>
                 <br/>
                 {
-                    implantLink ? <p>In order to download the implant binary click <a href={implantLink.url}>{implantLink.name}</a> </p> : <></>
+                    implantLink.id ? <p>In order to download the implant binary click <Button variant="outline-secondary" onClick={() => downloadImplant(implantLink.id)}>{implantLink.name}</Button> </p> : <></>
                 }
             </div>
         </Container>
