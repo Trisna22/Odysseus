@@ -1,5 +1,5 @@
 # Odysseus C2 framework
-C2 framework that makes use of object loading and has different handlers, clients and implants.
+C2 framework that makes use of object loading and has different handlers, clients and implants. This project is for fun and learning purposes, it can be used in red team operations.
 
 ## Server
 The C2 server that stands in the center of this project.
