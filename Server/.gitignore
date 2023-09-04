@@ -10,3 +10,5 @@ skeleton_implant
 ./skeleton_implant
 jobs/
 ./jobs
+./implants
+implants/

