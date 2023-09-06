@@ -3,6 +3,10 @@ Change log for every push
 
 ## (before) 27 aug 2023
 Added the implant downloader  
+
+## 6 sept 2023
+Page for generating scripts for implant binaries created, backend doesn't work yet.
+
 ```
 Todo:  
 - Windows implant compiler

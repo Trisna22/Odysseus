@@ -73,8 +73,6 @@ const generateWindowsImplant = (id, endianess) => {
     if (endianess == ENDIAN32) {
 
         console.log("Compiling implant for windows 32 bit.")
-
-        
         
     } else {
         

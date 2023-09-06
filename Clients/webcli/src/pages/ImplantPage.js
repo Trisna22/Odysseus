@@ -13,6 +13,7 @@ const ImlantPage = () => {
     const [payloadVars, setPayloadVars] = useState({});
     const [initPayload, setInitPayload] = useState("");
     const [implantLink, setImplantLink] = useState({});
+    const [useDownloader, setUseDownloader] = useState(false);
     
     useEffect(() => {
         setInterval(() => {
@@ -142,6 +143,30 @@ const ImlantPage = () => {
                         }
                     </Form.Select>
                 </InputGroup>
+                <InputGroup>
+                    <InputGroup.Text>Make use of downloader script?</InputGroup.Text>
+                    <InputGroup.Checkbox onClick={() => setUseDownloader(!useDownloader)}></InputGroup.Checkbox>
+                </InputGroup>
+                {
+                    useDownloader ? 
+                    <>
+                    <InputGroup>
+                        <InputGroup.Text>Target C2 server</InputGroup.Text>
+                            <Form.Control placeholder={localStorage.getItem("baseURL")}></Form.Control>
+                    </InputGroup>
+
+                    <InputGroup>
+                        <InputGroup.Text>Script technology</InputGroup.Text>
+                        <Form.Select>
+                            <option value="">Select language options</option>
+                            <option value="powershell">Powershell</option>
+                            <option value="bash">Bash</option>
+                            <option value="python3">Python3</option>
+                            <option value="python2">Python2</option>
+                        </Form.Select>
+                    </InputGroup>
+                    </> : <></>
+                }
 
                 {
                     initPayload ? <p>{initPayload.description}</p> : <></>
@@ -172,6 +197,9 @@ const ImlantPage = () => {
                     implantLink.id ? <p>In order to download the implant binary click <Button variant="outline-secondary" onClick={() => downloadImplant(implantLink.id)}>{implantLink.name}</Button> </p> : <></>
                 }
             </div>
+
+            <br/>
+        
         </Container>
     )
 }
