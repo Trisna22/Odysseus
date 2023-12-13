@@ -1,0 +1,6 @@
+[submodule "Implants/Components/CoughLoader"]
+	path = Implants/Components/CoughLoader
+	url = https://github.com/Trisna22/CoughLoader
+[submodule "Implants/Components/linux_crypter"]
+	path = Implants/Components/linux_crypter
+	url = https://github.com/Trisna22/odysseus_crypter
