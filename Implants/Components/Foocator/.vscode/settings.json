@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/ramb0/CoughLoader",
+            "binaryPath": "/home/ramb0/CoughLoader/bin",
+            "binaryArgs": []
+        }
+    ]
+}
