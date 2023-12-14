@@ -34,3 +34,9 @@
 bin/
 .gdb_history
 peda-session-stub.txt
+
+.vscode/
+
+*.obj
+
+
