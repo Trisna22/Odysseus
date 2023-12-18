@@ -8,10 +8,10 @@
 
 DWORD getFuncHash(char* foo) {
 	size_t stringLen = strnlen_s(foo, 60);
-	DWORD hash = 0x35;
+	DWORD hash = 0x22;
 
 	for (int i = 0; i < stringLen; i++) {
-		hash += (hash * 0xab10f29f + foo[i]) & 0xffffff;
+		hash += (hash * 0xab43f2e2 + foo[i]) & 0xffffff;
 	}
 
 	return hash;
@@ -45,10 +45,8 @@ PWORD getFooAddressesByHash(char* lib, DWORD hash) {
         // Calculate the hash of this exported function.
         DWORD functionNameHash = getFuncHash(functionName);
 
-        /// We wrote the code wrong somehwere.....
-
+        // Search for the hash.
         if (functionNameHash == hash) {
-            // If the has is found.
             DWORD functionAddressRVA = addrFunctionsRVA[addrOrdinalsRVA[i]];
             PWORD functionAddr = (PWORD)((DWORD_PTR)libraryBase + functionAddressRVA);
             printf("\nFound function %s (0x%x): %p\n", functionName, functionNameHash, functionAddr);
@@ -65,7 +63,7 @@ typedef int (WINAPI* msgbox)(HWND,LPCSTR,LPCSTR,UINT);
 int main(int argc, char* argv[]) {
     printf("MessageBoxA hash: 0x%x\n", getFuncHash("MessageBoxA"));
     
-    PWORD functionAddr = getFooAddressesByHash((char*)"user32", 0x4df9741);
+    PWORD functionAddr = getFooAddressesByHash((char*)"user32", 0x5e07617);
     if (functionAddr == NULL) {
         return 1;
     }
