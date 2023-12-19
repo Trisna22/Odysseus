@@ -1,2 +1,2 @@
 # Foocator
-Function obfuscator
+Function obfuscator for hiding IAT imports.

