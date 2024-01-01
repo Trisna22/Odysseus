@@ -1,9 +1,9 @@
 
-const { randomUUID } = require("crypto");
+const uuid = require("uuid");
     
 const createID = () => {
 
-    return randomUUID();
+    return uuid.v4();
 }
 
 module.exports = {
