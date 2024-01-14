@@ -13,3 +13,5 @@ Function hashing for obfuscating the malware source code.
 ## linux_crypter
 Crypter used by the Odysseus framework for linux systems.
 
+## ELFLoader
+Simple beacon object file loader for Linux ELF executables.
