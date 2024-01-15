@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ELFLoader.h"
+
 unsigned char* getObject(char* objectFile, size_t *fileSize)
 {
 
@@ -44,5 +46,5 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    
+    return parseObject(buffer, fileSize);
 }
