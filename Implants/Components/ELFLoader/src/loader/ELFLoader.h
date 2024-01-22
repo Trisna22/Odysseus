@@ -7,6 +7,7 @@
 #define TRAMPOLINE_SIZE 255 * 12
 #define THUNK_TRAMPOLINE "\x48\xb8\xEE\xEE\xEE\xEE\xEE\xEE\xEE\xEE\xff\xe0"
 #define THUNK_TRAMPOLINE_SIZE 12
+#define THUNKOFFSET 1
 // Program and section header defines.
 Elf64_Ehdr* elfHeader;
 Elf64_Phdr* progheader;
@@ -27,9 +28,11 @@ bool handleRelocations(unsigned char* objData) {
     printf("\nHandling section headers:(%d)\n", elfHeader->e_shnum);
     unsigned char* tempOffsetTable = (unsigned char*)mmap(NULL, TRAMPOLINE_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0); 
     int tempOffsetCounter = 0x5000;
-    int tempOffsetCounter2 = 0;
+    int tempOffsetCounterElf = 0;
 
     for (int i = 0; i < sectHeaderCount; i++) {
+
+        printf("Section number %d:\n\n", i);
 
         int SECTION_PROTS = PROT_READ | PROT_WRITE;
 
@@ -91,9 +94,21 @@ bool handleRelocations(unsigned char* objData) {
         } else {
             // Don't allocate memory, since not needed.
             sectionMappings[i] = NULL;
+            printf("Skipping this section!\n");
         }
 
+
         sectionMappingsProts[i] = SECTION_PROTS;
+
+        printf("\tName is %d\n", sectHeader[i].sh_name);
+        printf("\tType is %d\n", sectHeader[i].sh_type);
+        printf("\tAddr is 0x%lx\n", sectHeader[i].sh_addr);
+        printf("\tOffset is 0x%lx\n", sectHeader[i].sh_offset);
+        printf("\tSize is %ld\n", sectHeader[i].sh_size);
+        printf("\tLink is %d\n", sectHeader[i].sh_link);
+        printf("\tInfo is %d\n", sectHeader[i].sh_info);
+        printf("\tAddrAlign is %ld\n", sectHeader[i].sh_addralign);
+        printf("\tEntSize is %ld\n", sectHeader[i].sh_entsize);
 
         // Check remaining sections for tracking the important ones.
         switch (sectHeader[i].sh_type) {
@@ -102,6 +117,8 @@ bool handleRelocations(unsigned char* objData) {
                 printf("Found symbol and string table...\n");
                 symbolTable = (Elf64_Sym*)(objData + sectHeader[i].sh_offset);
                 stringTable = (char*)(objData + sectHeader[sectHeader[i].sh_link].sh_offset);
+                printf("  SymbolTable: %p\n", symbolTable);
+                printf("  StringTable: %p\n", stringTable);
                 break;
             }
 
@@ -110,6 +127,7 @@ bool handleRelocations(unsigned char* objData) {
                 break;
             }
             default: {
+                printf("\t\tCase not handled!\n");
                 break;
             }
         }
@@ -124,11 +142,18 @@ bool handleRelocations(unsigned char* objData) {
 
         Elf64_Rela* rel = (Elf64_Rela*)(objData + sectHeader[i].sh_offset);
 
+        printf("Type: %d\n", sectHeader[i].sh_type);
         // Only check for relocations with addends.
-        if (sectHeader[i].sh_type == SHT_RELA) {
+        if (sectHeader[i].sh_type == SHT_REL) {
+            
+            /// IDK why but code will skip this statement!...
+            // Type = 4, needs to be 9.
+
             
             // Handle all relocations in this section.
             for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf64_Rel); j++) {
+
+                printf("\n  Relocation %d from section[%d]\n", j, i);
 
                 char* relocStr = stringTable + symbolTable[ELF64_R_SYM(rel[j].r_info)].st_name;
                 char workingTrampoline[TRAMPOLINE_SIZE];
@@ -136,11 +161,35 @@ bool handleRelocations(unsigned char* objData) {
 
                 printf("  Symbol:    %s\n", relocStr);
                 printf("  Type:      0x%lx\n", ELF64_R_TYPE(rel[j].r_info));
+                printf("  Offset:    0x%lx\n", rel[j].r_offset);
+                printf("  Addend:    0x%lx\n", rel[j].r_addend);
 
-                // For functions that aren't defined in the object file.
+                // For functions that aren't defined in the object file, potentially external object.
                 if (symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx == 0) {
 
-                    // Fuck this.
+                    
+                    void* symAddr = dlsym(RTLD_DEFAULT, relocStr);
+                    if (symAddr == NULL) {
+                        printf("Failed to find the relocation function!\n");
+                        return false;
+                    }
+
+                    printf("    Function addr found:   %p\n", symAddr);
+                    memcpy(workingTrampoline + THUNKOFFSET, &symAddr, sizeof(void*));
+
+                    printf("  Temp offset counter: %d\n", tempOffsetCounterElf);
+                    memcpy((void*)(tempOffsetCounterElf + (tempOffsetCounterElf * THUNK_TRAMPOLINE_SIZE)), workingTrampoline, THUNK_TRAMPOLINE_SIZE);
+
+                    int32_t relativeOffset = (tempOffsetTable + (tempOffsetCounter * THUNK_TRAMPOLINE_SIZE)) - 
+                            (sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset) + rel[j].r_addend;
+
+                    printf("\t\tFirstAddress: %p\n", (sectionMappings[symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx]+rel[j].r_addend));
+                    printf("\t\tSecondAddress(NoOffset): %p\n", (sectionMappings[sectHeader[i].sh_info]));
+                    printf("\t\tSecondAddress: %p\n", (sectionMappings[sectHeader[i].sh_info]+rel[j].r_offset));
+                    printf("\t\tRelativeOffset: 0x%x\n", relativeOffset);
+
+                    /* Copy over the relative offset of the value to the section+offset */
+                    memcpy(sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, &relativeOffset, 4);
                 }
                 else if (sectHeader[i].sh_flags == 0x40) {
 
@@ -154,14 +203,12 @@ bool handleRelocations(unsigned char* objData) {
             }
         }
 
-        // Don't know why it won't work...
-
         // Handle the symbols here and get the entry point and all that.
         if (sectHeader[i].sh_type == SHT_SYMTAB) {
             for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf64_Sym); j++) {
 
                 Elf64_Sym* syms = (Elf64_Sym*)(objData + sectHeader[i].sh_offset);
-                if (strcmp("_Z2gov", stringTable + syms[j].st_name) == 0) {
+                if (strcmp("go", stringTable + syms[j].st_name) == 0) {
                     printf("FOUND go()!\n");
                     funcPointer = (int(*)())sectionMappings[syms[j].st_shndx] + syms[j].st_value;
                 }
@@ -176,6 +223,7 @@ bool handleRelocations(unsigned char* objData) {
     }
 
     for (int i = 0; i < sectHeaderCount; i++) {
+        printf("Section #%d is mapped at %p\n", i, sectionMappings[i]);
         if (sectionMappings[i] != NULL) {
 
             if (mprotect(sectionMappings[i], sectHeader[i].sh_size, sectionMappingsProts[i]) != 0) {
@@ -185,7 +233,10 @@ bool handleRelocations(unsigned char* objData) {
         }
 
     }
+
+    printf("Trying to run go()\n");
     funcPointer();
+    printf("Returned from go()\n");
     return true;
 
 }
