@@ -13,4 +13,8 @@ Todo:
 - Add crypter functions
 - Add feature to make the generator have the payload in a downloadable script,
 so that the slaves won't download the implant directly.
+- Different payload execution methods (add options to implant generation):
+	+ CreateRemoteThread()
+	+ ...
+
 ```
