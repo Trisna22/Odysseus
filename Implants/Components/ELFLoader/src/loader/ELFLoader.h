@@ -4,10 +4,11 @@
 #ifndef ELFLOADER_H
 #define ELFLOADER_H
 
+#define COMPILEDMACHINEARCH EM_X86_64
 #define TRAMPOLINE_SIZE 255 * 12
 #define THUNK_TRAMPOLINE "\x48\xb8\xEE\xEE\xEE\xEE\xEE\xEE\xEE\xEE\xff\xe0"
 #define THUNK_TRAMPOLINE_SIZE 12
-#define THUNKOFFSET 1
+#define THUNKOFFSET 2
 // Program and section header defines.
 Elf64_Ehdr* elfHeader;
 Elf64_Phdr* progheader;
@@ -144,29 +145,26 @@ bool handleRelocations(unsigned char* objData) {
 
         printf("Type: %d\n", sectHeader[i].sh_type);
         // Only check for relocations with addends.
-        if (sectHeader[i].sh_type == SHT_REL) {
-            
-            /// IDK why but code will skip this statement!...
-            // Type = 4, needs to be 9.
-
+        if (sectHeader[i].sh_type == SHT_RELA) {
             
             // Handle all relocations in this section.
-            for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf64_Rel); j++) {
+            for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf64_Rela); j++) {
 
                 printf("\n  Relocation %d from section[%d]\n", j, i);
 
                 char* relocStr = stringTable + symbolTable[ELF64_R_SYM(rel[j].r_info)].st_name;
-                char workingTrampoline[TRAMPOLINE_SIZE];
+                char workingTrampoline[THUNK_TRAMPOLINE_SIZE];
                 memcpy(workingTrampoline, THUNK_TRAMPOLINE, THUNK_TRAMPOLINE_SIZE);
 
                 printf("  Symbol:    %s\n", relocStr);
                 printf("  Type:      0x%lx\n", ELF64_R_TYPE(rel[j].r_info));
                 printf("  Offset:    0x%lx\n", rel[j].r_offset);
                 printf("  Addend:    0x%lx\n", rel[j].r_addend);
+                printf("  Info:      0x%lx\n", rel[j].r_info);
+                printf("  Shndx:     0x%x\n", symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx);
 
                 // For functions that aren't defined in the object file, potentially external object.
                 if (symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx == 0) {
-
                     
                     void* symAddr = dlsym(RTLD_DEFAULT, relocStr);
                     if (symAddr == NULL) {
@@ -178,18 +176,22 @@ bool handleRelocations(unsigned char* objData) {
                     memcpy(workingTrampoline + THUNKOFFSET, &symAddr, sizeof(void*));
 
                     printf("  Temp offset counter: %d\n", tempOffsetCounterElf);
-                    memcpy((void*)(tempOffsetCounterElf + (tempOffsetCounterElf * THUNK_TRAMPOLINE_SIZE)), workingTrampoline, THUNK_TRAMPOLINE_SIZE);
+                    memcpy(tempOffsetTable + (tempOffsetCounterElf * THUNK_TRAMPOLINE_SIZE), workingTrampoline, THUNK_TRAMPOLINE_SIZE);
 
-                    int32_t relativeOffset = (tempOffsetTable + (tempOffsetCounter * THUNK_TRAMPOLINE_SIZE)) - 
-                            (sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset) + rel[j].r_addend;
+                    int32_t relativeOffsetFunc = 0;
+                    relativeOffsetFunc = (tempOffsetTable + (tempOffsetCounterElf *THUNK_TRAMPOLINE_SIZE))-
+                        (sectionMappings[sectHeader[i].sh_info] + 
+                        rel[j].r_offset) + rel[j].r_addend;
 
-                    printf("\t\tFirstAddress: %p\n", (sectionMappings[symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx]+rel[j].r_addend));
-                    printf("\t\tSecondAddress(NoOffset): %p\n", (sectionMappings[sectHeader[i].sh_info]));
-                    printf("\t\tSecondAddress: %p\n", (sectionMappings[sectHeader[i].sh_info]+rel[j].r_offset));
-                    printf("\t\tRelativeOffset: 0x%x\n", relativeOffset);
+
+                    // IDK why relative offset gives other value.
+                    printf("\t\tRelativeOffset: 0x%x\n", relativeOffsetFunc);
 
                     /* Copy over the relative offset of the value to the section+offset */
-                    memcpy(sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, &relativeOffset, 4);
+                    memcpy(sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, &relativeOffsetFunc, 4);
+
+
+                    tempOffsetCounterElf += 1;
                 }
                 else if (sectHeader[i].sh_flags == 0x40) {
 
@@ -197,6 +199,13 @@ bool handleRelocations(unsigned char* objData) {
                     int32_t relativeOffset = (sectionMappings[symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx]) -
                         (sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset) + 
                             rel[j].r_addend + symbolTable[ELF64_R_SYM(rel[j].r_info)].st_value;
+
+                    printf("\t\tFirstAddress(NoAddend): %p\n", (sectionMappings[symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx]));
+                    
+                    printf("\t\tFirstAddress: %p\n", (sectionMappings[symbolTable[ELF64_R_SYM(rel[j].r_info)].st_shndx]+rel[j].r_addend));
+                    printf("\t\tSecondAddress(NoOffset): %p\n", (sectionMappings[sectHeader[i].sh_info]));
+                    printf("\t\tSecondAddress: %p\n", (sectionMappings[sectHeader[i].sh_info]+rel[j].r_offset));
+                    printf("\t\tRelativeOffset: 0x%x\n", relativeOffset);
 
                     memcpy(sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, &relativeOffset, 4);    
                 }
