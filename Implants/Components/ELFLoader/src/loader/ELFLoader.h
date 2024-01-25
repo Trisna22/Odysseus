@@ -179,7 +179,8 @@ bool handleRelocations(unsigned char* objData) {
                     memcpy(tempOffsetTable + (tempOffsetCounterElf * THUNK_TRAMPOLINE_SIZE), workingTrampoline, THUNK_TRAMPOLINE_SIZE);
 
                     int32_t relativeOffsetFunc = 0;
-                    relativeOffsetFunc = (tempOffsetTable + (tempOffsetCounterElf *THUNK_TRAMPOLINE_SIZE))-
+                    relativeOffsetFunc = (tempOffsetTable + (tempOffsetCounterElf
+                     *THUNK_TRAMPOLINE_SIZE))-
                         (sectionMappings[sectHeader[i].sh_info] + 
                         rel[j].r_offset) + rel[j].r_addend;
 
@@ -217,12 +218,19 @@ bool handleRelocations(unsigned char* objData) {
             for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf64_Sym); j++) {
 
                 Elf64_Sym* syms = (Elf64_Sym*)(objData + sectHeader[i].sh_offset);
-                if (strcmp("go", stringTable + syms[j].st_name) == 0) {
-                    printf("FOUND go()!\n");
+                if (strstr(stringTable + syms[j].st_name, "go") != NULL) {
+                    printf("Found go! '%s'\n", stringTable + syms[j].st_name);
                     funcPointer = (int(*)())sectionMappings[syms[j].st_shndx] + syms[j].st_value;
+                } else {
+                    printf("This '%s' is it not!\n", stringTable + syms[j].st_name);
                 }
             }
         }
+    }
+
+    if (funcPointer == NULL || funcPointer == (void*)-1) {
+        printf("Function go() not found!\n");
+        return false;
     }
 
 
