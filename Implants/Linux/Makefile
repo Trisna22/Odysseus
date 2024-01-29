@@ -9,7 +9,11 @@ PROJECT = implant
 
 default:
 	mkdir -p ./bin
-	$(CC) -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN)
+	if [[ -z IMPLANT_ID ]]; then
+		$(CC) -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN);
+	else
+		$(CC) -D SLAVE_ID=\"$(IMPLANT_ID)\" -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN);
+	fi
 
 run:
 	$(OUTPUT)/$(PROJECT)
