@@ -92,6 +92,12 @@ public:
 
     bool getObject(ObjectLoader *loader) {
 
+        if (this->OBJECT_SIZE <= 0 || this->JOB_ID.length() == 0) {
+            printf("No job currently!\n");
+            return false;
+        }
+
+        
     }
 };
 

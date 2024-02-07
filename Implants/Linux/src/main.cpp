@@ -29,7 +29,7 @@ bool newObject(ConnectionController* cc) {
 
     ObjectLoader* loader = new ObjectLoader();
     
-    cc->getNewObject();
+    cc->getObject(loader);
 
     ~loader();
     
