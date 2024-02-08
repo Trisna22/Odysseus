@@ -9,6 +9,7 @@ const implantMiddleware = require("../../middlewares/ImplantMiddleware")
 router.post("/", implantMiddleware.checkInitRequest, (req, res) => {
 
     // Check if slave exists.
+    console.log(req.body);
     const slaveExists = databaseHelper.getSlaveById(req.body.id);
     if (!slaveExists) {
 
