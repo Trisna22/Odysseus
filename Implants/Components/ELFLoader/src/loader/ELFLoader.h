@@ -36,37 +36,6 @@ bool handleRelocations(unsigned char* objData) {
         printf("Section number %d:\n\n", i);
 
         int SECTION_PROTS = PROT_READ | PROT_WRITE;
-
-        // printf("\nSection [%d]\n", i);
-
-        // printf("  Type:    0x%x ", sectHeader[i].sh_type);
-        // switch(sectHeader[i].sh_type) {
-        //     case SHT_NULL:
-        //         printf("NULL\n");break;
-        //     case SHT_PROGBITS:
-        //         printf("PROGBITS\n");break;
-        //     case SHT_STRTAB:
-        //         printf("STRTAB\n");break;
-        //     case SHT_NOBITS:
-        //         printf("SHT_NOBITS\n");break;
-        //     case SHT_RELA:
-        //         printf("RELA\n");break;
-        //     case SHT_REL:
-        //         printf("RELOC\n");break;
-        //     case SHT_NOTE: 
-        //         printf("NOTE");break;
-        //     case SHT_DYNAMIC:
-        //         printf("DYNAMIC\n");break;
-        //     case SHT_SYMTAB:
-        //         printf("SHT_SYMTAB\n");break;
-        //     case SHT_DYNSYM:
-        //         printf("SHT_DYNSYM\n");break;
-        //     default:
-        //         break;
-        // }
-
-
-        // printf("  Flags:   0x%lx\n", sectHeader[i].sh_flags);
         
         // Checking memory permissions.
         if (sectHeader[i].sh_flags & 01) {
@@ -309,10 +278,7 @@ bool parseObject(unsigned char* objData, size_t objSize)
         printf("Relocations appear to have failed, so exiting...\n");
         return false;
     }
-    
-    
 
-    
     return false;
 }
 
