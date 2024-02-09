@@ -5,7 +5,7 @@ const {exec, execFileSync, execSync} = require("child_process");
 global.PAYLOAD_PATH = "./payloads/";
 global.JOBS_PATH = "./jobs/"
 
-const COMMAND_COMPILE = "g++ -shared -fPIC -o " ;
+const COMMAND_COMPILE = "g++ -c -o " ;
 const TEMP_SOURCE = "/tmp/.source.cpp";
 
 const compilePayloadTest = (id, variables, success, error) => {

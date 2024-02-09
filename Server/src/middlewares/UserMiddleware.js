@@ -1,5 +1,5 @@
 
-const MALWARE_INIT = "extern \"C\" int payload_init()"
+const MALWARE_INIT = "int payload_init()"
 const authHelper = require("../helpers/AuthenticationHelper")
 
 const hasAuthToken = (req, res, next) => {    
