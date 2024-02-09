@@ -12,7 +12,7 @@
 #include <sys/utsname.h>
 
 // For parsing the ELF files.
-#include <elf.h>
+#include "LittleELF.h"
 #include <sys/mman.h>
 
 // Check if the compiler gives us an implant ID else use the fake one.
