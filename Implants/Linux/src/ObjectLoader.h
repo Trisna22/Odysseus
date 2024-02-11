@@ -13,10 +13,15 @@
     typedef Elf64_Phdr Elf_Phdr;
     typedef Elf64_Shdr Elf_Shdr;
     typedef Elf64_Sym Elf_Sym;
-    
+    typedef Elf64_Rela Elf_Rela;
+    typedef Elf64_Rel Elf_Rel;
 #else
     typedef Elf32_Ehdr Elf_Ehdr;
     typedef Elf32_Phdr Elf_Phdr;
+    typedef Elf32_Shdr Elf_Shdr;
+    typedef Elf32_Sym Elf_Sym;
+    typedef Elf32_Rela Elf_Rela;
+    typedef Elf32_Rel Elf_Rel;
 #endif
 #endif
 
@@ -119,7 +124,13 @@ private:
 
         printf("Relocating now...\n");
 
-        
+        for (int i = 0; i < sectHeaderCount; i++) {
+
+            char* sectName = sectionsStringTable + sectHeader[i].sh_name;
+            printf("Section %s [%d]:\n", sectName, i);
+
+            Elf_Rela* rel = (Elf_Rela*)(objData + sectHeader[i].sh_offset); 
+        }
     }
 
 public:

@@ -3,6 +3,8 @@
 #ifndef LITTLE_ELF_H
 #define LITTLE_ELF_H
 
+#define ET_REL 1 // Relocation type for ELF type.
+
 #define EI_NIDENT 16
 #define EM_386 3
 #define EM_X86_64 62
