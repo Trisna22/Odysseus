@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #include "Crypto.h"
+#include "Executor.h"
 
 #ifndef OBJECT_LOADER_H
 #define OBJECT_LOADER_H
@@ -391,8 +392,10 @@ public:
     }   
 
     int executeObject() {
-  
+        
         return entryPoint();
+        // TODO
+        // return executeFork(entryPoint);
     }
 };
 

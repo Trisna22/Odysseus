@@ -67,7 +67,6 @@ bool handleRelocations(unsigned char* objData) {
             printf("Skipping this section!\n");
         }
 
-
         sectionMappingsProts[i] = SECTION_PROTS;
 
         printf("\tName is %d\n", sectHeader[i].sh_name);
@@ -187,7 +186,7 @@ bool handleRelocations(unsigned char* objData) {
             for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf64_Sym); j++) {
 
                 Elf64_Sym* syms = (Elf64_Sym*)(objData + sectHeader[i].sh_offset);
-                if (strstr(stringTable + syms[j].st_name, "go") != NULL) {
+                if (strstr(stringTable + syms[j].st_name, "payload_init") != NULL) {
                     printf("Found go! '%s'\n", stringTable + syms[j].st_name);
                     funcPointer = (int(*)())sectionMappings[syms[j].st_shndx] + syms[j].st_value;
                 } else {
@@ -198,7 +197,7 @@ bool handleRelocations(unsigned char* objData) {
     }
 
     if (funcPointer == NULL || funcPointer == (void*)-1) {
-        printf("Function go() not found!\n");
+        printf("Function payload_init() not found!\n");
         return false;
     }
 

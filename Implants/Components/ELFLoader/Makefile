@@ -7,7 +7,7 @@ SOURCES_LOADER="./src/loader/"
 SOURCES_BOF="./src/bof/"
 OUTPUT="./bin/"
 
-all: loader bof
+all: loader
 
 loader:
 	$(CC) -g $(SOURCES_LOADER)/main.cpp -o $(OUTPUT)/loader

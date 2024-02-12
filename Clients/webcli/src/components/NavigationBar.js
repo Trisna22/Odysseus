@@ -41,7 +41,7 @@ const NavigationBar = () => {
                 isAuth() ? 
                 <>
                     <NavLink href="/">Implant generator</NavLink>
-                    <NavLink href="/slaves">Slaves</NavLink>
+                    <NavLink href="/implants">Implants</NavLink>
                     <NavLink href="/payloads">Payloads</NavLink>
                     <NavLink href="/jobs">Jobs</NavLink>
                     <Navbar.Text>

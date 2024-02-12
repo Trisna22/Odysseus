@@ -32,7 +32,7 @@ function App() {
             isAuth() ? 
             <>
               <Route path="/" element={<ImlantPage/>}/>
-              <Route path="/slaves" element={<SlavesPage/>}/>
+              <Route path="/implants" element={<SlavesPage/>}/>
               <Route path="/payloads" element={<PayloadsPage/>}/>
               <Route path="/jobs" element={<JobsPage/>}/>
             </>
