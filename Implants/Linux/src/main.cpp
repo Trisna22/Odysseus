@@ -41,12 +41,12 @@ int newObject(ConnectionController* cc) {
 
     printf("Object parsed, executing now...\n");
     int retVal = loader->executeObject();
+    int code = cc->finishJob(retVal);
 
     // Cleanup object loader.
     loader->~ObjectLoader();
-    return retVal;
+    return code;
 }
-
 
 
 void loop(ConnectionController* cc) {
@@ -59,9 +59,7 @@ void loop(ConnectionController* cc) {
             case RESPONSE_NEW_OBJECT: {
                 
                 int code = newObject(cc); // Load and execute new object.
-
-                // Send return value to server.
-                if (cc->finishJob(code) != RESPONSE_LOITER) {
+                if (code != RESPONSE_LOITER) {
                     printf("Failed to finish the job!\n");
                 }
 

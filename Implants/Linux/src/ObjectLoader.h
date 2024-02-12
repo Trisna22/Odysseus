@@ -6,9 +6,15 @@
 #ifndef OBJECT_LOADER_H
 #define OBJECT_LOADER_H
 
+#define ENTRY_POINT "payload_init\0"
 
 #if __GNUC__
 #if __x86_64__ || __ppc64__
+    #define ELF_R_SYM(i)			((i) >> 32)
+    #define ELF_R_TYPE(i)			((i) & 0xffffffff)
+    #define ELF_R_INFO(sym,type)    ((((Elf64_Xword) (sym)) << 32) + (type))
+    
+    // All x64 typedefs.
     typedef Elf64_Ehdr Elf_Ehdr;
     typedef Elf64_Phdr Elf_Phdr;
     typedef Elf64_Shdr Elf_Shdr;
@@ -16,6 +22,11 @@
     typedef Elf64_Rela Elf_Rela;
     typedef Elf64_Rel Elf_Rel;
 #else
+    #define ELF_R_SYM(val)		    ((val) >> 8)
+    #define ELF_R_TYPE(val)		    ((val) & 0xff)
+    #define ELF_R_INFO(sym, type)	(((sym) << 8) + ((type) & 0xff))
+
+    // All x32 typedefs.
     typedef Elf32_Ehdr Elf_Ehdr;
     typedef Elf32_Phdr Elf_Phdr;
     typedef Elf32_Shdr Elf_Shdr;
@@ -51,6 +62,7 @@ private:
 
     // Object function to execute.
     typedef int (*functionPointer)();
+    functionPointer entryPoint = NULL;
 
     // Program and section header defines.
     Elf_Ehdr* elfHeader;
@@ -67,9 +79,28 @@ private:
     char* sectionsStringTable;
     Elf_Sym* symbolTable;
 
-    bool handleRelocations() {
+    // Demangles function name to check if it is our entry point.
+    bool demangleCheck(char* foo) {
 
-        printf("Handling section header relocations...(%d)\n", sectHeaderCount);
+        // Check if we see mangled encoding.
+        if (!(foo[0] == '_' && foo[1] == 'Z' && foo[strlen(foo) -1] == 'v')) {
+            return false;
+        }
+
+        int lenName = atoi(foo + 2); // Get length of function name.
+        if (lenName != strlen(ENTRY_POINT)) {
+            return false;
+        }
+
+        // Copy substring of mangled function.
+        char funcName[lenName];
+        memcpy(funcName, foo +4, lenName);
+        funcName[lenName] = '\0';
+
+        return (strncmp(ENTRY_POINT, funcName, lenName) == 0);
+    }
+
+    bool handleRelocations() {
 
         unsigned char* tempOffsetTable = (unsigned char*)mmap(NULL, 255* THUNK_TRAMPOLINE_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
         int tempOffsetCounter = 0x5000;
@@ -105,10 +136,12 @@ private:
                 // printf("No PROGBITS, so skipping this section...\n\n");
             }
 
+            sectionMappingsProtections[i] = SECTION_PROTS;
+
             switch(sectHeader[i].sh_type) {
                 case SHT_SYMTAB: {
-                    printf("Found symbol and string table in section %d\n", i);
                     symbolTable = (Elf_Sym*)(objData + sectHeader[i].sh_offset);
+                    stringTable = (char*)(objData + sectHeader[sectHeader[i].sh_link].sh_offset);
                     break;
                 }
                 case SHT_STRTAB: {
@@ -122,15 +155,123 @@ private:
             }
         }
 
-        printf("Relocating now...\n");
+        int offsetCounterThunk = 0;
+        bool foundEntry = false;
 
         for (int i = 0; i < sectHeaderCount; i++) {
 
             char* sectName = sectionsStringTable + sectHeader[i].sh_name;
-            printf("Section %s [%d]:\n", sectName, i);
 
             Elf_Rela* rel = (Elf_Rela*)(objData + sectHeader[i].sh_offset); 
+
+            
+            if (sectHeader[i].sh_type == SHT_RELA) {
+                
+                for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf_Rela); j++) {
+
+                    char* relocStr = stringTable + symbolTable[ELF_R_SYM(rel[j].r_info)].st_name;
+                    char workingTrampoline[THUNK_TRAMPOLINE_SIZE];
+                    memcpy(workingTrampoline, THUNK_TRAMPOLINE, THUNK_TRAMPOLINE_SIZE);
+
+                    // For symbols outside the object file, potentially external objects.
+                    if (symbolTable[ELF_R_SYM(rel[j].r_info)].st_shndx == 0) {
+
+                        // Retrieve the symbol from external object.
+                        void* symAddr = dlsym(RTLD_DEFAULT, relocStr);
+                        memcpy(workingTrampoline + THUNKOFFSET, &symAddr, sizeof(void*));
+
+                        memcpy(tempOffsetTable + (offsetCounterThunk * THUNK_TRAMPOLINE_SIZE), workingTrampoline, THUNK_TRAMPOLINE_SIZE);
+
+                        int32_t relativeOffsetFunc = 0;
+
+                        #if defined(__amd64__) || defined(__x86_64__)
+
+                            relativeOffsetFunc = (tempOffsetTable + 
+                                (offsetCounterThunk * THUNK_TRAMPOLINE_SIZE)) - 
+                                (sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset) + 
+                                rel[j].r_addend;
+
+                                
+                            memcpy(sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, &relativeOffsetFunc, 4);
+
+                        #elif defined(__i386__)
+
+                            memcpy(&relativeOffsetFunc, sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, 4);
+                            relativeOffsetFunc += (tempOffsetTable + (offsetCounterThunk * THUNK_TRAMPOLINE_SIZE)) -
+                                (sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset);
+                            memcpy(sectionMappings[sectHeader[i].sh_info + rel[j].r_offset, &relativeOffsetFunc, 4]);
+
+                        #endif
+
+                        offsetCounterThunk += 1;
+                    }
+                    else if (sectHeader[i].sh_flags == 0x40) {
+                        
+                        #if defined(__amd64__) || defined(__x86_64__)
+                            int32_t relativeOffset = (sectionMappings[symbolTable[ELF_R_SYM(rel[j].r_info)].st_shndx]) -
+                                (sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset) + 
+                                    rel[j].r_addend + symbolTable[ELF_R_SYM(rel[j].r_info)].st_value;
+
+                        #elif defined(__i386__)
+
+                            int32_t relativeOffset = 0;
+                            if (ELF_R_TYPE(rel[j].r_info) == R_386_32) {
+
+                                memcpy(&relativeOffset, sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, 4);
+                                relativeOffset += elfinfo.symbolTable[ELF_R_SYM(rel[c2].r_info)].st_value;
+                                relativeOffset += (int32_t)(elfinfo.sectionMappings[elfinfo.symbolTable[ELF_R_SYM(rel[c2].r_info)].st_shndx]);
+                
+                            }
+                            else if (ELF_R_TYPE(rel[c2].r_info) == R_386_PC32) {
+                                
+                                memcpy(&relativeOffset, sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, 4);
+                                relativeOffset = (sectionMappings[symbolTable[ELF_R_SYM(rel[j].r_info)].st_shnx]) - 
+                                    (sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset) + relativeOffset + symbolTable[ELF_R_SYM(rel[j].r_info)].st_value;
+                            }   
+                        #endif 
+    
+                        memcpy(sectionMappings[sectHeader[i].sh_info] + rel[j].r_offset, &relativeOffset, 4);
+                    }
+                }
+            }
+
+            // Handle the symbols here and get the entry point and all that.
+            if (sectHeader[i].sh_type == SHT_SYMTAB) {
+                for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf_Sym); j++) {
+
+                    Elf_Sym* syms = (Elf_Sym*)(objData + sectHeader[i].sh_offset);
+                    if (demangleCheck(stringTable + syms[j].st_name)) {
+                        foundEntry = true;
+                        entryPoint = (functionPointer)sectionMappings[syms[j].st_shndx] + syms[j].st_value;
+                        break;
+                    }
+                }
+            }
         }
+
+
+        if (!foundEntry) {
+            printf("Failed to find entry point!\n");
+            return false;
+        }
+
+        // Add EXEC permissions to thunk table.
+        if (mprotect(tempOffsetTable, 255* THUNK_TRAMPOLINE_SIZE, PROT_READ | PROT_EXEC) != 0) {
+            printf("Failed to mprotect the thunk table!\n");
+            return false;
+        }
+
+        // Set the original EXEC permissions back to the sections.
+        for (int i = 0; i < sectHeaderCount; i++) {
+            if (sectionMappings[i] != NULL) {
+                if (mprotect(sectionMappings[i], sectHeader[i].sh_size, sectionMappingsProtections[i]) != 0) {
+                    printf("Failed to set permission of section %d! Error code: %d\n", i, errno);
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
 public:
@@ -250,7 +391,8 @@ public:
     }   
 
     int executeObject() {
-        return 0x22;
+  
+        return entryPoint();
     }
 };
 
