@@ -42,27 +42,31 @@ private:
         JobWorker* worker = (JobWorker*)params;
         worker->JOB_ID = worker->cc->getJobId();
 
+        // Download the object.
         ObjectLoader* loader = new ObjectLoader();
-
         if (!worker->cc->getObject(loader)) {
             printf("Failed to retrieve object!\n");
             return NULL;
         }
 
         printf("Downloaded the object...\n");
+
+        // Parse the object.
         if (!loader->parseObject()) {
             printf("Failed to parse object!\n");
             return NULL;
         }
 
         printf("Object parsed, executing now...\n");
+
+        // Execute the object.
         int retVal = loader->executeObject();
         int code = worker->cc->finishJob(retVal);
 
         // Cleanup object loader.
         loader->~ObjectLoader();
 
-        worker->finishThread(); // Let thread know we are finished.
+        worker->finishThread(); // Let thread manager know we are finished.
         return NULL;
     }
 

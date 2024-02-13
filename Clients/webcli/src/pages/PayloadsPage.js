@@ -245,7 +245,7 @@ const PayloadsPage = () => {
 
     return (
         <Container>
-            <Modal show={modalPayloadShow} onHide={() => setModalPayloadShow(false)}>
+            <Modal show={modalPayloadShow} onHide={() => setModalPayloadShow(false)} size="lg">
                 <Modal.Header closeButton>
                     <h3><FaBomb /> New payload</h3>
                 </Modal.Header>
