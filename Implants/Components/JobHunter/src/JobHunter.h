@@ -53,8 +53,9 @@ public:
         printf("CC with ID %d sending result %d \n", ID, result);
 
         pthread_mutex_unlock(&mutex);
-        
     }
+
+    int getID() { return ID; }
 };
 
 struct JobInfo {
@@ -74,6 +75,7 @@ private:
     int arg;
     int ID;
     pthread_t threadID;
+    bool finished = false;
 
 public:
     ThreadManager(ConnectionController* value, int TODO, int id) : cc(value), arg(TODO), ID(id) {}
@@ -87,6 +89,13 @@ public:
         return pthread_cancel(threadID);
     }
 
+    void finishThread() {
+        this->finished = true;
+    }
+
+    bool isFinished() {
+        return this->finished;
+    }
 
 private:
     static void* jobThread(void* params) {
@@ -103,9 +112,11 @@ private:
         /**
          * Put return value.
         **/
-        printf("CC in thread %d is %p\n", threadManager->ID, threadManager->cc);
+        printf("CC[%d] in thread %d is %p\n",  threadManager->cc->getID(), threadManager->ID, threadManager->cc);
         threadManager->cc->sendToServer(job->doCalcs(threadManager->arg));
+    
 
+        threadManager->finishThread();
         return NULL;
     }
 };
@@ -145,6 +156,8 @@ public:
             printf("Failed to kill, errno: %d\n", retVal);
         }
 
+        this->runningJobs.erase(this->runningJobs.begin() + id);
+
         return retVal == 0;
     }
 
@@ -157,7 +170,11 @@ public:
         }
 
         for (int i = 0; i < runningJobs.size(); i++) {
-            printf("  Job [%d] \n", i);
+
+            if (!runningJobs.at(i)->isFinished())
+                printf("  Job [%d] \n", i);
+            else 
+                runningJobs.erase(runningJobs.begin() + i);
         }
     }
 

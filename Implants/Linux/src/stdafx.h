@@ -19,6 +19,10 @@
 #include <sys/wait.h>
 #include <threads.h>
 
+// For JobHunter
+#include <vector>
+#include <pthread.h>
+
 // Check if the compiler gives us an implant ID else use the fake one.
 #ifndef SLAVE_ID
     #define SLAVE_ID "TEST_SLAVE_ID"

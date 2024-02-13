@@ -66,7 +66,7 @@ const compilePayload = (payload, jobId, variables, success, error) => {
     
     const path = PAYLOAD_PATH + payload.id + "/";
     let inputFile = path + "source.cpp";
-    if (variables) {
+    if (variables && payload.variables && payload.variables.length > 0) {
 
         // Fill in the variables.
         var data = fs.readFileSync(path + "source.cpp").toString();

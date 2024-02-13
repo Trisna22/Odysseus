@@ -9,3 +9,4 @@
 #define RESPONSE_PONG               0x022 // Response to ping
 #define RESPONSE_LOITER             0x022 // Response to ping
 #define RESPONSE_ERROR              0x023 // Error code
+#define RESPONSE_GET_JOBS           0x024
