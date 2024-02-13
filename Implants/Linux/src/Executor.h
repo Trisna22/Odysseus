@@ -14,10 +14,9 @@ typedef int (*payload)();
  */
 int executeThread(payload func) {
 
-
+    
     // thrd_t thread;
     // thrd_create(&thread, (thrd_start_t)func, (void*)NULL);
-    
 
 }
 

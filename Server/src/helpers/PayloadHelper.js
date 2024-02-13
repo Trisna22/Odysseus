@@ -144,7 +144,7 @@ const getSources = (payloads) => {
                 name: payload.name,
                 variables: payload.variables,
                 description: payload.description,
-                os: payload.os,
+                osPayloads: payload.osPayloads,
                 categories: payload.categories ? payload.categories : "",
                 location: payload.location,
                 source: source,
