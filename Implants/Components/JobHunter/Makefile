@@ -1,5 +1,5 @@
 
-all: multijob
+all: jobhunter
 
-multijob:
-	g++ -o bin/multijob src/main.cpp
+jobhunter:
+	g++ -o bin/jobhunter src/main.cpp
