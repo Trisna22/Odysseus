@@ -77,6 +77,15 @@ void loop(ConnectionController* cc, JobHunter jobHunter) {
                 break;
             }
 
+            case RESPONSE_KILL_JOB: {
+
+                if (!jobHunter.killJob(cc->getJobId())) {
+                    printf("Failed to kill job %s!\n", cc->getJobId().c_str());
+                }
+
+                break;
+            }
+
             case RESPONSE_PONG: {
                 break;
             }

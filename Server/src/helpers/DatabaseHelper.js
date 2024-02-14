@@ -36,6 +36,12 @@
  * }
  */
 
+/**
+ * KillList: {
+ *      slaveId: $string,
+ *      jobId: $string
+ * }
+ */
 class DatabaseHelper {
 
     constructor() {
@@ -45,6 +51,7 @@ class DatabaseHelper {
         this.payloads = [];
         this.jobs = [];
         this.jobList = [];
+        this.killList = [];
 
         this.payloads.push(
             {
@@ -144,6 +151,10 @@ class DatabaseHelper {
         })
     }
 
+    addToKillList() {
+
+    }
+
     setJobList(job, slaveId) {
         this.jobList.push({
             job: job,
@@ -215,6 +226,22 @@ class DatabaseHelper {
         })
 
         return newJobList;
+    }
+
+    getKillList(slaveId) {
+        return this.killList.filter((list) => list.slaveId == slaveId);
+    }
+
+    addToKillList(slaveId, jobId) {
+
+        this.killList.push({
+            "slaveId": slaveId,
+            "jobId": jobId
+        })
+    }
+
+    killJob(jobId) {
+        this.killList = this.killList.filter((kill) => kill.jobId != jobId); 
     }
 }
 

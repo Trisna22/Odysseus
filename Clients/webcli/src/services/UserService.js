@@ -82,5 +82,9 @@ export default class UserService {
             responseType: 'blob'
         });
     }
+
+    killJob(jobId) {
+        return this.instance.post("/payload/joblist/" + jobId);
+    }
     
 }

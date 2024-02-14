@@ -6,30 +6,6 @@
 #ifndef JOB_HUNTER_H
 #define JOB_HUNTER_H
 
-/**
-    ObjectLoader* loader = new ObjectLoader();
-    
-    if (!cc->getObject(loader)) {
-        printf("Failed to retrieve object!\n");
-        return RESPONSE_ERROR;
-    }
-
-    printf("Downloaded the object...\n");
-    if (!loader->parseObject()) {
-        printf("Failed to parse object!\n");
-        return RESPONSE_ERROR;
-    }
-
-    printf("Object parsed, executing now...\n");
-    int retVal = loader->executeObject();
-    int code = cc->finishJob(retVal);
-
-    // Cleanup object loader.
-    loader->~ObjectLoader();
-    return code;
-*/
-
-
 class JobWorker {
 private:
     ConnectionController* cc;
@@ -115,8 +91,26 @@ public:
     }
 
     // Kills a worker/thread with running object.
-    bool killJob(int id) {
-        return false;
+    bool killJob(string jobId) {
+
+        // Loop trough all jobs and check if we need to kill.
+        for (int i = 0; i < this->threads.size(); i++) {
+
+            if (this->threads.at(i)->JOB_ID.compare(jobId) == 0) {
+
+                printf("Found job to kill! %d\n", i);
+                
+                if (this->threads.at(i)->killThread() != 0) {
+                    printf("Failed to kill worker %d! Error code: %d\n", i, errno);
+                    return false;
+                }
+
+                this->threads.erase(this->threads.begin() + i); // Delete thread from list.
+            }
+        }
+
+        // Even if not found, just return true.
+        return true;
     }
 
     // Delete the jobs that are already finished.

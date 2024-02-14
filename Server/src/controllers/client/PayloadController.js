@@ -92,4 +92,9 @@ router.get("/joblist", userMiddleware.hasAuthToken, (req, res) => {
     res.json(databaseHelper.getJobList())
 })
 
+router.post("/joblist/:jobId", userMiddleware.hasAuthToken, (req, res) => {
+
+    res.json(databaseHelper.killJob(req.params.jobId));
+})
+
 module.exports = router;
