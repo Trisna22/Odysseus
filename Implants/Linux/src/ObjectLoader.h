@@ -282,30 +282,23 @@ public:
 
     ~ObjectLoader() {
 
-        // Cleanup file object
-        if (objData != NULL || objData != MAP_FAILED) {
-            munmap(objData, this->objectSize);
-        }
-
-        // TODO: Weird bug, for later
-        
         // Cleaning up the sections data.
-        // for (int i = 0; i < this->sectHeaderCount; i++) {
+        for (int i = 0; i < this->sectHeaderCount; i++) {
 
-        //     if (sectionMappings[i] != NULL) {
+            if (sectionMappings[i] != NULL) {
                 
-        //         // Set all permissions to write before unmapping memory.
-        //         mprotect(sectionMappings[i], sectHeader[i].sh_size, PROT_WRITE | PROT_READ);
+                // Set all permissions to write before unmapping memory.
+                mprotect(sectionMappings[i], sectHeader[i].sh_size, PROT_READ | PROT_WRITE);
 
-        //         // Zero out memory.
-        //         memset(sectionMappings[i], '\0', sectHeader[i].sh_size);
+                // Zero out memory.
+                memset(sectionMappings[i], '\0', sectHeader[i].sh_size);
                                 
-        //         // Cleaning up per section.
-        //         if (munmap(sectionMappings[i], sectHeader[i].sh_size) != 0) {
-        //             printf("Failed to unmap section header %d!\n");
-        //         }
-        //     }
-        // }
+                // Cleaning up per section.
+                if (munmap(sectionMappings[i], sectHeader[i].sh_size) != 0) {
+                    printf("Failed to unmap section header %d!\n");
+                }
+            }
+        }
 
         // Freeing the section mapping variables.
         if (sectionMappings) {
@@ -315,6 +308,11 @@ public:
         if (sectionMappingsProtections) {
             free(sectionMappingsProtections);
             sectionMappingsProtections = 0;
+        }
+        
+        // Cleanup file object
+        if (objData != NULL || objData != MAP_FAILED) {
+            munmap(objData, this->objectSize);
         }
 
         // Delete the data from memory descriptors.

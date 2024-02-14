@@ -77,12 +77,6 @@ void loop(ConnectionController* cc, JobHunter jobHunter) {
                 break;
             }
 
-            case RESPONSE_GET_JOBS: {
-
-                jobHunter.getAllJobs(cc);
-                break;
-            }
-
             case RESPONSE_PONG: {
                 break;
             }
@@ -93,7 +87,7 @@ void loop(ConnectionController* cc, JobHunter jobHunter) {
             }
 
         }
-        jobHunter.getAllJobs(cc); // For debugging.
+        jobHunter.checkAllJobs(); // Update the job list.
     }
 
 }

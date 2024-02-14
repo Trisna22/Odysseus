@@ -208,18 +208,6 @@ public:
         pthread_mutex_unlock(&mutex);
         return downloaded;
     }
-
-    bool sendJobList(vector<string> jobList) {
-
-        printf("# All active jobs:\n");
-
-        for (int i = 0; i < jobList.size(); i++) {
-
-            printf("%s\n", jobList.at(i).c_str());
-        }
-
-        return true;
-    }
 };
 
 #endif // !~ CONNECTION_CONTROLLER_H 

@@ -119,18 +119,14 @@ public:
         return false;
     }
 
-    void getAllJobs(ConnectionController* cc) {
+    // Delete the jobs that are already finished.
+    void checkAllJobs() {
 
         // Get all jobs and send the server.
         vector<string> jobList;
 
-        if (this->threads.size() == 0) {
+        if (this->threads.size() == 0) return;
 
-            printf("# No active jobs...\n");
-            cc->sendJobList(jobList);
-            return;
-        }
-        
         // Loop trough all saved threads to check if finished.
         for (int i = 0; i < this->threads.size(); i++) {
 
@@ -145,8 +141,6 @@ public:
                 this->threads.erase(this->threads.begin() + i);
             }
         }
-
-        cc->sendJobList(jobList);
     }
 
 
