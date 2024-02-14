@@ -84,7 +84,6 @@ void loop(ConnectionController* cc, JobHunter jobHunter) {
             }
 
             case RESPONSE_PONG: {
-                printf("PONG!\n");
                 break;
             }
 

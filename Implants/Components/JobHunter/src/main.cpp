@@ -11,8 +11,6 @@
  */
 // WARNING: dup2() fucks it up for the input when using reverse shells.
 
-
-
 int main(int argc, char* argv[])
 {
     JobHunter jobHunter;
@@ -38,7 +36,7 @@ int main(int argc, char* argv[])
 
         if (cmd.find("kill ") != std::string::npos && cmd.length() == 6) {
 
-            int idtoKill = atoi(cmd.substr(cmd.length() -2).c_str()); // Fuckedup code but works.
+            int idtoKill = atoi(cmd.substr(cmd.length() -2).c_str()); // Fuckedup code, but works.
             printf("Killing job %d\n", idtoKill);
 
             if (!jobHunter.killJob(idtoKill)) {
