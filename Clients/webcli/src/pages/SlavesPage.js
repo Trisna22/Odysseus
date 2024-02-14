@@ -69,7 +69,7 @@ const SlavesPage = () => {
         userService.launchPayload(payload).then((res) => {
 
             setModalShow(false);
-            window.location.replace("/jobs");
+            window.location.reload()
 
         }).catch((err) => {
 
