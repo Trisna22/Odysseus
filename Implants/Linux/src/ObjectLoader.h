@@ -291,7 +291,6 @@ public:
         // Cleaning up the sections data.
         for (int i = 0; i < this->sectHeaderCount; i++) {
 
-            printf("TEST\n");
             if (sectionMappings != NULL && sectionMappings[i] != NULL) {
                 
                 // Cleaning up per section.

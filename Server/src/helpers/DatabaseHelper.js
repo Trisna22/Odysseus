@@ -30,12 +30,11 @@
  *      id:   $string,
  *      description: $string,
  *      location: $string,
- *      os: $string
+ *      osPayloads: $string
  *      categories: $array<$string>
  *      variables: $array<$string>
  * }
  */
-
 
 class DatabaseHelper {
 
@@ -45,6 +44,26 @@ class DatabaseHelper {
         this.slaves = [];
         this.payloads = [];
         this.jobs = [];
+        this.jobList = [];
+
+        this.payloads.push(
+            {
+                id: "af469d67-512a-4b59-b236-55102709f5e4",
+                name: 'Sleepy Hellow',
+                description: 'Sleeps for X seconds',
+                location: "./payloads/af469d67-512a-4b59-b236-55102709f5e4/",
+                variables: [
+                  {
+                    varname: 'COUNT_SLEEP',
+                    description: 'Count of seconds to sleep.',
+                    vartype: 'number'
+                  }
+                ],
+                categories: [ 'scary', 'stealth' ],
+                osPayloads: [ 'linux' ]
+              }
+              
+        )
     }
 
     addNewSlave(slave) {
@@ -125,6 +144,13 @@ class DatabaseHelper {
         })
     }
 
+    setJobList(job, slaveId) {
+        this.jobList.push({
+            job: job,
+            slaveId: slaveId
+        })
+    }
+
     getSlaveById(id) {
         return this.slaves.filter((entry => entry.id == id))[0];
     }
@@ -156,6 +182,53 @@ class DatabaseHelper {
     getJobs() {
         return this.jobs;
     }
+
+    getJobList() {
+
+        // First get all slaves, with their active jobs.
+        let newJobList = [];
+        this.slaves.forEach((slave) => {
+
+            // Filter for inactive jobs for current slave.
+            let activeJobs = this.jobs.filter((job) => {
+
+                if (job.slaveId == slave.id && (job.finishedAt === "" || job.finishedAt.length === 0))
+                    return true;
+                else 
+                    return false;
+            }).map((job) => {
+
+                // Add extra metadata about payload.
+                let payload = this.getPayloadById(job.payloadId);
+                job.name = payload.name;
+                job.description = payload.description;
+                return job;
+            })
+
+            // Only add implant if it has active jobs currently.
+            if (activeJobs.length != 0) {
+                newJobList.push({
+                    "slave": slave,
+                    "activeJobs": activeJobs
+                })
+            }
+        })
+
+        return newJobList;
+    }
 }
 
 module.exports = DatabaseHelper;
+
+/**
+ * Jobs: {
+ *      id: $string,
+ *      slaveId: $string,
+ *      payloadId: $string,
+ *      createdAt: $string,
+ *      finishedAt: $string,
+ *      objectSize: $int,
+ *      status: $string,
+ *      variables: $array<$string>
+ * }
+ */

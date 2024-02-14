@@ -131,9 +131,8 @@ int main(int argc, char* argv[])
             printf("Failed to start the job!\n");
         }
     }
-    else {
-        loop(cc, jobHunter); // Forever looper.
-    }
+
+    loop(cc, jobHunter); // Forever looper.
 
     return 0;
 }

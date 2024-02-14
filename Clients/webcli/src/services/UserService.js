@@ -54,7 +54,11 @@ export default class UserService {
     }
 
     getJobs() {
-        return this.instance.get("/payload/jobs")
+        return this.instance.get("/payload/jobs");
+    }
+
+    getJobList() {
+        return this.instance.get("/payload/joblist");
     }
 
     getCategories() {

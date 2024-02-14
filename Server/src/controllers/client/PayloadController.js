@@ -87,4 +87,9 @@ router.get("/jobs", userMiddleware.hasAuthToken, (req, res) => {
     res.json(payloadHelper.getJobs())
 })
 
+router.get("/joblist", userMiddleware.hasAuthToken, (req, res) => {
+
+    res.json(databaseHelper.getJobList())
+})
+
 module.exports = router;
