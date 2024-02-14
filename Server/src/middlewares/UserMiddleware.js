@@ -203,11 +203,22 @@ const checkNewGeneration = (req, res, next) => {
     res.status(400).json({message: "Invalid body!"});
 }
 
+const checkKillParams = (req, res, next) => {
+THIS DONT WORK, IDK WHY
+    if (req.body && req.body.slaveId && req.body.jobId) {
+        next()
+        return;
+    }
+    
+    res.status(400).json({message: "Invalid body!"});
+}
+
 module.exports = {
     hasAuthToken,
     checkNickName,
     checkNewPayload,
     checkPayloadExists,
     checkLaunchingPayload,
-    checkNewGeneration
+    checkNewGeneration,
+    checkKillParams
 }

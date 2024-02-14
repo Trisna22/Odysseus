@@ -92,9 +92,11 @@ router.get("/joblist", userMiddleware.hasAuthToken, (req, res) => {
     res.json(databaseHelper.getJobList())
 })
 
-router.post("/joblist/:jobId", userMiddleware.hasAuthToken, (req, res) => {
+router.delete("/joblist", userMiddleware.checkKillParams, userMiddleware.hasAuthToken, (req, res) => {
 
-    res.json(databaseHelper.killJob(req.params.jobId));
+
+    databaseHelper.addToKillList(req.body.slaveId, req.body.jobId);
+    res.json({reason: "Okay KillBill"});
 })
 
 module.exports = router;

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import UserService from "../services/UserService";
-import { Accordion, AccordionBody, AccordionHeader, AccordionItem, Button, Container, Table, Toast } from "react-bootstrap";
+import { Accordion, Button, Container, Spinner, Table } from "react-bootstrap";
+import AccordionItem from "react-bootstrap/esm/AccordionItem";
+import AccordionHeader from "react-bootstrap/esm/AccordionHeader";
+import AccordionBody from "react-bootstrap/esm/AccordionBody";
 
 
 const JobManager = () => {
@@ -8,7 +11,7 @@ const JobManager = () => {
 
     const userService = new UserService();
     const [activeImplants, setActiveImplants] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
 
@@ -28,11 +31,11 @@ const JobManager = () => {
         }, 1000)
     }, [])
 
-    const killJob = (jobId) => {
+    const killJob = (jobId, slaveId) => {
 
         console.log("Killing job " + jobId)
 
-        userService.killJob(jobId).then((res) => {
+        userService.killJob(jobId, slaveId).then((res) => {
 
         }).catch((err) => {
             if (err.code == "ERR_NETWORK") {
@@ -75,7 +78,7 @@ const JobManager = () => {
                                                                 <td><a href="/jobs">{job.id}</a></td>
                                                                 <td><a href="/payloads">{job.name}</a></td>
                                                                 <td>{job.description}</td>
-                                                                <td><Button variant="danger" onClick={() => killJob(job.id)}>Kill</Button></td>
+                                                                <td><Button variant="danger" onClick={() => killJob(job.id, implant.slave.id)}>Kill</Button></td>
                                                             </tr>
                                                         ))
                                                     }
@@ -89,6 +92,10 @@ const JobManager = () => {
                             }
                         </Accordion>
                     </> : <>No active jobs currently from any implant...</>
+                }
+
+                {
+                    loading ? <p>Loading... <Spinner/></p> : <></>
                 }
             </Container>
         </>

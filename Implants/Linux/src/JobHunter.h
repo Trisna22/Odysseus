@@ -18,6 +18,9 @@ private:
         JobWorker* worker = (JobWorker*)params;
         worker->JOB_ID = worker->cc->getJobId();
 
+
+        printf("JOB [%s]: Downloading and parsing object...\n", worker->JOB_ID.c_str());
+
         // Download the object.
         ObjectLoader* loader = new ObjectLoader();
         if (!worker->cc->getObject(loader)) {
@@ -25,19 +28,19 @@ private:
             return NULL;
         }
 
-        printf("Downloaded the object...\n");
-
         // Parse the object.
         if (!loader->parseObject()) {
             printf("Failed to parse object!\n");
             return NULL;
         }
 
-        printf("Object parsed, executing now...\n");
+        printf("JOB [%s]: Executing object...\n===>\n", worker->JOB_ID.c_str());
 
         // Execute the object.
         int retVal = loader->executeObject();
         int code = worker->cc->finishJob(retVal);
+
+        printf("JOB [%s]: Finished executing object...\n<===\n", worker->JOB_ID.c_str());
 
         // Cleanup object loader.
         loader->~ObjectLoader();
