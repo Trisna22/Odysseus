@@ -8,7 +8,6 @@ const payloadHelper = require("../../helpers/PayloadHelper")
 router.get("/", userMiddleware.hasAuthToken, (req, res) => {
 
     // Get all payloads.
-
     res.json(payloadHelper.getSources(databaseHelper.getPayloads()))
 })
 
@@ -20,6 +19,8 @@ router.post("/", userMiddleware.hasAuthToken, userMiddleware.checkNewPayload,
     const payloadID = cryptoHelper.createID();
     payloadHelper.createNewPayload(req.files.payloadFile, payloadID, payload.variables, (location) => {
 
+        console.log(payload);
+
         console.log("Succesfully created payload at " + location)
         
         databaseHelper.addPayload({
@@ -27,7 +28,7 @@ router.post("/", userMiddleware.hasAuthToken, userMiddleware.checkNewPayload,
             name: payload.name,
             variables: payload.variables,
             description: payload.description,
-            os: payload.os,
+            osPayloads: payload.osPayloads ? payload.osPayloads : "",
             categories: payload.categories ? payload.categories : "",
             location: location
         })
@@ -84,6 +85,18 @@ router.post("/launch", userMiddleware.hasAuthToken, userMiddleware.checkLaunchin
 router.get("/jobs", userMiddleware.hasAuthToken, (req, res) => {
     
     res.json(payloadHelper.getJobs())
+})
+
+router.get("/joblist", userMiddleware.hasAuthToken, (req, res) => {
+
+    res.json(databaseHelper.getJobList())
+})
+
+router.post("/joblist", userMiddleware.hasAuthToken, userMiddleware.checkKillParams, (req, res) => {
+
+
+    databaseHelper.addToKillList(req.body.slaveId, req.body.jobId);
+    res.json({reason: "Okay KillBill"});
 })
 
 module.exports = router;

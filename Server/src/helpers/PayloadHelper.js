@@ -5,7 +5,7 @@ const {exec, execFileSync, execSync} = require("child_process");
 global.PAYLOAD_PATH = "./payloads/";
 global.JOBS_PATH = "./jobs/"
 
-const COMMAND_COMPILE = "g++ -shared -fPIC -o " ;
+const COMMAND_COMPILE = "g++ -c -o " ;
 const TEMP_SOURCE = "/tmp/.source.cpp";
 
 const compilePayloadTest = (id, variables, success, error) => {
@@ -66,7 +66,7 @@ const compilePayload = (payload, jobId, variables, success, error) => {
     
     const path = PAYLOAD_PATH + payload.id + "/";
     let inputFile = path + "source.cpp";
-    if (variables) {
+    if (variables && payload.variables && payload.variables.length > 0) {
 
         // Fill in the variables.
         var data = fs.readFileSync(path + "source.cpp").toString();
@@ -144,7 +144,7 @@ const getSources = (payloads) => {
                 name: payload.name,
                 variables: payload.variables,
                 description: payload.description,
-                os: payload.os,
+                osPayloads: payload.osPayloads,
                 categories: payload.categories ? payload.categories : "",
                 location: payload.location,
                 source: source,

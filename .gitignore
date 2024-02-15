@@ -34,7 +34,8 @@
 bin/
 .gdb_history
 peda-session-stub.txt
-
+peda-session-implant.txt
+peda-session-*.txt
 .vscode/
 
 *.obj

