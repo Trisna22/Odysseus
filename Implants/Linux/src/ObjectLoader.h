@@ -400,8 +400,6 @@ public:
     int executeObject() {
         
         return entryPoint();
-        // TODO
-        // return executeFork(entryPoint);
     }
 };
 

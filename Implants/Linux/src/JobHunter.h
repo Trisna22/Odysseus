@@ -100,8 +100,6 @@ public:
         for (int i = 0; i < this->threads.size(); i++) {
 
             if (this->threads.at(i)->JOB_ID.compare(jobId) == 0) {
-
-                printf("Found job to kill! %d\n", i);
                 
                 if (this->threads.at(i)->killThread() != 0) {
                     printf("Failed to kill worker %d! Error code: %d\n", i, errno);

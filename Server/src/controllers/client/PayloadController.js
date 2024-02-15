@@ -92,7 +92,7 @@ router.get("/joblist", userMiddleware.hasAuthToken, (req, res) => {
     res.json(databaseHelper.getJobList())
 })
 
-router.delete("/joblist", userMiddleware.checkKillParams, userMiddleware.hasAuthToken, (req, res) => {
+router.post("/joblist", userMiddleware.hasAuthToken, userMiddleware.checkKillParams, (req, res) => {
 
 
     databaseHelper.addToKillList(req.body.slaveId, req.body.jobId);

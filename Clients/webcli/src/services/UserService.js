@@ -84,8 +84,7 @@ export default class UserService {
     }
 
     killJob(jobId, slaveId) {
-        return this.instance.delete("/payload/joblist",
-        {
+        return this.instance.post("/payload/joblist", {
             slaveId: slaveId,
             jobId: jobId
         });

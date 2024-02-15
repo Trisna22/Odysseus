@@ -151,10 +151,6 @@ class DatabaseHelper {
         })
     }
 
-    addToKillList() {
-
-    }
-
     setJobList(job, slaveId) {
         this.jobList.push({
             job: job,
@@ -229,6 +225,7 @@ class DatabaseHelper {
     }
 
     getKillList(slaveId) {
+
         return this.killList.filter((list) => list.slaveId == slaveId);
     }
 
@@ -241,6 +238,8 @@ class DatabaseHelper {
     }
 
     killJob(jobId) {
+
+        this.setJobStatus(jobId, "KILLED", 0, true);
         this.killList = this.killList.filter((kill) => kill.jobId != jobId); 
     }
 }

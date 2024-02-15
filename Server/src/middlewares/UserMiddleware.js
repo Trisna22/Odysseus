@@ -204,13 +204,16 @@ const checkNewGeneration = (req, res, next) => {
 }
 
 const checkKillParams = (req, res, next) => {
-THIS DONT WORK, IDK WHY
-    if (req.body && req.body.slaveId && req.body.jobId) {
-        next()
+
+    if (!req.body || !req.body.slaveId || !req.body.jobId || 
+            typeof req.body.slaveId !== 'string' || 
+            typeof req.body.jobId !== 'string') {
+
+        res.status(400).json({message: "Invalid body!"});
         return;
     }
     
-    res.status(400).json({message: "Invalid body!"});
+    next()
 }
 
 module.exports = {
