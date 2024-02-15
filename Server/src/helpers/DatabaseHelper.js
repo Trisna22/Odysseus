@@ -30,13 +30,18 @@
  *      id:   $string,
  *      description: $string,
  *      location: $string,
- *      os: $string
+ *      osPayloads: $string
  *      categories: $array<$string>
  *      variables: $array<$string>
  * }
  */
 
-
+/**
+ * KillList: {
+ *      slaveId: $string,
+ *      jobId: $string
+ * }
+ */
 class DatabaseHelper {
 
     constructor() {
@@ -45,53 +50,27 @@ class DatabaseHelper {
         this.slaves = [];
         this.payloads = [];
         this.jobs = [];
+        this.jobList = [];
+        this.killList = [];
 
-        // this.payloads.push(
-        //     {
-        //         "id": "df53576a-faf1-4fda-944f-8fa7e4569a63",
-        //         "name": "Echo",
-        //         "variables": [
-        //             {
-        //                 "varname": "TEXT",
-        //                 "description": "String to echo.",
-        //                 "vartype": "string"
-        //             }
-        //         ],
-        //         "description": "Echoes input var.",
-        //         "os": "linux",
-        //         "categories": [
-        //             "scary", "stealth"
-        //         ],
-        //         "location": "./payloads/df53576a-faf1-4fda-944f-8fa7e4569a63/",
-        //         "source": "#include <iostream>\n#include <stdio.h>\n\n#define TO_ECHO TEXT\n\nextern \"C\" int payload_init() {\n\tprintf(\"Hello world! Message: %s\n\", TO_ECHO);\nreturn 22;\n}\n\n",
-        //         "createdAt": "Wed, 12 Jul 2023 15:59:22 GMT"
-        //     })
-
-        //     this.payloads.push(
-        //         {
-        //             "id": "8659be86-04b6-4f6b-93e2-77df4cf9bb69",
-        //             "name": "Reverse shell (TCP)",
-        //             "variables": [
-        //                 {
-        //                     "varname": "TARGET_PORT",
-        //                     "description": "Target port number to use.",
-        //                     "vartype": "number"
-        //                 },
-        //                 {
-        //                     "varname": "TARGET_IP",
-        //                     "description": "Sets the target IP address.",
-        //                     "vartype": "string"
-        //                 },
-        //             ],
-        //             "description": "Creates shell access trough reverse TCP connection.",
-        //             "os": "linux",
-        //             "categories": [
-        //                 "networking", "reverse connection", "stealth", "shell", "command & control"
-        //             ],
-        //             "location": "./payloads/8659be86-04b6-4f6b-93e2-77df4cf9bb69/",
-        //             "source": "#include <iostream>\n\nconst char addrIP[] = TARGET_IP;\nint port = PORT_NUM;\n\nvoid hax() {\n\tprintf(\"Hacking the fuck out of it!\\n\");\n}\nextern \"C\" int payload_init()\n{\n\thax();\n}\n\n",
-        //             "createdAt": "Wed, 12 Jul 2023 15:59:22 GMT"
-        //         })
+        this.payloads.push(
+            {
+                id: "af469d67-512a-4b59-b236-55102709f5e4",
+                name: 'Sleepy Hellow',
+                description: 'Sleeps for X seconds',
+                location: "./payloads/af469d67-512a-4b59-b236-55102709f5e4/",
+                variables: [
+                  {
+                    varname: 'COUNT_SLEEP',
+                    description: 'Count of seconds to sleep.',
+                    vartype: 'number'
+                  }
+                ],
+                categories: [ 'scary', 'stealth' ],
+                osPayloads: [ 'linux' ]
+              }
+              
+        )
     }
 
     addNewSlave(slave) {
@@ -162,13 +141,20 @@ class DatabaseHelper {
     addPayload(payload) {
         this.payloads.push({
             id: payload.id,
-            os: payload.os,
+            osPayloads: payload.osPayloads,
             name: payload.name,
             variables: payload.variables,
             location: payload.location,
             createdAt: new Date(Date.now()).toUTCString(),
             description: payload.description,
             categories: payload.categories
+        })
+    }
+
+    setJobList(job, slaveId) {
+        this.jobList.push({
+            job: job,
+            slaveId: slaveId
         })
     }
 
@@ -203,6 +189,72 @@ class DatabaseHelper {
     getJobs() {
         return this.jobs;
     }
+
+    getJobList() {
+
+        // First get all slaves, with their active jobs.
+        let newJobList = [];
+        this.slaves.forEach((slave) => {
+
+            // Filter for inactive jobs for current slave.
+            let activeJobs = this.jobs.filter((job) => {
+
+                if (job.slaveId == slave.id && (job.finishedAt === "" || job.finishedAt.length === 0))
+                    return true;
+                else 
+                    return false;
+            }).map((job) => {
+
+                // Add extra metadata about payload.
+                let payload = this.getPayloadById(job.payloadId);
+                job.name = payload.name;
+                job.description = payload.description;
+                return job;
+            })
+
+            // Only add implant if it has active jobs currently.
+            if (activeJobs.length != 0) {
+                newJobList.push({
+                    "slave": slave,
+                    "activeJobs": activeJobs
+                })
+            }
+        })
+
+        return newJobList;
+    }
+
+    getKillList(slaveId) {
+
+        return this.killList.filter((list) => list.slaveId == slaveId);
+    }
+
+    addToKillList(slaveId, jobId) {
+
+        this.killList.push({
+            "slaveId": slaveId,
+            "jobId": jobId
+        })
+    }
+
+    killJob(jobId) {
+
+        this.setJobStatus(jobId, "KILLED", 0, true);
+        this.killList = this.killList.filter((kill) => kill.jobId != jobId); 
+    }
 }
 
 module.exports = DatabaseHelper;
+
+/**
+ * Jobs: {
+ *      id: $string,
+ *      slaveId: $string,
+ *      payloadId: $string,
+ *      createdAt: $string,
+ *      finishedAt: $string,
+ *      objectSize: $int,
+ *      status: $string,
+ *      variables: $array<$string>
+ * }
+ */

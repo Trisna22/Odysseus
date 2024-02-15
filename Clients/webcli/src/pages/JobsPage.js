@@ -95,7 +95,7 @@ const JobsPage = () => {
                             {
                                 detailsJob.slave ? 
                                 <>
-                                <h4>Slave</h4>
+                                <h4>Implant</h4>
                                 <Table bordered>
                                     <tbody>
                                     <tr>
@@ -120,7 +120,7 @@ const JobsPage = () => {
                                     </tr>
                                     </tbody>
                                 </Table>
-                                </> : <>No slave data available</>
+                                </> : <>No implant data available</>
                             }
                             </>
                             <>
@@ -183,7 +183,7 @@ const JobsPage = () => {
             <h1>Jobs page</h1>
             <Table bordered hover>
                 <thead>
-                    <th>Slave</th>
+                    <th>Implant</th>
                     <th>Payload</th>
                     <th>Status</th>
                     <th>Code</th>

@@ -54,7 +54,11 @@ export default class UserService {
     }
 
     getJobs() {
-        return this.instance.get("/payload/jobs")
+        return this.instance.get("/payload/jobs");
+    }
+
+    getJobList() {
+        return this.instance.get("/payload/joblist");
     }
 
     getCategories() {
@@ -76,6 +80,13 @@ export default class UserService {
     downloadImplant(id) {
         return this.instance.get("/client/implant/" + id, {
             responseType: 'blob'
+        });
+    }
+
+    killJob(jobId, slaveId) {
+        return this.instance.post("/payload/joblist", {
+            slaveId: slaveId,
+            jobId: jobId
         });
     }
     

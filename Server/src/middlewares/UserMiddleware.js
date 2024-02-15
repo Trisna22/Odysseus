@@ -47,7 +47,7 @@ const checkNewPayload = (req, res, next) => {
     // Check body.
     const payload = JSON.parse(req.body.payload);
     if (payload && payload.name && payload.description 
-            && payload.os && payload.categories ) {
+            && payload.osPayloads && payload.categories ) {
             
         // Check if file is valid.
         if (req.files && req.files.payloadFile) {
@@ -203,11 +203,25 @@ const checkNewGeneration = (req, res, next) => {
     res.status(400).json({message: "Invalid body!"});
 }
 
+const checkKillParams = (req, res, next) => {
+
+    if (!req.body || !req.body.slaveId || !req.body.jobId || 
+            typeof req.body.slaveId !== 'string' || 
+            typeof req.body.jobId !== 'string') {
+
+        res.status(400).json({message: "Invalid body!"});
+        return;
+    }
+    
+    next()
+}
+
 module.exports = {
     hasAuthToken,
     checkNickName,
     checkNewPayload,
     checkPayloadExists,
     checkLaunchingPayload,
-    checkNewGeneration
+    checkNewGeneration,
+    checkKillParams
 }

