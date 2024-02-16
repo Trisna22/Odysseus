@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import UserService from "../services/UserService";
-import { Accordion, Button, Container, Spinner, Table } from "react-bootstrap";
+import { Accordion, Button, Container, Modal, Spinner, Table } from "react-bootstrap";
 import AccordionItem from "react-bootstrap/esm/AccordionItem";
 import AccordionHeader from "react-bootstrap/esm/AccordionHeader";
 import AccordionBody from "react-bootstrap/esm/AccordionBody";
@@ -12,6 +12,10 @@ const JobManager = () => {
     const userService = new UserService();
     const [activeImplants, setActiveImplants] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [modalDeleteJob, setModalDeleteJob] = useState(false);
+    const [jobToKill, setJobToKill] = useState("");
+    const [fromSlave, setFromSlave] = useState("");
 
     useEffect(() => {
 
@@ -76,7 +80,7 @@ const JobManager = () => {
                                                                 <td><a href="/jobs">{job.id}</a></td>
                                                                 <td><a href="/payloads">{job.name}</a></td>
                                                                 <td>{job.description}</td>
-                                                                <td><Button variant="danger" onClick={() => killJob(job.id, implant.slave.id)}>Kill</Button></td>
+                                                                <td><Button variant="danger" onClick={() => {setModalDeleteJob(true);setJobToKill(job.id);setFromSlave(implant.slave.id)}}>Kill</Button></td>
                                                             </tr>
                                                         ))
                                                     }
@@ -96,6 +100,18 @@ const JobManager = () => {
                     loading ? <p>Loading... <Spinner/></p> : <></>
                 }
             </Container>
+            <Modal show={modalDeleteJob} onHide={() => setModalDeleteJob(false)} closeButton>
+                <Modal.Header>
+                    Warning
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure to kill this job?
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="success" onClick={() => {killJob(jobToKill, fromSlave);setModalDeleteJob(false)}}>Yes</Button>
+                    <Button variant="danger" onClick={() => setModalDeleteJob(false)}>No</Button>
+                </Modal.Footer>
+            </Modal>
         </>
     )
 }

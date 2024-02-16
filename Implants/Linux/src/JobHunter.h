@@ -107,6 +107,7 @@ public:
                 }
 
                 this->threads.erase(this->threads.begin() + i); // Delete thread from list.
+                printf("\n<===\nJOB [%s]: Killed...\n", jobId.c_str());
             }
         }
 

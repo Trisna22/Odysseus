@@ -11,7 +11,7 @@ const NavigationBar = () => {
     const userLogout = () => {
 
         localStorage.clear();
-        window.location.reload(false);
+        window.location.replace("/");
     }
 
     const isAuth = () => {        
