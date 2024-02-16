@@ -14,4 +14,7 @@ The implant programs that connects to the C2 server and is been runned by the vi
 Handles different types of connections and bounces the requests to the C2 server.
 
 ## Framework architecture
-![Diagram_Odysseus](./documentation/odysseus_architecture.png)
+![Architecture_Diagram_Odysseus](./documentation/odysseus_architecture.png)
+
+## Class diagram
+![Class_Diagram_Odysseus](./documentation/class_diagram_ody.png)
