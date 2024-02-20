@@ -7,14 +7,30 @@ Added the implant downloader
 ## 6 sept 2023
 Page for generating scripts for implant binaries created, backend doesn't work yet.
 
+## 16 feb 2024
+ELF implant can now execute BOF retrieved from the server. Also the JobHunter feature has been added to create parallel execution and job management.
+
+
 ```
-Todo:  
-- Windows implant compiler
-- Add crypter functions
-- Add feature to make the generator have the payload in a downloadable script,
+ToDo:  
+
++ Client
+  - Add feature to make the generator have the payload in a downloadable script,
 so that the implants won't download the implant directly.
-- Different payload execution methods (add options to implant generation):
-	+ CreateRemoteThread()
-	+ ...
+  - Add implant sleep and jitter options.
+  - 
+
++ Implant
+  - Add crypter functions
+  - Different payload execution methods (add options to implant generation):
+    *  CreateRemoteThread()
+    * ...
+  - Sleep/jitter features
+
++ Server
+  - Windows implant compiler
+
++ Beacon Object Files
+  - AMSI bypass
 
 ```
