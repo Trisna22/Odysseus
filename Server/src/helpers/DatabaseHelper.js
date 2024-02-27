@@ -21,6 +21,8 @@
  *      objectSize: $int,
  *      status: $string,
  *      variables: $array<$string>
+ *      data: $string/$raw
+ *      encoding: $string
  * }
  */
 
@@ -119,6 +121,23 @@ class DatabaseHelper {
                     job.finishedAt = new Date(Date.now()).toUTCString() 
                     job.code = code;
                 }
+                
+                return job;
+            }
+
+            return job; // Leave the other jobs be.
+        });
+    }
+
+    setJobData(id, data, encoding) {
+
+        this.jobs = this.jobs.map(job => {
+
+            // Change the data of the job with id.
+            if (job.id == id) {
+
+                job.data = data;
+                job.encoding = encoding
                 
                 return job;
             }

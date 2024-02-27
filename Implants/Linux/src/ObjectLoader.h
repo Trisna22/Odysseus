@@ -2,11 +2,12 @@
 #include "stdafx.h"
 
 #include "Crypto.h"
+#include "OutputFormatter.h"
 
 #ifndef OBJECT_LOADER_H
 #define OBJECT_LOADER_H
 
-#define ENTRY_POINT "payload_init\0"
+#define ENTRY_POINT "payload_init"
 
 #if __GNUC__
 #if __x86_64__ || __ppc64__
@@ -61,7 +62,7 @@ private:
     unsigned char* objData;
 
     // Object function to execute.
-    typedef int (*functionPointer)();
+    typedef int (*functionPointer)(OutputFormatter*);
     functionPointer entryPoint = NULL;
 
     // Program and section header defines.
@@ -83,7 +84,7 @@ private:
     bool demangleCheck(char* foo) {
 
         // Check if we see mangled encoding.
-        if (!(foo[0] == '_' && foo[1] == 'Z' && foo[strlen(foo) -1] == 'v')) {
+        if (!(foo[0] == '_' && foo[1] == 'Z')) {
             return false;
         }
 
@@ -240,6 +241,7 @@ private:
                 for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf_Sym); j++) {
 
                     Elf_Sym* syms = (Elf_Sym*)(objData + sectHeader[i].sh_offset);
+
                     if (demangleCheck(stringTable + syms[j].st_name)) {
                         foundEntry = true;
                         entryPoint = (functionPointer)sectionMappings[syms[j].st_shndx] + syms[j].st_value;
@@ -396,9 +398,9 @@ public:
         return handleRelocations();
     }   
 
-    int executeObject() {
+    int executeObject(OutputFormatter* of) {
         
-        return entryPoint();
+        return entryPoint(of);
     }
 };
 

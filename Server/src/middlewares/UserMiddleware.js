@@ -1,5 +1,5 @@
 
-const MALWARE_INIT = "int payload_init()"
+const MALWARE_INIT = "int payload_init(OutputFormatter* of)"
 const authHelper = require("../helpers/AuthenticationHelper")
 
 const hasAuthToken = (req, res, next) => {    
@@ -83,7 +83,7 @@ const checkNewPayload = (req, res, next) => {
                 return;
             }
 
-            res.status(400).json({message: "No malware entry inside payload code!"})
+            res.status(400).json({message: "No malware entry inside payload code! Must be void 'payload_init(OutputFormatter* of)'"})
             return;
         }
 

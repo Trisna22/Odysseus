@@ -26,6 +26,7 @@ so that the implants won't download the implant directly.
     *  CreateRemoteThread()
     * ...
   - Sleep/jitter features
+  - return strings
 
 + Server
   - Windows implant compiler

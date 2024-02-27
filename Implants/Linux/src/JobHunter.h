@@ -9,6 +9,7 @@
 class JobWorker {
 private:
     ConnectionController* cc;
+    OutputFormatter* of;
     pthread_t thread;
     bool finished = false;
 
@@ -17,7 +18,6 @@ private:
 
         JobWorker* worker = (JobWorker*)params;
         worker->JOB_ID = worker->cc->getJobId();
-
 
         printf("JOB [%s]: Downloading and parsing object...\n", worker->JOB_ID.c_str());
 
@@ -37,8 +37,8 @@ private:
         printf("JOB [%s]: Executing object...\n===>\n", worker->JOB_ID.c_str());
 
         // Execute the object.
-        int retVal = loader->executeObject();
-        int code = worker->cc->finishJob(retVal);
+        int retVal = loader->executeObject(worker->of);
+        int code = worker->cc->finishJob(retVal, worker->of);
 
         printf("JOB [%s]: Finished executing object...\n<===\n", worker->JOB_ID.c_str());
 
@@ -51,7 +51,7 @@ private:
 
 public:
     string JOB_ID;
-    JobWorker(ConnectionController* connectionController) : cc(connectionController) {}
+    JobWorker(ConnectionController* connectionController, OutputFormatter* outputFormatter) : cc(connectionController), of(outputFormatter) {}
 
     int startWorker() {
         return pthread_create(&thread, NULL, jobThread, this);
@@ -81,9 +81,9 @@ public:
     }
 
     // Starts new ObjectLoader job.
-    bool startNewJob(ConnectionController* cc) {
+    bool startNewJob(ConnectionController* cc, OutputFormatter* of) {
 
-        JobWorker* worker = new JobWorker(cc);
+        JobWorker* worker = new JobWorker(cc, of);
         int code = worker->startWorker();
         if (code != 0) {
             printf("Failed to start worker for new object! Errror code: %d\n", errno);

@@ -6,6 +6,8 @@ const router = express.Router();
 const responseHelper = require("../../helpers/ImplantResponseHelper")
 const implantMiddleware = require("../../middlewares/ImplantMiddleware")
 
+
+
 router.post("/", implantMiddleware.checkInitRequest, (req, res) => {
 
     // Check if slave exists.
@@ -81,6 +83,12 @@ router.get("/job/:jobId", (req, res) => {
 })
 
 router.post("/job/:jobId", (req, res) => {
+
+    // Check if job has a string result.
+    if (req.body && req.body.data && req.body.encoding) {
+
+        databaseHelper.setJobData(req.params.jobId, req.body.data, req.body.encoding);
+    }
     
     // Mark job as done.    
     databaseHelper.setJobStatus(req.params.jobId, "FINISHED", req.body.code, true);

