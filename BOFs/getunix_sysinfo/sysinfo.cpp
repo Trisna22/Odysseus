@@ -23,7 +23,13 @@ int payload_init(char* data) {
     int infoSize = 65*3;
     char info[infoSize];
 
+    snprintf(info, infoSize, "%s %s %s", buffer.release, buffer.machine, buffer.version); // From OutputFormatter.h
+    printf("[BOF]: %s\n", info);
 
-    // of->setOutputData("%s %s %s", buffer.release, buffer.machine, buffer.version); // From OutputFormatter.h
+
+    // Realloc buffer...
+    // char* tempStr = (char*)realloc(data, infoSize) +1;
+
+    snprintf(data, infoSize, "%s %s %s", buffer.release, buffer.machine, buffer.version); // Add output to dataOutput.
     return 0;
 }
