@@ -169,7 +169,7 @@ public:
     }
 
     // Sends finish request to the server to let know we finished executing the job.
-    int finishJob(int code, OutputFormatter* of, unsigned char* jobResult = NULL) {
+    int finishJob(int code, unsigned char* jobResult = NULL) {
 
         // Creat URL with job ID.
         char* urlJob = prepareJobURL();
@@ -178,12 +178,15 @@ public:
             return RESPONSE_ERROR;
         }
 
-        int outputSize;
-        char* outputData = of->getOutputData(&outputSize);
-        printf("FinishJob outputData loc: %p\n", outputData);
-        outputData[outputSize] = '\0';
 
-        printf("MAIN_THREAD: output(%d):\n", outputSize);
+        printf("[CC] OUTPUT_DATA: %p\n", OutputVariables::OUTPUT_DATA);
+        printf("[CC] data:        %s\n", OutputVariables::OUTPUT_DATA);
+
+        // int outputSize;
+        // char* outputData = of->getOutputData(&outputSize);
+        // printf("[CC] FinishJob outputData loc: %p\n", outputData);
+        // outputData[outputSize] = '\0';
+        // printf("[CC] MAIN_THREAD: output(%d):\n", outputSize);
         // printf("%s\n", outputData);
 
         // Cleanup job for the next one.

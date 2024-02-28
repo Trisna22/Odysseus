@@ -24,7 +24,7 @@ void prepareConnection(ConnectionController* cc) {
     cc->prepareConnection(buffer.nodename, username, info);
 }
 
-void loop(ConnectionController* cc, JobHunter jobHunter, OutputFormatter* of) {
+void loop(ConnectionController* cc, JobHunter jobHunter) {
 
     for (;;) {
         sleep(5);
@@ -33,7 +33,7 @@ void loop(ConnectionController* cc, JobHunter jobHunter, OutputFormatter* of) {
         switch (responseCode) {
             case RESPONSE_NEW_OBJECT: {
                 
-                if (!jobHunter.startNewJob(cc, of)) {
+                if (!jobHunter.startNewJob(cc)) {
                     printf("Failed to start the job!\n");
                 }
 
@@ -90,8 +90,9 @@ int main(int argc, char* argv[])
 
     // Handles the connections.
     ConnectionController *cc = new ConnectionController(slaveId);
-    OutputFormatter* of = new OutputFormatter(); // Handles the output of BOF.
-    printf("Outputformatter value: %p\n",of);
+
+    // For string outputs.
+    OutputVariables::OUTPUT_DATA = (char*)malloc(10); 
 
     prepareConnection(cc);
 
@@ -107,12 +108,12 @@ int main(int argc, char* argv[])
         printf("Getting init object.\n");
 
         // If we have an init job.
-        if (!jobHunter.startNewJob(cc, of)) {
+        if (!jobHunter.startNewJob(cc)) {
             printf("Failed to start the job!\n");
         }
     }
 
-    loop(cc, jobHunter, of); // Forever looper.
+    loop(cc, jobHunter); // Forever looper.
 
     return 0;
 }

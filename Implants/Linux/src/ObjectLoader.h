@@ -62,7 +62,7 @@ private:
     unsigned char* objData;
 
     // Object function to execute.
-    typedef int (*functionPointer)(OutputFormatter*);
+    typedef int (*functionPointer)(volatile char*);
     functionPointer entryPoint = NULL;
 
     // Program and section header defines.
@@ -398,9 +398,12 @@ public:
         return handleRelocations();
     }   
 
-    int executeObject(OutputFormatter* of) {
+    int executeObject() {
+
+        printf("[OL] OUTPUT_DATA: %p\n", OutputVariables::OUTPUT_DATA);
+        printf("[OL] data:        %s\n", OutputVariables::OUTPUT_DATA);
         
-        return entryPoint(of);
+        return entryPoint(OutputVariables::OUTPUT_DATA);
     }
 };
 

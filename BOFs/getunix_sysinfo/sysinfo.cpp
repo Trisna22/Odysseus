@@ -5,7 +5,10 @@
 
 #include "../OutputFormatter.h" // Required!
 
-int payload_init(OutputFormatter* of) {
+int payload_init(char* data) {
+
+    printf("[BOF] OUTPUT_DATA:  %p\n", data);
+    printf("[BOF] data:         %s\n", data);
 
     // Get username.
     char* username = getlogin();
@@ -20,8 +23,7 @@ int payload_init(OutputFormatter* of) {
     int infoSize = 65*3;
     char info[infoSize];
 
-    printf("[BOF] OutputFormatter: %p\n", of);
-    of->setOutputData("This should print in the main program...\n");
+
     // of->setOutputData("%s %s %s", buffer.release, buffer.machine, buffer.version); // From OutputFormatter.h
     return 0;
 }
