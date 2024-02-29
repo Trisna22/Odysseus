@@ -62,8 +62,8 @@ private:
     unsigned char* objData;
 
     // Object function to execute.
-    typedef void(*output_func)(const char* fmt, ...); 
-    typedef int (*functionPointer)(output_func);
+    typedef void(*output_func)(int, const char* fmt, ...); 
+    typedef int (*functionPointer)(int, output_func);
     functionPointer entryPoint = NULL;
 
     // Program and section header defines.
@@ -399,9 +399,9 @@ public:
         return handleRelocations();
     }   
 
-    int executeObject() {
+    int executeObject(int outputId) {
         
-        return entryPoint(OutputVariables::setOutputData);
+        return entryPoint(outputId, OutputVariables::setOutputData);
     }
 };
 

@@ -36,8 +36,9 @@ private:
         printf("JOB [%s]: Executing object...\n===>\n", worker->JOB_ID.c_str());
 
         // Execute the object.
-        int retVal = loader->executeObject();
-        int code = worker->cc->finishJob(retVal);
+        int outputId = OutputVariables::getNewOutputId();
+        int retVal = loader->executeObject(outputId);
+        int code = worker->cc->finishJob(retVal, outputId);
 
         printf("JOB [%s]: Finished executing object...\n<===\n", worker->JOB_ID.c_str());
 

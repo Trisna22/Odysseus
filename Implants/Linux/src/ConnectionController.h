@@ -117,6 +117,9 @@ end:
             snprintf(jobBody, bodySize, BODY_JOB, status.c_str());
         }
 
+        printf("Body to send: \n%s\n", jobBody);
+        
+
         return jobBody;
     }
 
@@ -181,11 +184,11 @@ public:
     }
 
     // Sends finish request to the server to let know we finished executing the job.
-    int finishJob(int code) {
+    int finishJob(int code, int outputId) {
 
         // Get the output if any.
         int sizeOutput = 0;
-        char* outputData = OutputVariables::getOutputData(&sizeOutput);
+        char* outputData = OutputVariables::getOutputData(outputId, &sizeOutput);
 
         // Creat URL with job ID.
         char* urlJob = prepareJobURL();

