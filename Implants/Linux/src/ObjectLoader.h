@@ -62,7 +62,8 @@ private:
     unsigned char* objData;
 
     // Object function to execute.
-    typedef int (*functionPointer)(volatile char*);
+    typedef void(*output_func)(const char* fmt, ...); 
+    typedef int (*functionPointer)(output_func);
     functionPointer entryPoint = NULL;
 
     // Program and section header defines.
@@ -399,11 +400,8 @@ public:
     }   
 
     int executeObject() {
-
-        printf("[OL] OUTPUT_DATA: %p\n", OutputVariables::OUTPUT_DATA);
-        printf("[OL] data:        %s\n", OutputVariables::OUTPUT_DATA);
         
-        return entryPoint(OutputVariables::OUTPUT_DATA);
+        return entryPoint(OutputVariables::setOutputData);
     }
 };
 

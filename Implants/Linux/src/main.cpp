@@ -91,9 +91,6 @@ int main(int argc, char* argv[])
     // Handles the connections.
     ConnectionController *cc = new ConnectionController(slaveId);
 
-    // For string outputs.
-    OutputVariables::OUTPUT_DATA = (char*)malloc(10); 
-
     prepareConnection(cc);
 
     JobHunter jobHunter; // Worker pool

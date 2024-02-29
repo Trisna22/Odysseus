@@ -99,11 +99,23 @@ end:
         return urlJob;
     }
 
-    char* prepareJobBody(int code) {
+    char* prepareJobBody(int code, int outputSize, char* outputData) {
+        
+        char* jobBody;
         string status = to_string(code);
+        int bodySize = outputSize + status.length();
 
-        char* jobBody = new char[status.length() + strlen(BODY_JOB)];
-        snprintf(jobBody, status.length() + strlen(BODY_JOB), BODY_JOB, status.c_str());
+        if (outputSize > 0) {
+            bodySize += strlen(BODY_JOB_OUTPUT);
+            jobBody = new char[bodySize];
+            snprintf(jobBody, bodySize, BODY_JOB_OUTPUT, status.c_str(), outputData);
+
+        } else {
+            bodySize += strlen(BODY_JOB);
+            jobBody = new char[bodySize];
+
+            snprintf(jobBody, bodySize, BODY_JOB, status.c_str());
+        }
 
         return jobBody;
     }
@@ -169,25 +181,19 @@ public:
     }
 
     // Sends finish request to the server to let know we finished executing the job.
-    int finishJob(int code, unsigned char* jobResult = NULL) {
+    int finishJob(int code) {
+
+        // Get the output if any.
+        int sizeOutput = 0;
+        char* outputData = OutputVariables::getOutputData(&sizeOutput);
 
         // Creat URL with job ID.
         char* urlJob = prepareJobURL();
-        json::JSON responseBody = httpPOST(urlJob, prepareJobBody(code));
+
+        json::JSON responseBody = httpPOST(urlJob, prepareJobBody(code, sizeOutput, outputData));
         if (responseBody.size() <= 0) {
             return RESPONSE_ERROR;
         }
-
-
-        printf("[CC] OUTPUT_DATA: %p\n", OutputVariables::OUTPUT_DATA);
-        printf("[CC] data:        %s\n", OutputVariables::OUTPUT_DATA);
-
-        // int outputSize;
-        // char* outputData = of->getOutputData(&outputSize);
-        // printf("[CC] FinishJob outputData loc: %p\n", outputData);
-        // outputData[outputSize] = '\0';
-        // printf("[CC] MAIN_THREAD: output(%d):\n", outputSize);
-        // printf("%s\n", outputData);
 
         // Cleanup job for the next one.
         this->OBJECT_SIZE = 0;

