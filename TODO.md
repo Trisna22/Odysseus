@@ -10,6 +10,8 @@ Page for generating scripts for implant binaries created, backend doesn't work y
 ## 16 feb 2024
 ELF implant can now execute BOF retrieved from the server. Also the JobHunter feature has been added to create parallel execution and job management.
 
+## 1 mar 2024
+Bug fix of JOB_ID in multi-threading. Cleanup and output with string possible.
 
 ```
 ToDo:  
@@ -26,7 +28,6 @@ so that the implants won't download the implant directly.
     *  CreateRemoteThread()
     * ...
   - Sleep/jitter features
-  - return strings
 
 + Server
   - Windows implant compiler
