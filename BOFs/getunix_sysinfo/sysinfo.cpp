@@ -11,9 +11,9 @@ typedef void(*output_func)(int, const char* fmt, ...); // For printing output on
 int payload_init(int id, output_func output) {
 
     srand(time(NULL));
-    int randInt = rand() % 1000;
+    int randInt = rand() % 100000 + 30000;
 
-    sleep(10);
+    sleep(30);
 
     // Get username.
     char* username = getlogin();

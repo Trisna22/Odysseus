@@ -12,7 +12,6 @@
 #ifndef OUTPUT_FORMATTER_H
 #define OUTPUT_FORMATTER_H
 
-// volatile struct*
 namespace OutputVariables {
 
     // For memory safe operations on the output.
@@ -27,38 +26,30 @@ namespace OutputVariables {
 
         pthread_mutex_lock(&mutex);
 
-        printf("Current ID: %d\n", countOutputs);
-
         // Reallocating list everytime we have a new output.
-        outputDataList = (char**)reallocarray(NULL, countOutputs+1, sizeof(char*));
-        outputSizeList = (int*)reallocarray(NULL, countOutputs+1, sizeof(int));
-        outputOffsetList = (int*)reallocarray(NULL, countOutputs+1, sizeof(int));
+        char**tempArray = (char**)reallocarray(outputDataList, countOutputs+1, sizeof(char*));
+        int* tempSize = (int*)reallocarray(outputSizeList, countOutputs+1, sizeof(int));
+        int*tempOffset = (int*)reallocarray(outputOffsetList, countOutputs+1, sizeof(int));
+
+        outputDataList = tempArray;
+        outputSizeList = tempSize;
+        outputOffsetList = tempOffset;
 
         // Inital values.
         outputDataList[countOutputs] = (char*)malloc(10);
         outputSizeList[countOutputs] = 0;
         outputOffsetList[countOutputs] = 0;
 
-        printf("OUTPUT_DATA %d %p\n", countOutputs, outputDataList[countOutputs]);
-
-        printf("[OF generation] Output data list: %p\n", outputDataList);
-
         pthread_mutex_unlock(&mutex);
         return countOutputs++; // Give the ID of the last item (which is new).
     }
 
     void setOutputData(int id, const char* fmt, ...) {
-
-        printf("[OF setter] JOB output ID: %d\n", id);
-        printf("[OF setter] outputDataList: %p\n", outputDataList);
-
         pthread_mutex_lock(&mutex);
 
         // char* OUTPUT_DATA = outputDataList[id]; // The data buffer to store it in.
         int sizeOutputData = outputSizeList[id];
         int outputDataOffset = outputOffsetList[id];
-
-        printf("[OF setter] OUTPUT_DATA: %p\n", outputDataList[id]);
 
         // Get argument count.
         va_list args;
@@ -91,8 +82,6 @@ namespace OutputVariables {
     // Retrieve the output buffer from the programs.
     char* getOutputData(int id, int* outputSize) {
 
-        printf("[OF getter] Cleaning up %d\n", id);
-
         pthread_mutex_lock(&mutex);
 
         *outputSize = outputSizeList[id];
@@ -104,10 +93,10 @@ namespace OutputVariables {
         tempStr[outputSizeList[id]] = '\0';
 
         // Cleanup.
-        // if (outputDataList[id]) {
-        //     free(outputDataList[id]);
-        //     outputDataList[id] = NULL;
-        // }
+        if (outputDataList[id]) {
+            free(outputDataList[id]);
+            outputDataList[id] = NULL;
+        }
         
         outputSizeList[id]= 0;
         outputOffsetList[id] = 0;

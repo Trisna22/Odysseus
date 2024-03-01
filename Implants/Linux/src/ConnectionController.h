@@ -91,10 +91,12 @@ end:
         return bodyInit;
     }
 
-    char* prepareJobURL() {
-        int urlLen = this->JOB_ID.length() + strlen(URL_JOB);
+    // For safe multithreading, job Id must be given.
+    char* prepareJobURL(string jobId) {
+
+        int urlLen = jobId.length() + strlen(URL_JOB);
         char* urlJob = new char[urlLen];
-        snprintf(urlJob, urlLen, URL_JOB, this->JOB_ID.c_str());
+        snprintf(urlJob, urlLen, URL_JOB, jobId.c_str());
 
         return urlJob;
     }
@@ -115,10 +117,7 @@ end:
             jobBody = new char[bodySize];
 
             snprintf(jobBody, bodySize, BODY_JOB, status.c_str());
-        }
-
-        printf("Body to send: \n%s\n", jobBody);
-        
+        }        
 
         return jobBody;
     }
@@ -184,14 +183,14 @@ public:
     }
 
     // Sends finish request to the server to let know we finished executing the job.
-    int finishJob(int code, int outputId) {
+    int finishJob(string jobId, int code, int outputId) {
 
         // Get the output if any.
         int sizeOutput = 0;
         char* outputData = OutputVariables::getOutputData(outputId, &sizeOutput);
 
         // Creat URL with job ID.
-        char* urlJob = prepareJobURL();
+        char* urlJob = prepareJobURL(jobId);
 
         json::JSON responseBody = httpPOST(urlJob, prepareJobBody(code, sizeOutput, outputData));
         if (responseBody.size() <= 0) {
@@ -227,7 +226,7 @@ public:
         }
 
         // Load object data to object loader.
-        bool downloaded = downloadFile(prepareJobURL(), loader);
+        bool downloaded = downloadFile(prepareJobURL(this->JOB_ID), loader);
 
         pthread_mutex_unlock(&mutex);
         return downloaded;

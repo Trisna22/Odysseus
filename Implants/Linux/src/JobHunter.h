@@ -38,7 +38,7 @@ private:
         // Execute the object.
         int outputId = OutputVariables::getNewOutputId();
         int retVal = loader->executeObject(outputId);
-        int code = worker->cc->finishJob(retVal, outputId);
+        int code = worker->cc->finishJob(worker->JOB_ID, retVal, outputId);
 
         printf("JOB [%s]: Finished executing object...\n<===\n", worker->JOB_ID.c_str());
 
@@ -51,7 +51,7 @@ private:
 
 public:
     string JOB_ID;
-    JobWorker(ConnectionController* connectionController) : cc(connectionController) {}
+    JobWorker(ConnectionController* connectionController, string jobId) : cc(connectionController), JOB_ID(jobId) {}
 
     int startWorker() {
         return pthread_create(&thread, NULL, jobThread, this);
@@ -83,7 +83,7 @@ public:
     // Starts new ObjectLoader job.
     bool startNewJob(ConnectionController* cc) {
 
-        JobWorker* worker = new JobWorker(cc);
+        JobWorker* worker = new JobWorker(cc, cc->getJobId());
         int code = worker->startWorker();
         if (code != 0) {
             printf("Failed to start worker for new object! Errror code: %d\n", errno);
