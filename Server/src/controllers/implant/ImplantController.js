@@ -83,10 +83,6 @@ router.get("/job/:jobId", (req, res) => {
 })
 
 router.post("/job/:jobId", (req, res) => {
-
-    console.log("POST from")
-    console.log(req.params.jobId );
-    console.log(req.body);
     
     // Check if job has a string result.
     if (req.body && req.body.data && req.body.encoding) {
