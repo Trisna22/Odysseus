@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 // Check if compiler gives us an random value for metamorphism.
 #ifndef RANDOMINT
@@ -27,30 +28,23 @@
 /**
  *  Randomized code substitution 
  */
-#ifdef RANDOMINT % 2 == 0
-	#define CODE_SUBSTITUTION
+#if RANDOMINT % 2 == 0
+	#define CODE_SUBSTITUTION 1
+#else 
+	#define CODE_SUBSTITUTION 0
 #endif
 
 void importantFunction() {
-
-	#ifdef CODE_SUBSTITUTION 
-		printf("fopen()\n");
-		FILE* reader = fopen("virus.exe", "rb");
-	#else
-		printf("open()\n");
-		int fd = open("virus.exe", O_RDONLY);
-	#endif
 	
 	printf("Very important function!\n");	
-	printf("Executing BOF...\n");
-
-	char buffer[1000];
-	#ifdef CODE_SUBSTITUTION
-		fread(buffer, 1000, 1, reader);
-	#else
-		read(fd, buffer, 1000);
-	#endif 
 	
+	#if CODE_SUBSTITUTION 
+		printf("fopen()\n");
+	#else
+		printf("open()\n");
+	#endif
+
+	printf("Loading BOF...\n");	
 } 
 
 int main(int argc, char* argv[])
