@@ -178,6 +178,38 @@ public:
         else if (code == RESPONSE_KILL_JOB) {
             this->JOB_ID = json::getStr("jobId", responseBody);
         }
+        else {
+
+            // Garbage code
+            #if (RANDOMINT % 3) == 0
+		        printf("checkNewJob: G0\n");
+
+                int count = 0;
+                for (int x = 0; x < (RANDOMINT % 100); x++) {
+                    count += x;
+                }
+
+            #elif (RANDOMINT % 2) == 0
+                printf("checkNewJob: G1\n");
+
+                int v = 42;
+                if ((v >> 4) < 100) {
+                    v += 20 << 4;
+                } else if (v + (2 >> 3) == 214) {
+                    v -= 241;
+                }
+                else {
+                    v = v >> 12 - 14;
+                }
+
+            #else
+                printf("checkNewJob: G2\n");
+                int j = RANDOMINT % 100;
+                for (int i = j; i > 0; i--) {
+                    j = j /2;
+                }
+            #endif
+        }
 
         return code;
     }

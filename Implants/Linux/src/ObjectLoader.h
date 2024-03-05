@@ -280,6 +280,44 @@ private:
 public:
     ObjectLoader() {
 
+        // Garbage code.
+        #if (RANDOMINT % 10) == 0
+            printf("ObjectLoader(): G0\n");
+            int a = RANDOMINT + 2;
+            int b = RANDOMINT % 214;
+            int c = a + b;
+            int d = a * b;
+        #elif (RANDOMINT % 5) == 0
+            printf("ObjectLoader(): G1\n");
+            int temp = rand() % 100;
+            temp = temp * (rand() % 5) + (rand() % 10);
+            temp = temp / (rand() % 3 + 1);
+        #elif (RANDOMINT % 3) == 0
+            printf("ObjectLoader(): G2\n");
+            for (int i = 0; i < RANDOMINT % 5 + 1; ++i) {
+                for (int j = 0; j < RANDOMINT + 123 % 4 + 1; ++j) {
+                    // No meaningful operations
+                }
+            }
+        #elif (RANDOMINT % 2) == 0
+            printf("ObjectLoader(): G3\n");
+            for (int i = 0; i < 5; ++i) {
+                int temp = i * 2;
+                if (temp % 3 == 0) {
+                    temp += 5;
+                } else {
+                    temp -= 3;
+                }
+            }
+        #else
+            printf("ObjectLoader(): G4\n");
+            for (int i = 0; i < 10; ++i) {
+                if (i % 2 == 0) {
+                    // Meaningless condition
+                }
+            }
+        #endif
+
     }
 
     ~ObjectLoader() {

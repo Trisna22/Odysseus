@@ -26,13 +26,62 @@
 #endif 
 
 /**
- *  Randomized code substitution 
+ * Garbage code using random value.
+*/
+void garbageCode2() {
+
+	#if (RANDOMINT % 3) == 0
+
+		printf("G2 0\n");
+
+		int count = 0;
+		for (int x = 0; x < (RANDOMINT % 100); x++) {
+			count += x;
+		}
+
+	#elif (RANDOMINT % 2) == 0
+		printf("G2 1\n");
+
+		int v = 42;
+		if ((v >> 4) < 100) {
+			v += 20 << 4;
+		} else if (v + (2 >> 3) == 214) {
+			v -= 241;
+		}
+		else {
+			v = v >> 12 - 14;
+		}
+		
+	#else
+		printf("G2 2\n");
+		int j = RANDOMINT % 100;
+		for (int i = j; i > 0; i--) {
+			j = j /2;
+		}
+	#endif
+}
+
+/**
+ * Randomized code substitution 
  */
-#if RANDOMINT % 2 == 0
+#if (RANDOMINT % 2) == 0
 	#define CODE_SUBSTITUTION 1
 #else 
 	#define CODE_SUBSTITUTION 0
 #endif
+
+/**
+ * Indirect jumps
+*/
+void doSomething(int id) {
+
+	printf("== doSomething() ===>\n");
+
+	printf("ID: %d\n", id);
+
+	printf("<= doSomething() ====\n");
+}
+void (*functionPointer)(int) = &doSomething;
 
 void importantFunction() {
 	
@@ -52,9 +101,15 @@ int main(int argc, char* argv[])
 	printf("Starting metamorphism kit...\n\n");
 
 	printf("Random number: %d\n", RANDOMINT);
-	garbageCode();
 
-	importantFunction();
+
+	garbageCode(); // Insert garbage function.
+	garbageCode2();
+
+	importantFunction(); // Code substitition.
+
+	doSomething(0); // Indirect jump (normal)
+	functionPointer(1); // Indirect jump (indirect)
 
 	return 0;
 }

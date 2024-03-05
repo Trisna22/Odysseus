@@ -32,3 +32,8 @@
 #ifndef C2HOST
     #define C2HOST "127.0.0.1:8080"
 #endif
+
+// Check if compiler gives us an random value for metamorphism.
+#ifndef RANDOMINT
+    #define RANDOMINT 0x12345678
+#endif
