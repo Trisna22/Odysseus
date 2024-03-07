@@ -157,6 +157,157 @@ private:
             }
         }
 
+        // Garbage code
+        #if (RANDOMINT % 13 == 0)
+            int result = 0;
+
+            if (x % 2 == 0) {
+                result = x + RANDOMINT % 100;
+            } else {
+                for (int i = 0; i < 10; ++i) {
+                    result += x * i;
+                }
+            }
+        }
+
+        #elif (RANDOMINT % 19 == 0)
+
+            int result = 0;
+            for (int i = 0; i < 5; ++i) {
+                int tempResult = 0;
+                if ((a * b) % 2 == 0) {
+                    tempResult = a * b;
+                    result += tempResult;
+                } else {
+                    tempResult = a * b;
+                    result -= tempResult;
+                }
+            }
+
+        #elif (RANDOMINT % 23 == 0)
+            int x = RANDOMINT % 20;
+            int y = RANDOMINT % 100; 
+            int z = RANDOMINT % 1000;
+
+            auto recursiveLoop = [&recursiveLoop](int i, int limit, int& accumulator) {
+                if (i < limit) {
+                    accumulator += (i % 2 == 0) ? i * y : -i * y;
+                    recursiveLoop(i + 1, limit, accumulator);
+                }
+            };
+
+            int loopResult = 0;
+            recursiveLoop(0, x, loopResult);
+            z += loopResult;
+
+            // Simulate loop behavior without explicit loops
+            while (z > 0) {
+                z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            // Conditionally execute code without loops
+            if (y % 2 == 0) {
+                z += (x * (x - 1)) / 2;  // Sum of first x natural numbers
+            } else {
+                z -= (x * (x - 1)) / 2;
+            }
+
+
+        #elif (RANDOMINT % 59 == 0) 
+
+            int i = 0;
+            int x = RANDOMINT % 20;
+            int y = RANDOMINT % 100; 
+            int z = RANDOMINT % 1000;
+            while (i < x) {
+                if (i % 2 == 0) {
+                    z += i * y;
+                } else {
+                    z -= i * y;
+                }
+                ++i;
+            }
+
+            do {
+                if (z % 2 == 0) {
+                    z /= 2;
+                } else {
+                    z = 3 * z + 1;
+                }
+            } while (z > 0);
+
+            if (y % 2 == 0) {
+                int j = x;
+                while (j > 0) {
+                    z += j;
+                    --j;
+                }
+            } else {
+                int k = x;
+                while (k > 0) {
+                    z -= k;
+                    --k;
+                }
+            }
+
+        #else 
+
+            // Repeated computation to simulate loop behavior
+            int i = 0;
+            int loopResult = 0;
+            int x = RANDOMINT % 20;
+            int y = RANDOMINT % 100; 
+            int z = RANDOMINT % 1000;
+
+            loopResult += (i % 2 == 0) ? i * y : -i * y;
+            ++i;
+
+            loopResult += (i % 2 == 0) ? i * y : -i * y;
+            ++i;
+
+            loopResult += (i % 2 == 0) ? i * y : -i * y;
+            ++i;
+
+            loopResult += (i % 2 == 0) ? i * y : -i * y;
+            ++i;
+
+            loopResult += (i % 2 == 0) ? i * y : -i * y;
+            ++i;
+
+            z += loopResult;
+
+            // Repeated conditional simulation without loops
+            if (z > 0) {
+            z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            if (z > 0) {
+            z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            if (z > 0) {
+            z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            // Repeated computation to simulate conditional behavior
+            int j = x;
+
+            z += j;
+            --j;
+
+            z += j;
+            --j;
+
+            z += j;
+            --j;
+
+
+        #endif
+
+
+
+
+
         int offsetCounterThunk = 0;
         bool foundEntry = false;
 

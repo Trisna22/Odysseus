@@ -2,7 +2,10 @@
 
 
 ## Metamorphism possibilities
+
 ```
+Garbage code (for signature based evasion)
+
 checkNewJob():    3 
 ObjectLoader():   5
 
