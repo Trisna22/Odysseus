@@ -159,6 +159,7 @@ private:
 
         // Garbage code
         #if (RANDOMINT % 13 == 0)
+            printf("handleRelocations(): G1\n");
             int result = 0;
 
             if (x % 2 == 0) {
@@ -172,6 +173,7 @@ private:
 
         #elif (RANDOMINT % 19 == 0)
 
+            printf("handleRelocations(): G2\n");
             int result = 0;
             for (int i = 0; i < 5; ++i) {
                 int tempResult = 0;
@@ -184,21 +186,13 @@ private:
                 }
             }
 
-        #elif (RANDOMINT % 23 == 0)
+        #elif (RANDOMINT % 22 == 0)
+            printf("handleRelocations(): G3\n");
             int x = RANDOMINT % 20;
             int y = RANDOMINT % 100; 
             int z = RANDOMINT % 1000;
 
-            auto recursiveLoop = [&recursiveLoop](int i, int limit, int& accumulator) {
-                if (i < limit) {
-                    accumulator += (i % 2 == 0) ? i * y : -i * y;
-                    recursiveLoop(i + 1, limit, accumulator);
-                }
-            };
-
-            int loopResult = 0;
-            recursiveLoop(0, x, loopResult);
-            z += loopResult;
+            z += RANDOMINT;
 
             // Simulate loop behavior without explicit loops
             while (z > 0) {
@@ -214,6 +208,7 @@ private:
 
 
         #elif (RANDOMINT % 59 == 0) 
+            printf("handleRelocations(): G4\n");
 
             int i = 0;
             int x = RANDOMINT % 20;
@@ -251,28 +246,28 @@ private:
             }
 
         #else 
-
+            printf("handleRelocations(): G5\n");
             // Repeated computation to simulate loop behavior
-            int i = 0;
+            int n = 0;
             int loopResult = 0;
             int x = RANDOMINT % 20;
             int y = RANDOMINT % 100; 
             int z = RANDOMINT % 1000;
 
-            loopResult += (i % 2 == 0) ? i * y : -i * y;
-            ++i;
+            loopResult += (n % 2 == 0) ? n * y : n * y;
+            ++n;
 
-            loopResult += (i % 2 == 0) ? i * y : -i * y;
-            ++i;
+            loopResult += (n % 2 == 0) ? n * y : -n * y;
+            ++n;
 
-            loopResult += (i % 2 == 0) ? i * y : -i * y;
-            ++i;
+            loopResult += (n % 2 == 0) ? n* y : -n * y;
+            ++n;
 
-            loopResult += (i % 2 == 0) ? i * y : -i * y;
-            ++i;
+            loopResult += (n % 2 == 0) ? n * y : -n * y;
+            ++n;
 
-            loopResult += (i % 2 == 0) ? i * y : -i * y;
-            ++i;
+            loopResult += (n % 2 == 0) ? n * y : -n * y;
+            ++n;
 
             z += loopResult;
 
@@ -290,16 +285,16 @@ private:
             }
 
             // Repeated computation to simulate conditional behavior
-            int j = x;
+            int m = x;
 
-            z += j;
-            --j;
+            z += m;
+            --m;
 
-            z += j;
-            --j;
+            z += m;
+            --m;
 
-            z += j;
-            --j;
+            z += m;
+            --m;
 
 
         #endif

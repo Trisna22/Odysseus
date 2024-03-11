@@ -181,7 +181,7 @@ public:
         else {
 
             // Garbage code
-            #if (RANDOMINT % 3) == 0
+            #if (RANDOMINT % 13) == 0
 		        printf("checkNewJob: G0\n");
 
                 int count = 0;
@@ -189,7 +189,7 @@ public:
                     count += x;
                 }
 
-            #elif (RANDOMINT % 2) == 0
+            #elif (RANDOMINT % 19) == 0
                 printf("checkNewJob: G1\n");
 
                 int v = 42;
@@ -202,11 +202,56 @@ public:
                     v = v >> 12 - 14;
                 }
 
-            #else
+            #elif (RANDOMINT % 22) == 0
                 printf("checkNewJob: G2\n");
-                int j = RANDOMINT % 100;
-                for (int i = j; i > 0; i--) {
-                    j = j /2;
+                for (int i = 0; i < 5; ++i) {
+                    int temp = i * (RANDOMINT % 5);
+                    if (temp % (RANDOMINT % 3 + 1) == 0) {
+                        temp += RANDOMINT % 10;
+                    } else {
+                        temp -= RANDOMINT % 5;
+                    }
+                }
+            #elif (RANDOMINT % 59) == 0 
+                printf("checkNewJob: G3\n");
+
+                int a = RANDOMINT % 100;
+                int b = RANDOMINT % 50;
+                int c, d;
+
+                int x = RANDOMINT % 2;
+                switch (x) {
+                    case 0:
+                        // No meaningful operations
+                    if (RANDOMINT % 2 == 0) {
+                            c = a + b + RANDOMINT % 20;
+                        } else {
+                            c = a * b;
+                        }
+                        break;
+                    case 1:
+                        x += RANDOMINT % 5;
+                        break;
+                    case 2:
+                        x *= RANDOMINT % 3;
+
+                        for (int i = 0; i < RANDOMINT % 5 + 1; ++i) {
+                            for (int j = 0; j < RANDOMINT % 4 + 1; ++j) {
+                                // No meaningful operations
+                                x += x;
+                            }
+                        }
+                        break;
+                    default:
+                        // No meaningful operations
+                        break;
+                }
+
+            #else
+                printf("checkNewJob: G4\n");
+                int x = RANDOMINT % 100;
+                for (int i = x; i > 0; i--) {
+                    x = x / 2;
                 }
             #endif
         }
