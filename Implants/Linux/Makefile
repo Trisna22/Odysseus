@@ -20,4 +20,4 @@ run:
 hash:
 	@echo Random $(RANDOM)
 	$(CC) --no-warnings -D SLAVE_ID=\"$(IMPLANT_ID)\" -D C2HOST=\"$(HOST)\" -D RANDOMINT=$(RANDOM) -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN);
-	cat $(OUTPUT)/$(PROJECT) | sha256sum
+	@cat $(OUTPUT)/$(PROJECT) | sha256sum
