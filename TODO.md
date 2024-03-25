@@ -38,6 +38,9 @@ so that the implants won't download the implant directly.
 + Beacon Object Files
   - AMSI bypass
   - Browser password stealer
+
+= Look at the example (GIF)
+https://github.com/tdragon6/Supershell
 ```
 
 ## Resources
