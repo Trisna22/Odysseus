@@ -6,8 +6,8 @@
 ```
 Garbage code (for signature based evasion)
 
-checkNewJob():    3 
-ObjectLoader():   5
+ConnectionController::checkNewJob():    3 
+ObjectLoader::ObjectLoader():   5
 
 ___________________*
 

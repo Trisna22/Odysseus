@@ -88,6 +88,10 @@ const SlavesPage = () => {
         })
         
     }
+
+    const launchShell = () => {
+        window.location.replace("/shell/" + selectedSlave)
+    }
     
 
     useEffect(() => {
@@ -226,7 +230,8 @@ const SlavesPage = () => {
                 {payloadErrorText ? <p style={{color: "red"}}>{payloadErrorText}</p> : <></>}
                 <br/>
                 { compileError.length > 0 ? <pre>{compileError}</pre> : <></>}
-                <Button variant="outline-danger" onClick={() => launchPayload()}>Launch</Button>
+                <Button variant="outline-danger" onClick={() => launchPayload()}>Launch</Button>  
+                <Button variant="outline-dark" style={{marginLeft: "10px"}} onClick={() => launchShell()}>Shell</Button>
             </Modal.Body>
         </Modal>
 
