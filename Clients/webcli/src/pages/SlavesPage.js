@@ -53,7 +53,7 @@ const SlavesPage = () => {
         setPayloadErrorText("");
         if (selectedPayload.variables && payloadVars) {
 
-            // Check if payloadvars are set.
+            // Check if payloadvars are set. 
             if (payloadVars.filter((v => v.value != null)).length != 
                 selectedPayload.variables.length) {
                 setPayloadErrorText("No variables set correctly!");
