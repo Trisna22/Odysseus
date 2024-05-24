@@ -243,6 +243,11 @@ class DatabaseHelper {
         return newJobList;
     }
 
+    getJobsForImplant(id) {
+
+        return this.jobs.filter((list) => list.slaveId == id)
+    }
+
     getKillList(slaveId) {
 
         return this.killList.filter((list) => list.slaveId == slaveId);

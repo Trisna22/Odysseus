@@ -1,14 +1,14 @@
 
-
 .outputShell {
-    height: 80vh;
+    height: 60vh;
     border-radius: 5px;
     overflow-y: scroll;
     overflow-x: scroll;
     text-align: left;
     border: solid grey 1px;
-    flex-direction: column-reverse;
+    flex-direction: column;
     display: flex;
+    font-family: 'terminalfont';
 }
 
 .terminal {
@@ -19,4 +19,24 @@
 
 .commandOutput {
     padding-left: 10px;
+}
+
+.implantBox {
+    border-bottom: #ccc solid 1px;
+}
+
+.outputUser {
+    color: gray
+}
+
+.builtinCommand {
+    color: red;    
+}
+
+.statusInit {
+    color: red;
+}
+
+.statusOnline {
+    color: green;
 }

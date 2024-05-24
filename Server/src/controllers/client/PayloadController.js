@@ -87,6 +87,11 @@ router.get("/jobs", userMiddleware.hasAuthToken, (req, res) => {
     res.json(payloadHelper.getJobs())
 })
 
+router.get("/jobs/:implantId", userMiddleware.hasAuthToken, (req, res) => {
+
+    res.json(databaseHelper.getJobsForImplant(req.params.implantId));
+})
+
 router.get("/joblist", userMiddleware.hasAuthToken, (req, res) => {
 
     res.json(databaseHelper.getJobList())
