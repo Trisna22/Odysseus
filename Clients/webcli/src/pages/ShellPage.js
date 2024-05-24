@@ -192,9 +192,37 @@ download/get [path]           Downloads the file from the target implant.
         }
 
         // Check if command exists.
-        if (isPayloadCommand(copyCommand)) {
+        let payload = isPayloadCommand(copyCommand);
+        if (payload) {
 
-            userService.launchPayload().then((res) => {
+            // Now check if variables match. (Fucking hacky)
+            if (payload.variables && payload.variables.length != copyCommand.split(" ").slice(1).length) {
+
+                setListChanged(true);
+                setBuiltInJobs(prev => [...prev, {
+                    index: jobList.length > 0 ? jobList.length -1 : 1,
+                    output: "Failed to launch payload! \nReason: Invalid arguments given.",
+                    command: command,
+                    failedPayload: true
+                }])
+                return;
+            }
+            
+            var variableset = copyCommand.split(" ").slice(1).map((v, i) => {
+                return {
+                    name: payload.variables[i].varname,
+                    value: v
+                }
+            })
+            
+            const newPayload = {
+                payloadId: payload.id,
+                variables: variableset,
+                slaveId: implantId
+            }
+            
+            userService.launchPayload(newPayload).then((res) => {
+
                 setListChanged(true);
 
             }).catch((err) => {

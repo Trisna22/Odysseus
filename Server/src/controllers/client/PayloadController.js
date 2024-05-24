@@ -56,6 +56,7 @@ router.post("/launch", userMiddleware.hasAuthToken, userMiddleware.checkLaunchin
 
     const payload = req.body;
     const jobId = cryptoHelper.createID();
+    console.log(payload)
 
     // First compile the code and save the object in a seperate folder.
     const selectedPayload = databaseHelper.getPayloadById(payload.payloadId);
