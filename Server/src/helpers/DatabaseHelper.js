@@ -32,6 +32,7 @@
  *      id:   $string,
  *      description: $string,
  *      location: $string,
+ *      command: $string,
  *      osPayloads: $string
  *      categories: $array<$string>
  *      variables: $array<$string>
@@ -59,6 +60,7 @@ class DatabaseHelper {
             {
                 id: "af469d67-512a-4b59-b236-55102709f5e4",
                 name: 'Sleepy Hellow',
+                command: "sleep",
                 description: 'Sleeps for X seconds',
                 location: "./payloads/af469d67-512a-4b59-b236-55102709f5e4/",
                 variables: [
@@ -162,6 +164,7 @@ class DatabaseHelper {
             id: payload.id,
             osPayloads: payload.osPayloads,
             name: payload.name,
+            command: payload.command,
             variables: payload.variables,
             location: payload.location,
             createdAt: new Date(Date.now()).toUTCString(),

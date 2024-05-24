@@ -83,7 +83,7 @@ const SlavesPage = () => {
                 setCompileError(err.response.data.compileError);
             }
 
-            console.error("Failed to launch implant!");
+            console.error("Failed to launch payload!");
             setPayloadErrorText("Failed to launch payload! Message: " + err.response.data.message);
         })
         

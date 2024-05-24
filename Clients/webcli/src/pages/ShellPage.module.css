@@ -30,7 +30,7 @@
 }
 
 .builtinCommand {
-    color: red;    
+    color: green;    
 }
 
 .statusInit {
@@ -39,4 +39,8 @@
 
 .statusOnline {
     color: green;
+}
+
+.failedCommand {
+    color: red;
 }

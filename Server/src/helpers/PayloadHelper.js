@@ -148,6 +148,7 @@ const getSources = (payloads) => {
                 categories: payload.categories ? payload.categories : "",
                 location: payload.location,
                 source: source,
+                command: payload.command,
                 createdAt: payload.createdAt
             })
     });

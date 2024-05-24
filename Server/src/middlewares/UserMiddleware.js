@@ -47,7 +47,7 @@ const checkNewPayload = (req, res, next) => {
     // Check body.
     const payload = JSON.parse(req.body.payload);
     if (payload && payload.name && payload.description 
-            && payload.osPayloads && payload.categories ) {
+            && payload.osPayloads && payload.categories && payload.command ) {
             
         // Check if file is valid.
         if (req.files && req.files.payloadFile) {
@@ -75,7 +75,6 @@ const checkNewPayload = (req, res, next) => {
                             res.status(400).json({message: "Given variables doesn't exists in payload code!"})    
                             return;
                         }
-
                     }
                 }
                 

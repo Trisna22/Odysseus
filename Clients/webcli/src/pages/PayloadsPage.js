@@ -252,12 +252,19 @@ const PayloadsPage = () => {
                 <Modal.Body>
                     <InputGroup>
                         <InputGroup.Text>Name</InputGroup.Text>
-                        <Form.Control name="name" onChange={handleChangeInput} placeholder="Self destruction payload"></Form.Control>
+                        <Form.Control name="name" onChange={handleChangeInput} placeholder="Self destruction payload" required></Form.Control>
                     </InputGroup>
+                    
+                    <br />
+                    <InputGroup>
+                        <InputGroup.Text>Command</InputGroup.Text>
+                        <Form.Control name="command" onChange={handleChangeInput} placeholder="hack" required/>
+                    </InputGroup>
+
                     <br />
                     <Form>
                         <Form.Label>Description of payload</Form.Label>
-                        <Form.Control name="description" onChange={handleChangeInput} placeholder="Does haxx" as="textarea" rows={3} />
+                        <Form.Control name="description" onChange={handleChangeInput} placeholder="Does haxx" as="textarea" rows={3} required/>
                     </Form>
                     <br />
                     <InputGroup>
@@ -408,6 +415,7 @@ const PayloadsPage = () => {
                                 <Card.Body>
                                     <h4>Description</h4>
                                     <pre>{payload.description}</pre>
+                                    <pre>Command: {payload.command}</pre>
                                     <i>Created at: {payload.createdAt}</i>
                                     {
                                         payload.variables ? 

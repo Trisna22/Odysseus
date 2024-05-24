@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import UserService from "../services/UserService";
 import { Button, FormControl, InputGroup, Spinner, Table } from "react-bootstrap";
@@ -29,10 +29,14 @@ download/get [path]           Downloads the file from the target implant.
     const [command, setCommand] = useState()
     const [loggedInUser, setLoggedInUser] = useState();
     
+    const [listChanged, setListChanged] = useState(false);
     const [jobList, setJobList] = useState();
     const [builtInJobs, setBuiltInJobs] = useState([]);
     
     const [payloads, setPayloads] = useState([]);
+
+
+    const refShell = React.createRef();
 
     useEffect(() => {
 
@@ -92,6 +96,14 @@ download/get [path]           Downloads the file from the target implant.
         }, 1000);
     }, [])
 
+    // Auto scroller in terminal view.
+    useEffect(() => {
+
+        refShell.current?.scrollIntoView({behavior: "smooth"})
+
+        setListChanged(false);
+    }, [listChanged])
+
     const helpTableRow = (command, description, variables) => {
 
         var row = command;
@@ -118,9 +130,11 @@ download/get [path]           Downloads the file from the target implant.
 
     const isBuildInCommand = (command) => {
 
+        var args = command.split(" ");
+        
         var output = "";
         
-        switch (command) {
+        switch (args[0].toLowerCase()) {
 
             case "?":
             case "help": {
@@ -141,23 +155,27 @@ download/get [path]           Downloads the file from the target implant.
                 index: jobList.length > 0 ? jobList.length -1 : 1,
                 output: output,
                 command: command,
+                failedPayload: false
             }
         ]);
+        setListChanged(true);
 
         return true;
     }
 
     const isPayloadCommand = (command) => {
 
-        var isPayloadCommand = false;
+        // Check for arguments.
+        const args = command.split(" "); 
+        
         for (var payload of payloads) {
 
-            if (payload.name == command) {
-                isPayloadCommand = true;
+            if (payload.command.toLowerCase() == args[0].toLowerCase()) {
+                return payload;
             }
         }
 
-        return isPayloadCommand;
+        return null;
     }
 
     const exec = () => {
@@ -175,16 +193,40 @@ download/get [path]           Downloads the file from the target implant.
 
         // Check if command exists.
         if (isPayloadCommand(copyCommand)) {
-            
-            // userService.launchCommand()...
+
+            userService.launchPayload().then((res) => {
+                setListChanged(true);
+
+            }).catch((err) => {
+
+                if (err.code == "ERR_NETWORK") {
+                    localStorage.clear();
+                    window.location.replace("/?error=reset");
+                    return;
+                }
+    
+                console.error("FiLLALEDD")
+                console.error(err.toJSON());
+
+                setListChanged(true);
+                setBuiltInJobs(prev => [...prev, {
+                    index: jobList.length > 0 ? jobList.length -1 : 1,
+                    output: "Failed to launch payload!",
+                    command: command,
+                    failedPayload: true
+                }])
+            })
 
         }
         else {   
+            setListChanged(true);
+
             // If command not exists.
             setBuiltInJobs(prev => [...prev, {
                 index: jobList.length > 0 ? jobList.length -1 : 1,
                 output: output,
-                command: command
+                command: command,
+                failedPayload: true 
             }])
         }
     }
@@ -195,9 +237,9 @@ download/get [path]           Downloads the file from the target implant.
         }
     }
 
-    const getPayloadNameById = (id) => {
+    const getPayloadCommandById = (id) => {
 
-        const payloadname = payloads.filter((payload) => payload.id == id)[0].name;
+        const payloadname = payloads.filter((payload) => payload.id == id)[0].command;
         return payloadname ? payloadname : "[command lost]" ;
     }
 
@@ -272,7 +314,11 @@ download/get [path]           Downloads the file from the target implant.
                         if (builtin.index > jobList.length) {
                             return (
                             <div class={css.commandOutput}>
-                                    &#40;<span class={css.builtinCommand}>BUILTIN</span>&#41;
+                                    {
+                                        builtin.failedPayload ? 
+                                        <>&#40;<span class={css.failedCommand}>FAILED</span>&#41;&nbsp;</> :
+                                        <>&#40;<span class={css.builtinCommand}>BUILTIN</span>&#41;&nbsp;</>
+                                    }                                    
                                     &#91;<span class={css.outputUser}>{loggedInUser}</span>&#93;&nbsp;-&gt;&nbsp;
                                     {builtin.command}
                                     {
@@ -282,6 +328,7 @@ download/get [path]           Downloads the file from the target implant.
                         }
                     }) : <></>
                 }
+                
                 {
                     jobList && jobList.length > 0 ? jobList.map((job, i) => {
 
@@ -293,7 +340,7 @@ download/get [path]           Downloads the file from the target implant.
                                     
                                     &nbsp;&#91;<span class={css.outputUser}>{loggedInUser}</span>&#93;&nbsp;-&gt;&nbsp;
                                     
-                                    {getPayloadNameById(job.payloadId)} 
+                                    {getPayloadCommandById(job.payloadId)} 
                                     {job.variables && job.variables.length > 0 ? job.variables.map((vars) => {
                                         return <>{" " + vars.value}</>
                                     }) : <></>}
@@ -310,7 +357,12 @@ download/get [path]           Downloads the file from the target implant.
                                     if (builtin.index == i) {
                                         return (
                                             <div class={css.commandOutput}>
-                                                &#40;<span class={css.builtinCommand}>BUILTIN</span>&#41;
+                                                {
+                                                    builtin.failedPayload ? 
+                                                    <>&#40;<span class={css.failedCommand}>FAILED</span>&#41;&nbsp;</> :
+                                                    <>&#40;<span class={css.builtinCommand}>BUILTIN</span>&#41;&nbsp;</>
+                                                }
+                                                
                                                 &#91;<span class={css.outputUser}>{loggedInUser}</span>&#93;&nbsp;-&gt;&nbsp;
                                                 {builtin.command}
                                                 {
@@ -325,6 +377,7 @@ download/get [path]           Downloads the file from the target implant.
                         )
                     }) : <></>
                 }
+                <div ref={refShell}/>
             </div>
 
             <div class={css.terminal}>
@@ -339,5 +392,3 @@ download/get [path]           Downloads the file from the target implant.
 }
 
 export default ShellPage;
-
-// We don't need it?
