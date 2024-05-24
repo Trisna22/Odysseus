@@ -1,6 +1,6 @@
 
 .outputShell {
-    height: 60vh;
+    height: 70vh;
     border-radius: 5px;
     overflow-y: scroll;
     overflow-x: scroll;
@@ -12,7 +12,7 @@
 }
 
 .terminal {
-    max-width: 60%;
+    max-width: 60%; 
     padding: 20px;
     bottom: 0px;
 }
@@ -44,3 +44,16 @@
 .failedCommand {
     color: red;
 }
+
+@media screen and (min-height: 600px), (max-height: 800px) {
+    .outputShell {
+        height: 30vh;
+    }
+}
+
+@media screen and (min-height: 800px), (max-height: 1100px) {
+    .outputShell {
+        height: 50vh;
+    }
+}
+

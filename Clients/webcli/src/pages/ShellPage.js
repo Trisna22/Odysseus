@@ -29,12 +29,10 @@ download/get [path]           Downloads the file from the target implant.
     const [command, setCommand] = useState()
     const [loggedInUser, setLoggedInUser] = useState();
     
-    const [listChanged, setListChanged] = useState(false);
-    const [jobList, setJobList] = useState();
+    const [jobList, setJobList] = useState(null);
     const [builtInJobs, setBuiltInJobs] = useState([]);
     
     const [payloads, setPayloads] = useState([]);
-
 
     const refShell = React.createRef();
 
@@ -81,7 +79,6 @@ download/get [path]           Downloads the file from the target implant.
             userService.getJobForImplant(implantId).then((res) => {
 
                 setJobList(res.data);
-
             }).catch((err) => {
 
                 if (err.code == "ERR_NETWORK") {
@@ -96,19 +93,28 @@ download/get [path]           Downloads the file from the target implant.
         }, 1000);
     }, [])
 
-    // Auto scroller in terminal view.
+    // Scroll when data changes.
     useEffect(() => {
 
         refShell.current?.scrollIntoView({behavior: "smooth"})
 
-        setListChanged(false);
-    }, [listChanged])
+    }, [builtInJobs, jobList && jobList.length, 
+        jobList && jobList.length > 0 && jobList[jobList.length -1].status])
 
     const helpTableRow = (command, description, variables) => {
 
         var row = command;
 
-        for (var i = 0; i < (30 -command.length); i++) {
+        let lengthVars = 0;
+        if (variables) {
+
+            for (var v of variables) {
+                row += " [" + v.varname + "]";
+                lengthVars += v.varname.length + 3;
+            }
+        }
+
+        for (var i = 0; i < (30 -command.length - lengthVars); i++) {
             row += " ";
         }
 
@@ -122,7 +128,7 @@ download/get [path]           Downloads the file from the target implant.
         
         // Create table that is readable.
         for (var payload of payloads) {
-            commandList += helpTableRow(payload.name, payload.description, payload.variables);
+            commandList += helpTableRow(payload.command, payload.description, payload.variables);
         }
 
         return commandList;
@@ -131,7 +137,6 @@ download/get [path]           Downloads the file from the target implant.
     const isBuildInCommand = (command) => {
 
         var args = command.split(" ");
-        
         var output = "";
         
         switch (args[0].toLowerCase()) {
@@ -158,7 +163,6 @@ download/get [path]           Downloads the file from the target implant.
                 failedPayload: false
             }
         ]);
-        setListChanged(true);
 
         return true;
     }
@@ -198,10 +202,16 @@ download/get [path]           Downloads the file from the target implant.
             // Now check if variables match. (Fucking hacky)
             if (payload.variables && payload.variables.length != copyCommand.split(" ").slice(1).length) {
 
-                setListChanged(true);
+                // Print out usage.
+                var vars = ""
+                for (var v of payload.variables) {
+                    vars += " [" + v.varname + "]"
+                }
+                var usage = payload.command + vars + "\n";
+                
                 setBuiltInJobs(prev => [...prev, {
                     index: jobList.length > 0 ? jobList.length -1 : 1,
-                    output: "Failed to launch payload! \nReason: Invalid arguments given.",
+                    output: "Failed to launch payload! \nUsage: " + usage,
                     command: command,
                     failedPayload: true
                 }])
@@ -223,7 +233,6 @@ download/get [path]           Downloads the file from the target implant.
             
             userService.launchPayload(newPayload).then((res) => {
 
-                setListChanged(true);
 
             }).catch((err) => {
 
@@ -236,7 +245,6 @@ download/get [path]           Downloads the file from the target implant.
                 console.error("FiLLALEDD")
                 console.error(err.toJSON());
 
-                setListChanged(true);
                 setBuiltInJobs(prev => [...prev, {
                     index: jobList.length > 0 ? jobList.length -1 : 1,
                     output: "Failed to launch payload!",
@@ -247,7 +255,6 @@ download/get [path]           Downloads the file from the target implant.
 
         }
         else {   
-            setListChanged(true);
 
             // If command not exists.
             setBuiltInJobs(prev => [...prev, {
@@ -288,7 +295,6 @@ download/get [path]           Downloads the file from the target implant.
                 <span class={css.statusInit}>Unknown...<Spinner animation="border" size="sm"></Spinner></span>
             )
         }
-
     }
     
     return (
