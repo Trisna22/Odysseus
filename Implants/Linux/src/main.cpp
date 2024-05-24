@@ -17,7 +17,7 @@ void prepareConnection(ConnectionController* cc) {
     }
 
     // Put all together.
-    int infoSize = strlen(buffer.release) + strlen(buffer.machine) + strlen(buffer.version);
+    int infoSize = 65*3;
     char info[infoSize];
     snprintf(info, infoSize, "%s %s %s", buffer.release, buffer.machine, buffer.version);
 
@@ -90,6 +90,7 @@ int main(int argc, char* argv[])
 
     // Handles the connections.
     ConnectionController *cc = new ConnectionController(slaveId);
+
     prepareConnection(cc);
 
     JobHunter jobHunter; // Worker pool

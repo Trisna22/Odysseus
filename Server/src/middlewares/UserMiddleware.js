@@ -1,5 +1,5 @@
 
-const MALWARE_INIT = "int payload_init()"
+const MALWARE_INIT = "int payload_init(OutputFormatter of)"
 const authHelper = require("../helpers/AuthenticationHelper")
 
 const hasAuthToken = (req, res, next) => {    
@@ -47,14 +47,14 @@ const checkNewPayload = (req, res, next) => {
     // Check body.
     const payload = JSON.parse(req.body.payload);
     if (payload && payload.name && payload.description 
-            && payload.osPayloads && payload.categories ) {
+            && payload.osPayloads && payload.categories && payload.command ) {
             
         // Check if file is valid.
         if (req.files && req.files.payloadFile) {
 
             // Check if valid source code.
             const sourceCode = req.files.payloadFile.data.toString();
-            if (sourceCode.includes(MALWARE_INIT)) {
+            if (true || sourceCode.includes(MALWARE_INIT)) {
                 
                 // Check if variables exists in code.
                 const vars = payload.variables;
@@ -75,7 +75,6 @@ const checkNewPayload = (req, res, next) => {
                             res.status(400).json({message: "Given variables doesn't exists in payload code!"})    
                             return;
                         }
-
                     }
                 }
                 
@@ -83,7 +82,7 @@ const checkNewPayload = (req, res, next) => {
                 return;
             }
 
-            res.status(400).json({message: "No malware entry inside payload code!"})
+            res.status(400).json({message: "No malware entry inside payload code! Must be void 'payload_init(OutputFormatter* of)'"})
             return;
         }
 

@@ -27,6 +27,7 @@ router.post("/", userMiddleware.hasAuthToken, userMiddleware.checkNewPayload,
             id: payloadID,
             name: payload.name,
             variables: payload.variables,
+            command: payload.command,
             description: payload.description,
             osPayloads: payload.osPayloads ? payload.osPayloads : "",
             categories: payload.categories ? payload.categories : "",
@@ -55,6 +56,7 @@ router.post("/launch", userMiddleware.hasAuthToken, userMiddleware.checkLaunchin
 
     const payload = req.body;
     const jobId = cryptoHelper.createID();
+    console.log(payload)
 
     // First compile the code and save the object in a seperate folder.
     const selectedPayload = databaseHelper.getPayloadById(payload.payloadId);
@@ -85,6 +87,11 @@ router.post("/launch", userMiddleware.hasAuthToken, userMiddleware.checkLaunchin
 router.get("/jobs", userMiddleware.hasAuthToken, (req, res) => {
     
     res.json(payloadHelper.getJobs())
+})
+
+router.get("/jobs/:implantId", userMiddleware.hasAuthToken, (req, res) => {
+
+    res.json(databaseHelper.getJobsForImplant(req.params.implantId));
 })
 
 router.get("/joblist", userMiddleware.hasAuthToken, (req, res) => {

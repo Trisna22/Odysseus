@@ -6,7 +6,6 @@ import UserService from "../services/UserService";
 const SlavesPage = () => {
 
     const userService = new UserService();
-    const navigate = useNavigate();
     const [slaves, setSlaves] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalShow, setModalShow] = useState(false);
@@ -53,7 +52,7 @@ const SlavesPage = () => {
         setPayloadErrorText("");
         if (selectedPayload.variables && payloadVars) {
 
-            // Check if payloadvars are set.
+            // Check if payloadvars are set. 
             if (payloadVars.filter((v => v.value != null)).length != 
                 selectedPayload.variables.length) {
                 setPayloadErrorText("No variables set correctly!");
@@ -83,10 +82,14 @@ const SlavesPage = () => {
                 setCompileError(err.response.data.compileError);
             }
 
-            console.error("Failed to launch implant!");
+            console.error("Failed to launch payload!");
             setPayloadErrorText("Failed to launch payload! Message: " + err.response.data.message);
         })
         
+    }
+
+    const launchShell = () => {
+        window.location.replace("/shell/" + selectedSlave)
     }
     
 
@@ -226,7 +229,8 @@ const SlavesPage = () => {
                 {payloadErrorText ? <p style={{color: "red"}}>{payloadErrorText}</p> : <></>}
                 <br/>
                 { compileError.length > 0 ? <pre>{compileError}</pre> : <></>}
-                <Button variant="outline-danger" onClick={() => launchPayload()}>Launch</Button>
+                <Button variant="outline-danger" onClick={() => launchPayload()}>Launch</Button>  
+                <Button variant="outline-dark" style={{marginLeft: "10px"}} onClick={() => launchShell()}>Shell</Button>
             </Modal.Body>
         </Modal>
 

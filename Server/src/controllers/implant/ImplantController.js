@@ -66,7 +66,7 @@ router.get("/ping/:slaveId", (req, res) => {
 })
 
 router.get("/job/:jobId", (req, res) => {
-        
+    
     // Check if slave even has job.
     const job = databaseHelper.getJobWithId(req.params.jobId);
     if (!job) {
@@ -81,6 +81,12 @@ router.get("/job/:jobId", (req, res) => {
 })
 
 router.post("/job/:jobId", (req, res) => {
+    
+    // Check if job has a string result.
+    if (req.body && req.body.data && req.body.encoding) {
+
+        databaseHelper.setJobData(req.params.jobId, req.body.data, req.body.encoding);
+    }
     
     // Mark job as done.    
     databaseHelper.setJobStatus(req.params.jobId, "FINISHED", req.body.code, true);
