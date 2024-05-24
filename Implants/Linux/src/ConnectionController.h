@@ -105,12 +105,18 @@ end:
         
         char* jobBody;
         string status = to_string(code);
-        int bodySize = outputSize + status.length();
+        int bodySize = status.length();
 
         if (outputSize > 0) {
-            bodySize += strlen(BODY_JOB_OUTPUT);
+
+            // First encode data.
+            string encodedData = Crypto::base64_encode((unsigned char*)outputData, outputSize);
+        
+            // Create new buffer with the correct sizes.
+            bodySize += strlen(BODY_JOB_OUTPUT) + encodedData.length();
             jobBody = new char[bodySize];
-            snprintf(jobBody, bodySize, BODY_JOB_OUTPUT, status.c_str(), outputData);
+
+            snprintf(jobBody, bodySize, BODY_JOB_OUTPUT, status.c_str(), encodedData.c_str());
 
         } else {
             bodySize += strlen(BODY_JOB);

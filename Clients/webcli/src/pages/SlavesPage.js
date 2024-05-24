@@ -6,7 +6,6 @@ import UserService from "../services/UserService";
 const SlavesPage = () => {
 
     const userService = new UserService();
-    const navigate = useNavigate();
     const [slaves, setSlaves] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalShow, setModalShow] = useState(false);

@@ -242,7 +242,7 @@ download/get [path]           Downloads the file from the target implant.
                     return;
                 }
     
-                console.error("FiLLALEDD")
+                console.error("Failed to launch payload!")
                 console.error(err.toJSON());
 
                 setBuiltInJobs(prev => [...prev, {
@@ -380,8 +380,8 @@ download/get [path]           Downloads the file from the target implant.
                                     }) : <></>}
 
                                 </div>
-                                {job.data ? <pre> {job.data} </pre> : <></>}
-                                {job.status != "FINISHED" ? <>Running... <Spinner animation="border" size="sm"></Spinner></> : <></>}
+                                {job.data ? <pre>{job.data}</pre> : <></>}
+                                {job.status != "FINISHED" ? <>{job.status}... <Spinner animation="border" size="sm"></Spinner></> : <></>}
                             </div>
 
                             {

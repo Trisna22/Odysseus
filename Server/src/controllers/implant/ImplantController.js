@@ -6,8 +6,6 @@ const router = express.Router();
 const responseHelper = require("../../helpers/ImplantResponseHelper")
 const implantMiddleware = require("../../middlewares/ImplantMiddleware")
 
-
-
 router.post("/", implantMiddleware.checkInitRequest, (req, res) => {
 
     // Check if slave exists.
@@ -68,7 +66,7 @@ router.get("/ping/:slaveId", (req, res) => {
 })
 
 router.get("/job/:jobId", (req, res) => {
-        
+    
     // Check if slave even has job.
     const job = databaseHelper.getJobWithId(req.params.jobId);
     if (!job) {
