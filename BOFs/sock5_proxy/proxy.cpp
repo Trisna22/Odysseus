@@ -114,8 +114,7 @@ class Sock5Proxy {
 };
 #endif // !~ SOCK5_PROXY_H
 
-#define TEST
-#ifdef TEST
+#ifdef DEBUG_BOF
     int main(int argc, char * argv[]) {
 
         Sock5Proxy proxy(9050);
@@ -136,4 +135,4 @@ int payload_init(int id, output_func output) {
 
     return 0;
 }
-#endif
+#endif // DEBUG_BOF
