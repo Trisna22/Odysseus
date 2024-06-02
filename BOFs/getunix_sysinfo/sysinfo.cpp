@@ -22,7 +22,7 @@ int payload_init(int id, output_func output) {
     struct utsname buffer;
     if (uname(&buffer) < 0) {
         output(id, "Failed to get uname information! Error code: %d\n", errno);
-        return 1;
+        return 1; 
     }
 
     // Put all together.
