@@ -10,6 +10,12 @@
 
 #include "../OutputFormatter.h" // Required!
 
+#ifdef DEBUG_BOF
+#define INPUT_PORT 9080
+#endif
+
+#define HOST_PORT INPUT_PORT
+
 typedef void(*output_func)(int, const char* fmt, ...); // For printing output on C2 server.
 /**
  * @brief Features to add
@@ -236,54 +242,33 @@ private:
     int proxyConnect(int addrType, char* ip, int port) {
 
         int red, appSock = SOCKET_ERROR;
-        
-        if (addrType == AddressType::IPV4) {
 
-            // Construct struct for connecting
-            struct sockaddr_in remote;
-            memset(&remote, 0, sizeof(sockaddr_in));
-            remote.sin_addr.s_addr = inet_addr(ip);
-            remote.sin_port = htons(port);
-            remote.sin_family = AF_INET;
+        // Construct struct for connecting.
+        struct sockaddr_in remote;
+        memset(&remote, 0, sizeof(sockaddr_in));
+        remote.sin_addr.s_addr = inet_addr(ip);
+        remote.sin_port = htons(port);
+        remote.sin_family = AF_INET;
 
-            /**
-             *  Connect to remote address.
-             */
-            printf("Connecting to app %s:%d\n", ip, port);
+        /**
+         *  Connect to remote address.
+         */
+        printf("[#] Connecting to app %s:%d\n", ip, port);
 
-            appSock = socket(AF_INET, SOCK_STREAM, 0);
-            if (appSock == SOCKET_ERROR) {
+        appSock = socket(AF_INET, SOCK_STREAM, 0);
+        if (appSock == SOCKET_ERROR) {
 
-                printf("[-] Failed to create app socket! Error code: %d\n", errno);
-                return SOCKET_ERROR;
-            }
-
-            if (connect(appSock, (sockaddr*)&remote, sizeof(remote)) == SOCKET_ERROR) {
-
-                printf("[-] Failed to connect to the app! Error code: %d\n", errno);
-                return SOCKET_ERROR;
-            }
-
-            return appSock;
+            printf("[-] Failed to create app socket! Error code: %d\n", errno);
+            return SOCKET_ERROR;
         }
-        else if (addrType == AddressType::IPV6) {
-            
-            printf("  IPv6: \n");
-            // sendObject()
-            CommandReply::ADDR_NOT_SUPPORTED;
+
+        if (connect(appSock, (sockaddr*)&remote, sizeof(remote)) == SOCKET_ERROR) {
+
+            printf("[-] Failed to connect to the app! Error code: %d\n", errno);
+            return SOCKET_ERROR;
         }
-        else if (addrType == AddressType::FQDN) {
-            printf("  Domain: \n");
-            // sendObject()
-            CommandReply::ADDR_NOT_SUPPORTED;
-        }
-        else {
-            printf("  Unknown address type...\n");
-            // sendObject()
-            CommandReply::ADDR_NOT_SUPPORTED;
-        }
-        
-        return SOCKET_ERROR;
+
+        return appSock;
     }
 
     /**
@@ -330,7 +315,7 @@ private:
                     break;
                 }
 
-                printf("[*] %d bytes appSocket => clientSocket\n", nread);
+                // printf("[*] %d bytes appSocket => clientSocket\n", nread);
 
                 // Send to cient socket.
                 if (send(clientSock, (const void*)buffer, nread, NULL) == SOCKET_ERROR) {
@@ -355,7 +340,7 @@ private:
                     break;
                 }
 
-                printf("[*] %d bytes clientSocket => appSocket\n", nread);
+                // printf("[*] %d bytes clientSocket => appSocket\n", nread);
 
                 // Send to app socket.
                 if (send(appSocket, (const void*)buffer, nread, NULL) == SOCKET_ERROR) {
@@ -448,16 +433,7 @@ public:
         // Get the command from the client.
         char* IP;
         int red, port;
-        IPv4 ipv4;
-        IPv6 ipv6;
         CommandRequest request = this->receiveObject<CommandRequest>(&red);
-
-        // Debug log.
-        printf("Incoming command:\n");
-        printf("  version:        %hhx\n", request.version);
-        printf("  command:        %hhx\n", request.command);
-        printf("  reserved:       %hhx\n", request.reserved);
-        printf("  addrtype:       %hhx\n", request.addrType);
 
         int appSocket = SOCKET_ERROR;
 
@@ -466,10 +442,17 @@ public:
         {
         case Command::CONNECT: {
 
-            // Parse the addresses.
-            ipv4 = this->receiveObject<IPv4>(&red);
-            IP = Sock5Proxy::parseIPv4(ipv4.ip);
-            port = htons(ipv4.port);
+            // Check if an domain is given instread of IP.
+            if (request.addrType == AddressType::FQDN) {
+                // Parse the domain.
+
+
+            } else {
+                // Parse the addresses.
+                IPv4 ipv4 = this->receiveObject<IPv4>(&red);
+                IP = Sock5Proxy::parseIPv4(ipv4.ip);
+                port = htons(ipv4.port);
+            }
 
             appSocket = this->proxyConnect(request.addrType, IP ,port);
 
@@ -483,16 +466,11 @@ public:
                 ver::SOCKS5,
                 CommandReply::CMD_NOT_SUPPORTED,
                 0x00, // Reserved
-                request.addrType,
-                // .BindAddress = {
-                //     .ipv4 {
-                //         0x999,
-                //         0x666
-                //     }
-                // }
+                request.addrType
             };
             
             this->sendObject<CommandResponse>(response, sizeof(response));
+            this->sendIPResponse("0.0.0.0", 666);
             this->exitThread();
             
             break;
@@ -504,16 +482,11 @@ public:
                 ver::SOCKS5,
                 CommandReply::CMD_NOT_SUPPORTED,
                 0x00, // Reserved
-                request.addrType,
-                // .BindAddress = {
-                //     .ipv4 {
-                //         0x999,
-                //         0x666
-                //     }
-                // }
+                request.addrType
             };
             
             this->sendObject<CommandResponse>(response, sizeof(response));
+            this->sendIPResponse("0.0.0.0", 666);
             this->exitThread();
             break;
         }
@@ -525,15 +498,10 @@ public:
                 CommandReply::CMD_NOT_SUPPORTED,
                 0x00, // Reserved
                 request.addrType,
-                // .BindAddress = {
-                //     .ipv4 {
-                //         0x999,
-                //         0x666
-                //     }
-                // }
             };
             
             this->sendObject<CommandResponse>(response, sizeof(response));
+            this->sendIPResponse("0.0.0.0", 666);
             this->exitThread();
             break;
         }
@@ -551,10 +519,9 @@ public:
             };
             
             this->sendObject<CommandResponse>(response, sizeof(response));
-            this->sendIPResponse(IP, port);
+            this->sendIPResponse("0.0.0.0", 666);
 
             // Pipe connection.
-            printf("[!] Piping now...\n");
             pipeSocketApp(this->clientSocket, appSocket);
         }
         else {
@@ -564,13 +531,7 @@ public:
                 ver::SOCKS5,
                 CommandReply::ERROR,
                 0x00, // Reserved
-                request.addrType,
-                // .BindAddress = {
-                //     .ipv4 {
-                //         0x00,
-                //         port
-                //     }
-                // }
+                request.addrType
             };
 
             // Based on socket error.
@@ -598,7 +559,7 @@ public:
             }
 
             this->sendObject<CommandResponse>(response, sizeof(response));
-
+            this->sendIPResponse("0.0.0.0", 666);
         }
 
         this->exitThread(); // If finished close thread.
@@ -713,13 +674,12 @@ public:
 #ifdef DEBUG_BOF
     int main(int argc, char * argv[]) {
 
-        
         int serverSocket;
-        if ((serverSocket = Sock5Proxy::startProxy(9080)) == SOCKET_ERROR) {
+        if ((serverSocket = Sock5Proxy::startProxy(INPUT_PORT)) == SOCKET_ERROR) {
             return 1;
         }
         
-        printf("[!] Listening for connections on port %d...\n", 9050);
+        printf("[!] Listening for connections on port %d...\n", INPUT_PORT);
 
         return Sock5Proxy::handleClients(serverSocket);
     }
