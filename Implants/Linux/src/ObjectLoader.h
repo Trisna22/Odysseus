@@ -299,10 +299,6 @@ private:
 
         #endif
 
-
-
-
-
         int offsetCounterThunk = 0;
         bool foundEntry = false;
 

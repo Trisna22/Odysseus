@@ -17,6 +17,8 @@ Built-In commands:
 ls/dir                        Lists the current working directory.
 pwd/cwd                       Display the current working directory.
 whoami                        Show logged in user.
+jobs                          Print list of active jobs.
+kill [job]                    Kill job
 sysinfo                       Display system information.
 upload/put                    Uploads a file to the target implant.
 download/get [path]           Downloads the file from the target implant.
