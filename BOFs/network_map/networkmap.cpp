@@ -4,10 +4,12 @@
 #include <sys/utsname.h>
 #include <time.h>
 
+
 #include "../OutputFormatter.h" // Required!
 
 typedef void(*output_func)(int, const char* fmt, ...); // For printing output on C2 server.
 #define TARGET_HOST "127.0.0.1"
+#define TARGET_PORTS "0-1000"
 
 /**
 * Network mapping BOF for the Odysseus C2 framework.
@@ -22,6 +24,7 @@ void scanSYN(int port) {
 
 void scanCONNECT(int port) {
 
+    
 }
 
 bool scanPING(char* host) {
@@ -31,12 +34,18 @@ bool scanPING(char* host) {
 
 #ifdef DEBUG_BOF
 int main(int argc, char* argv[]) {
-    printf("[!] Starting network map BOF...\n");
+
+    printf("[!] Starting portscan on %s with range %s\n", TARGET_HOST, TARGET_PORTS);
+
 
     return 0;
 }
 #else
 int payload_init(int id, output_func output) {
+
+    output(id, "Starting portscan on %s with range %s\n", TARGET_HOST, TARGET_PORTS);
+
+
 
 }
 #endif 
