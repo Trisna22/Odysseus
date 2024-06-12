@@ -40,11 +40,11 @@ so that the implants won't download the implant directly.
     * R_X86_64_64
       + SYMBOL
 
-
 + Server
   - Windows implant compiler
 
 + Beacon Object Files
+  - Network mapper (ping/port scan)
   - AMSI bypass
   - Browser password stealer
 
