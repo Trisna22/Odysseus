@@ -31,6 +31,15 @@ so that the implants won't download the implant directly.
     *  CreateRemoteThread()
     * ...
   - Sleep/jitter features
+  - Relocation to add for object loading with classes.
+    * R_X86_64_PC32
+      + SYMBOL
+      + SHF_INFO_LINK
+    * R_X86_64_PLT32
+      + SYMBOL
+    * R_X86_64_64
+      + SYMBOL
+
 
 + Server
   - Windows implant compiler
