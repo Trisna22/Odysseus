@@ -21,3 +21,6 @@ hash:
 	@echo Random $(RANDOM)
 	$(CC) --no-warnings -D SLAVE_ID=\"$(IMPLANT_ID)\" -D C2HOST=\"$(HOST)\" -D RANDOMINT=$(RANDOM) -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN);
 	@cat $(OUTPUT)/$(PROJECT) | sha256sum
+
+debug:
+	$(CC) -g --no-warnings -D RANDOMINT=$(RANDOM) -D SLAVE_ID=\"DEBUG_SLAVE_ID\" -D C2HOST=\"127.0.0.1:8080\" -o $(OUTPUT)/$(PROJECT) $(SOURCE)/$(MAIN);
