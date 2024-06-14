@@ -5,4 +5,6 @@ default:
 
 debug:
 	g++ -o ./networkmap networkmap.cpp -DDEBUG_BOF -g
-	
+
+run:
+	./networkmap
