@@ -151,7 +151,7 @@ void* scanCONNECT(void* input) {
 
     /**
      * Port alive, get information and set results.
-     */
+    **/
 
     // Port information.
     service = getservbyport(htons(params->port), "tcp");
@@ -189,7 +189,6 @@ void startScanPorts() {
         case SCAN_PORTSCAN_CONNECT: {
 
             functionPointer = &scanCONNECT;
-
             resultSize = sizePortScan; // Don't forget to put the potential size of output.
 
             threads = new pthread_t[sizePortScan];
@@ -209,9 +208,35 @@ void startScanPorts() {
                     sem_post(&semaphore); // Release on error.
                 }
             }
-
+        
             break;
         }
+
+            case SCAN_PORTSCAN_SYN: {
+
+                functionPointer = &scanSYN;
+                resultSize = sizePortScan; // Don't forget to put the potential size of output.
+
+                threads = new pthread_t[sizePortScan];
+                results = (char**)calloc(sizePortScan, sizeof(char*));
+                for (int i = 0; i < sizePortScan; i++) {
+
+                    sem_wait(&semaphore); // Wait for slot to open.
+
+                    FunctionParams *params = new FunctionParams();
+
+                    params->threadId = i;
+                    params->host = TARGET_HOST;
+                    params->port = portScan[i];
+
+                    if (pthread_create(&threads[i], NULL, functionPointer, params) != 0) {
+                        printf("Failed to start portscan on port %d\n", portScan[i]);
+                        sem_post(&semaphore); // Release on error.
+                    }
+                }
+                
+                break;
+            }
     }
 
     // Wait for all the threads to finish.

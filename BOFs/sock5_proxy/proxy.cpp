@@ -29,8 +29,6 @@ typedef void(*output_func)(int, const char* fmt, ...); // For printing output on
  * RFC: https://datatracker.ietf.org/doc/html/rfc1928
  * C2: https://github.com/Trisna22/Odysseus   
  */
-// #ifndef SOCK5_PROXY_H
-// #define SOCK5_PROXY_H
 
 #define NULL                            0x00
 #define SOCKET_ERROR                    -1
@@ -142,8 +140,8 @@ struct CommandResponse {
 #pragma pack(push, 1)
 
 /**
-    * Receive any object from client socket.
-    */
+* Receive any object from client socket.
+*/
 template<typename T>
 T receiveObject(int clientSocket, int* red) {
 
@@ -157,8 +155,8 @@ T receiveObject(int clientSocket, int* red) {
 }
 
 /**
-    * Send any object to client socket.
-    */
+* Send any object to client socket.
+*/
 template<typename T>
 void sendObject(int clientSocket, T obj, int size) {
 
@@ -178,8 +176,8 @@ void sendIPResponse(int clientSocket, char* ip, unsigned short int port) {
 }
 
 /**
-    * Handle SOCK5 authentication.
-    */
+* Handle SOCK5 authentication.
+*/
 void handleSOCK5Authentication(int clientSocket) {
     // Send response its fine.
     InvitationResponse response = {
@@ -191,8 +189,8 @@ void handleSOCK5Authentication(int clientSocket) {
 }
 
 /**
-    * Convert uint32 to IP address.
-    */
+* Convert uint32 to IP address.
+*/
 static char* parseIPv4(uint32_t value) {
     
     // uint32_t networkByteOrder = htonl(value);
@@ -278,8 +276,8 @@ int proxyConnect(int addrType, char* ip, int port) {
     remote.sin_family = AF_INET;
 
     /**
-        *  Connect to remote address.
-        */
+    *  Connect to remote address.
+    */
     printf("[#] Connecting to app %s:%d\n", ip, port);
 
     appSock = socket(AF_INET, SOCK_STREAM, 0);
@@ -299,8 +297,8 @@ int proxyConnect(int addrType, char* ip, int port) {
 }
 
  /**
-    * Proxy pipe the connection between app and the client.
-    */
+* Proxy pipe the connection between app and the client.
+*/
 void pipeSocketApp(int clientSock, int appSocket) {
 
     // The biggest file descriptor is what we are looking for.
@@ -375,9 +373,9 @@ void pipeSocketApp(int clientSock, int appSocket) {
 
 
 /**
-    * @brief Handles the incoming proxy request.
-    * RFC: https://datatracker.ietf.org/doc/html/rfc1928#section-4
-    */
+* @brief Handles the incoming proxy request.
+* RFC: https://datatracker.ietf.org/doc/html/rfc1928#section-4
+*/
 void handleCommands(int clientSocket) {
     
     // Get the command from the client.
@@ -565,7 +563,7 @@ int handleClients(int serverSocket) {
         return 0;
 }
 
-/**
+    /**
      * Start proxy server.
      */
     int startProxy(int PORT = 1080) {
