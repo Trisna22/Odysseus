@@ -31,11 +31,8 @@ so that the implants won't download the implant directly.
   - Add implant sleep and jitter options.
   - 
 
-+ Implant
++ Implant (linux)
   - Add crypter functions
-  - Different payload execution methods (add options to implant generation):
-    *  CreateRemoteThread()
-    * ...
   - Sleep/jitter features
   - Relocation to add for object loading with classes.
     * R_X86_64_PC32
@@ -70,6 +67,20 @@ so that the implants won't download the implant directly.
           }
       }
 
++ Implant (Windows)
+  - Add code obfuscation
+  - Anti sandbox/edr
+  - CoughLoader
+  - Different payload execution methods (add options to implant generation):
+    *  CreateRemoteThread()
+    * ...
+
++ Implant (XLL)
+  - Write a XLL excel implant
+  - https://learn.microsoft.com/en-us/office/client-developer/excel/creating-xlls
+
++ Implant (mal. lnk)
+  - https://assume-breach.medium.com/home-grown-red-team-using-lnk-files-to-bypass-applocker-3fb1ecae291f
 
 + Server
   - Windows implant compiler
