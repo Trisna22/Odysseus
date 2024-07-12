@@ -127,31 +127,6 @@ typedef struct COFF_RELOC_TABLE {
 // typedef 
 
 
-// Reads the object bytes from file.
-unsigned char* getObject(char* objFile, size_t* fileSize)
-{
-	FILE* obj = fopen(objFile, "rb");
-	if (obj == NULL) {
-		printf("Failed to open object file! Error code: %d", GetLastError());
-		return NULL;
-	}
-	
-	fseek(obj, 0, SEEK_END);
-	*fileSize = ftell(obj);
-	rewind(obj);
-
-	unsigned char* buffer = (unsigned char*)malloc(*fileSize);
-	memset(buffer, '\0', *fileSize);
-
-	if (fread(buffer, *fileSize, 1, obj) <= 0) {
-		printf("Failed to read the object file!");
-		return NULL;
-	}
-
-	fclose(obj);
-	return buffer;
-}
-
 BOOL parseObject(unsigned char* objData, size_t fileSize)
 {
 
