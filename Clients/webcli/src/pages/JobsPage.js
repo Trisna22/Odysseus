@@ -72,6 +72,19 @@ const JobsPage = () => {
                                                 <th>Object size</th>
                                                 <td>{detailsJob.objectSize} bytes</td>
                                             </tr>
+                                            {
+                                                detailsJob.data ? 
+                                                <>
+                                                <tr>
+                                                    <th>Output encoding</th>
+                                                    <td>{detailsJob.encoding}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Output</th>
+                                                    <td>{detailsJob.data}</td>
+                                                </tr>
+                                                </> : <></>
+                                            }
                                             <tr>
                                                 <th>Created at</th>
                                                 <td>{detailsJob.createdAt}</td>
@@ -95,7 +108,7 @@ const JobsPage = () => {
                             {
                                 detailsJob.slave ? 
                                 <>
-                                <h4>Slave</h4>
+                                <h4>Implant</h4>
                                 <Table bordered>
                                     <tbody>
                                     <tr>
@@ -120,7 +133,7 @@ const JobsPage = () => {
                                     </tr>
                                     </tbody>
                                 </Table>
-                                </> : <>No slave data available</>
+                                </> : <>No implant data available</>
                             }
                             </>
                             <>
@@ -154,7 +167,7 @@ const JobsPage = () => {
                                         <tr>
                                             <th>Variables</th>
                                             {
-                                                detailsJob.payload.variables ? <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.variables.length} variables to set.</td> : <></>
+                                                detailsJob.payload.variables ? <td colSpan={detailsJob.payload.categories.length}>{detailsJob.payload.variables.length} variables to set.</td> : <td>None</td>
                                             }
                                         </tr>
                                         {
@@ -183,7 +196,7 @@ const JobsPage = () => {
             <h1>Jobs page</h1>
             <Table bordered hover>
                 <thead>
-                    <th>Slave</th>
+                    <th>Implant</th>
                     <th>Payload</th>
                     <th>Status</th>
                     <th>Code</th>
@@ -201,7 +214,7 @@ const JobsPage = () => {
                                 <td>{job.slave.ip ? job.slave.ip : "Not connected yet"} {job.slave.nickname ? "(" + job.slave.nickname + ")" : <></>}</td>
                                 <td>{job.payload.name}</td>
                                 <td>{job.status}</td>
-                                <td>{job.code ? job.code : <></>}</td>
+                                <td>{job.code ? job.code : <>0</>}</td>
                                 <td>{job.createdAt}</td>
                                 <td>{job.finishedAt ? job.finishedAt : <>Still running</>}</td>
                             </> :

@@ -5,7 +5,7 @@ const {exec, execFileSync, execSync} = require("child_process");
 global.PAYLOAD_PATH = "./payloads/";
 global.JOBS_PATH = "./jobs/"
 
-const COMMAND_COMPILE = "g++ -shared -fPIC -o " ;
+const COMMAND_COMPILE = "g++ -c -o " ;
 const TEMP_SOURCE = "/tmp/.source.cpp";
 
 const compilePayloadTest = (id, variables, success, error) => {
@@ -15,6 +15,7 @@ const compilePayloadTest = (id, variables, success, error) => {
 
         // Fill in the variables.
         var data = fs.readFileSync(path + "source.cpp").toString();
+        var copyData = data;
 
         for (var v of variables) {
             if (v.vartype == "number") {
@@ -26,11 +27,13 @@ const compilePayloadTest = (id, variables, success, error) => {
 
         // Now compile temporary file.
         fs.writeFileSync(TEMP_SOURCE, data);
+        // Replace the temp file with the target source (temporary).
+        fs.renameSync(TEMP_SOURCE, path + "source.cpp"); 
 
         exec(COMMAND_COMPILE + 
             path + "object.so" + // Output path 
             " " +
-            TEMP_SOURCE // Source path
+            path + "source.cpp" // Source path
             , (err, stdout, stderr) => {
                 
                 if (err) {
@@ -39,7 +42,10 @@ const compilePayloadTest = (id, variables, success, error) => {
                     error(stderr, true);
                     return;
                 }
-                
+            
+            // Now change the original values to path.
+            // We replaced the path with the file with filled in variables remember!
+            fs.writeFileSync(path + "source.cpp", copyData)
             success(path);
         })
     }
@@ -66,7 +72,7 @@ const compilePayload = (payload, jobId, variables, success, error) => {
     
     const path = PAYLOAD_PATH + payload.id + "/";
     let inputFile = path + "source.cpp";
-    if (variables) {
+    if (variables && payload.variables && payload.variables.length > 0) {
 
         // Fill in the variables.
         var data = fs.readFileSync(path + "source.cpp").toString();
@@ -77,6 +83,8 @@ const compilePayload = (payload, jobId, variables, success, error) => {
             if (v.varname == variables[i].name)
                 v.value = variables[i].value;
 
+            console.log("Changing variable " + v.varname + " to " + v.value)
+
             if (v.vartype == "number") {
                 data = data.replace(v.varname, v.value);
             } else {
@@ -84,8 +92,8 @@ const compilePayload = (payload, jobId, variables, success, error) => {
             }
 
             // Now compile temporary file.
-            fs.writeFileSync(TEMP_SOURCE, data);     
-            inputFile = TEMP_SOURCE;       
+            fs.writeFileSync(TEMP_SOURCE, data);   
+            fs.renameSync(TEMP_SOURCE, inputFile); // Replace the temp file with the target source.
         }
     }
 
@@ -144,10 +152,11 @@ const getSources = (payloads) => {
                 name: payload.name,
                 variables: payload.variables,
                 description: payload.description,
-                os: payload.os,
+                osPayloads: payload.osPayloads,
                 categories: payload.categories ? payload.categories : "",
                 location: payload.location,
                 source: source,
+                command: payload.command,
                 createdAt: payload.createdAt
             })
     });

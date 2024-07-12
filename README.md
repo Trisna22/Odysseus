@@ -8,10 +8,13 @@ The C2 server that stands in the center of this project.
 The interface which the owner uses to connect with the C2 server.
 
 ## Implants
-The slave programs that connects to the C2 server and is been runned by the victims.
+The implant programs that connects to the C2 server and is been runned by the victims.
 
 ## Handlers
 Handles different types of connections and bounces the requests to the C2 server.
 
 ## Framework architecture
-![Diagram_Odysseus](./documentation/odysseus_architecture.png)
+![Architecture_Diagram_Odysseus](./documentation/odysseus_architecture.png)
+
+## Class diagram
+![Class_Diagram_Odysseus](./documentation/class_diagram_ody.png)

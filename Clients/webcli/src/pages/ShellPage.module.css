@@ -1,0 +1,59 @@
+
+.outputShell {
+    height: 70vh;
+    border-radius: 5px;
+    overflow-y: scroll;
+    overflow-x: scroll;
+    text-align: left;
+    border: solid grey 1px;
+    flex-direction: column;
+    display: flex;
+    font-family: 'terminalfont';
+}
+
+.terminal {
+    max-width: 60%; 
+    padding: 20px;
+    bottom: 0px;
+}
+
+.commandOutput {
+    padding-left: 10px;
+}
+
+.implantBox {
+    border-bottom: #ccc solid 1px;
+}
+
+.outputUser {
+    color: gray
+}
+
+.builtinCommand {
+    color: green;    
+}
+
+.statusInit {
+    color: red;
+}
+
+.statusOnline {
+    color: green;
+}
+
+.failedCommand {
+    color: red;
+}
+
+@media screen and (min-height: 600px), (max-height: 800px) {
+    .outputShell {
+        height: 30vh;
+    }
+}
+
+@media screen and (min-height: 800px), (max-height: 1100px) {
+    .outputShell {
+        height: 50vh;
+    }
+}
+

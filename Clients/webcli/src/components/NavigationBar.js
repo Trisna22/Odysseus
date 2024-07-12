@@ -11,7 +11,7 @@ const NavigationBar = () => {
     const userLogout = () => {
 
         localStorage.clear();
-        window.location.reload(false);
+        window.location.replace("/");
     }
 
     const isAuth = () => {        
@@ -41,9 +41,12 @@ const NavigationBar = () => {
                 isAuth() ? 
                 <>
                     <NavLink href="/">Implant generator</NavLink>
-                    <NavLink href="/slaves">Slaves</NavLink>
+                    <NavLink href="/implants">Implants</NavLink>
                     <NavLink href="/payloads">Payloads</NavLink>
-                    <NavLink href="/jobs">Jobs</NavLink>
+                    <NavDropdown title="Jobs" id="jobsDropdown">
+                        <NavDropdown.Item href="/jobs">All jobs</NavDropdown.Item>
+                        <NavDropdown.Item href="/job-manager">Job manager</NavDropdown.Item>
+                    </NavDropdown>
                     <Navbar.Text>
                         Signed in as:
                     </Navbar.Text>

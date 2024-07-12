@@ -35,15 +35,6 @@ const PayloadsPage = () => {
         setErrorText("");
         setCompileError("");
     }
-    const handleRadioInput = (e) => {
-        const { name, id } = e.target;
-        setNewPayload(prevState => ({
-            ...prevState,
-            [name]: id
-        }))
-        setErrorText("");
-        setCompileError("");
-    }
     const handleVariableInput = (e, index, erase = false) => {
         const { name, value } = e.target;
 
@@ -92,6 +83,9 @@ const PayloadsPage = () => {
             }
         })
         newPayload.categories = cats;
+
+        // Add the OSPayloads to the new payload.
+        newPayload.osPayloads = selectedOSPayloads;
 
         // Fire away payload.
         userService.newPayload(newPayload, inputRef.current.files[0]).then((res) => {
@@ -142,7 +136,19 @@ const PayloadsPage = () => {
 
         setSelCategories(newCategories);
     }
-      
+
+    // OS systems
+    const [selectedOSPayloads, setSelectedOSPayloads] = useState([]);
+    const handleOSPayloadsChange = (e) => {
+        const {name, checked} = e.target;
+
+        if (checked) {
+            setSelectedOSPayloads(prev => [...prev, name])
+        }
+        else {
+            setSelectedOSPayloads(prev => prev.filter((el) => el != name));
+        }
+    }
 
     // Accordion magic.
     const [activeId, setActiveId] = useState(0);
@@ -188,8 +194,8 @@ const PayloadsPage = () => {
         )
     }
 
-    const renderOSLogo = (os) => {
-        switch(os) {
+    const renderOSLogo = (os) => {            
+        switch (os) {
             case "windows":
                 return <FaWindows/>
             case "linux":
@@ -221,6 +227,7 @@ const PayloadsPage = () => {
             userService.getPayloads().then((res) => {
 
                 setPayloads(res.data);
+                console.log(res.data);
                 setLoading(false);
 
             }).catch((err) => {
@@ -238,19 +245,26 @@ const PayloadsPage = () => {
 
     return (
         <Container>
-            <Modal show={modalPayloadShow} onHide={() => setModalPayloadShow(false)}>
+            <Modal show={modalPayloadShow} onHide={() => setModalPayloadShow(false)} size="lg">
                 <Modal.Header closeButton>
                     <h3><FaBomb /> New payload</h3>
                 </Modal.Header>
                 <Modal.Body>
                     <InputGroup>
                         <InputGroup.Text>Name</InputGroup.Text>
-                        <Form.Control name="name" onChange={handleChangeInput} placeholder="Self destruction payload"></Form.Control>
+                        <Form.Control name="name" onChange={handleChangeInput} placeholder="Self destruction payload" required></Form.Control>
                     </InputGroup>
+                    
+                    <br />
+                    <InputGroup>
+                        <InputGroup.Text>Command</InputGroup.Text>
+                        <Form.Control name="command" onChange={handleChangeInput} placeholder="hack" required/>
+                    </InputGroup>
+
                     <br />
                     <Form>
                         <Form.Label>Description of payload</Form.Label>
-                        <Form.Control name="description" onChange={handleChangeInput} placeholder="Does haxx" as="textarea" rows={3} />
+                        <Form.Control name="description" onChange={handleChangeInput} placeholder="Does haxx" as="textarea" rows={3} required/>
                     </Form>
                     <br />
                     <InputGroup>
@@ -296,37 +310,33 @@ const PayloadsPage = () => {
                             )) : <></>
                     }
                     <br />
+                    <p>Target OS</p>
                     <Form>
                         <Form.Check inline
-                            onChange={handleRadioInput}
-                            type="radio"
+                            onChange={handleOSPayloadsChange}
                             id="linux"
                             label="Linux"
-                            name="os" />
+                            name="linux" />
                         <Form.Check inline
-                            onChange={handleRadioInput}
-                            type="radio"
+                            onChange={handleOSPayloadsChange}
                             id="windows"
                             label="Windows"
-                            name="os" />
+                            name="windows" />
                         <Form.Check inline
-                            onChange={handleRadioInput}
-                            type="radio"
+                            onChange={handleOSPayloadsChange}
                             id="macos"
                             label="MacOS"
-                            name="os" />
+                            name="macos" />
                         <Form.Check inline
-                            onChange={handleRadioInput}
-                            type="radio"
+                            onChange={handleOSPayloadsChange}
                             id="android"
                             label="Android"
-                            name="os" />
+                            name="android" />
                         <Form.Check inline
-                            onChange={handleRadioInput}
-                            type="radio"
+                            onChange={handleOSPayloadsChange}
                             id="iphone"
                             label="Iphone"
-                            name="os" />
+                            name="iphone" />
                     </Form>
                     <p>Categories:</p>
                     <Form>
@@ -387,7 +397,9 @@ const PayloadsPage = () => {
                         <Card>
                             <Card.Header>
                                 {
-                                    payload.os ? renderOSLogo(payload.os) : <></>
+                                    payload.osPayloads ? payload.osPayloads.map((os) => {
+                                        return renderOSLogo(os)
+                                    }) : <></>
                                 }
                                 <CustomAccordion eventKey={index}>
                                     <a onClick={() => setActiveId(index)} style={{ margin: "10px" }}>{payload.name} </a>
@@ -403,6 +415,7 @@ const PayloadsPage = () => {
                                 <Card.Body>
                                     <h4>Description</h4>
                                     <pre>{payload.description}</pre>
+                                    <pre>Command: {payload.command}</pre>
                                     <i>Created at: {payload.createdAt}</i>
                                     {
                                         payload.variables ? 
