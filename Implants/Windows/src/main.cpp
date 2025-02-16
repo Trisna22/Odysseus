@@ -1,9 +1,6 @@
 
 #include "stdafx.h"
-
-#include "Foocator.h"
 #include "CoughLoader.h"
-
 
 // Reads the object bytes from file.
 unsigned char* getObject(char* objFile, size_t* fileSize)
@@ -32,8 +29,21 @@ unsigned char* getObject(char* objFile, size_t* fileSize)
 
 int main(int argc, char* argv[]) {
 
-    printf("Initializing implant...\n");
+	printf("Initializing BOF debugger...\n");
 
-    // if (parseObject())
+	if (argc != 2) {
+		printf("%s [bof-file]\n", argv[0]);
+		return 1;
+	}
+
+	size_t objSize;
+	unsigned char* objContent = getObject(argv[1], &objSize);
+	if (objContent == NULL) {
+		return 1;
+	}
+
+	parseObject(objContent, objSize);
+
     return 0;    
 }
+
