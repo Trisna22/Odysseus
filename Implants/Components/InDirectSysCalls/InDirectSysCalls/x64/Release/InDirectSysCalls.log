@@ -1,0 +1,20 @@
+﻿  main.cpp
+C:\Users\trisn\Desktop\Odysseus\Implants\Components\InDirectSysCalls\NotDirect.h(96,52): warning C4244: 'argument': conversion from 'SIZE_T' to 'ULONG', possible loss of data
+  (compiling source file 'main.cpp')
+  
+C:\Users\trisn\Desktop\Odysseus\Implants\Components\InDirectSysCalls\NotDirect.h(96,12): warning C4312: 'type cast': conversion from 'NTSTATUS' to 'void *' of greater size
+  (compiling source file 'main.cpp')
+  
+C:\Users\trisn\Desktop\Odysseus\Implants\Components\InDirectSysCalls\CoughLoader.h(42,1): warning C4010: single-line comment contains line-continuation character
+  (compiling source file 'main.cpp')
+  
+C:\Users\trisn\Desktop\Odysseus\Implants\Components\InDirectSysCalls\CoughLoader.h(500,24): warning C4018: '<': signed/unsigned mismatch
+  (compiling source file 'main.cpp')
+  
+InDirectSysCalls\x64\Release\syscalls.obj : warning LNK4042: object specified more than once; extras ignored
+  Generating code
+  3 of 10 functions (30.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  InDirectSysCalls.vcxproj -> C:\Users\trisn\Desktop\Odysseus\Implants\Components\InDirectSysCalls\x64\Release\InDirectSysCalls.exe
