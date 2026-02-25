@@ -18,3 +18,7 @@ Handles different types of connections and bounces the requests to the C2 server
 
 ## Class diagram
 ![Class_Diagram_Odysseus](./documentation/class_diagram_ody.png)
+
+
+## Author
+Trisna a.k.a. ramb0
